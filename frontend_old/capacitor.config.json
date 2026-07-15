@@ -1,0 +1,10 @@
+{
+  "appId": "com.yashbaing.stockwave",
+  "appName": "Stockwave",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "http://10.51.16.224:3000",
+    "cleartext": true
+  }
+}

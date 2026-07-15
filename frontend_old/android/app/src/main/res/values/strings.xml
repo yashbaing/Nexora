@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Stockwave</string>
+    <string name="title_activity_main">Stockwave</string>
+    <string name="package_name">com.yashbaing.stockwave</string>
+    <string name="custom_url_scheme">com.yashbaing.stockwave</string>
+</resources>
