@@ -133,7 +133,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setChainId(currentChainId);
       setIsDevAccount(false);
 
-      if (currentChainId !== TARGET_CHAIN_ID) {
+      if (currentChainId !== targetChainId) {
         await switchNetwork();
         const updatedNetwork = await browserProvider.getNetwork();
         setChainId(Number(updatedNetwork.chainId));
