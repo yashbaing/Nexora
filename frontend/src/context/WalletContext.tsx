@@ -18,6 +18,7 @@ interface WalletContextType {
   switchNetwork: () => Promise<void>;
   isCorrectNetwork: boolean;
   isDevAccount: boolean;
+  loginWithGoogle: (email: string, name: string) => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -66,6 +67,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.removeItem("stockwave_jwt");
     localStorage.removeItem("stockwave_address");
     localStorage.removeItem("stockwave_is_dev");
+    localStorage.removeItem("stockwave_private_key");
     delete axios.defaults.headers.common["Authorization"];
   }, []);
 
@@ -176,7 +178,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } finally {
       setIsConnecting(false);
     }
-  }, [disconnectWallet, switchNetwork]);
+  }, [disconnectWallet, switchNetwork, targetChainId]);
 
   const connectDevAccount = useCallback(async () => {
     try {
@@ -227,6 +229,47 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [targetChainId]);
 
+  const loginWithGoogle = useCallback(async (email: string, name: string) => {
+    try {
+      setIsConnecting(true);
+      
+      const loginResp = await axios.post(`${BACKEND_URL}/api/auth/google-login`, {
+        email,
+        name
+      });
+      
+      const { token, privateKey, user } = loginResp.data;
+      
+      const isFuji = targetChainId === 43113;
+      const rpcUrl = isFuji 
+        ? "https://api.avax-test.network/ext/bc/C/rpc"
+        : "http://127.0.0.1:8545";
+        
+      const devProvider = new ethers.JsonRpcProvider(rpcUrl);
+      const devSigner = new ethers.Wallet(privateKey, devProvider);
+      
+      setProvider(devProvider);
+      setSigner(devSigner);
+      setChainId(targetChainId);
+      setAddress(user.id);
+      setJwtToken(token);
+      setIsDevAccount(true); // Treat embedded wallets as dev accounts so they don't look for window.ethereum
+      
+      localStorage.setItem("stockwave_jwt", token);
+      localStorage.setItem("stockwave_address", user.id);
+      localStorage.setItem("stockwave_is_dev", "true");
+      localStorage.setItem("stockwave_private_key", privateKey);
+      
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setIsConnected(true);
+    } catch (err) {
+      console.error("❌ Google login failed:", err);
+      alert("Google login failed. Please try again!");
+    } finally {
+      setIsConnecting(false);
+    }
+  }, [targetChainId]);
+
   useEffect(() => {
     if (isDevAccount) return; // Don't track window.ethereum events for dev accounts
     
@@ -264,13 +307,25 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (cachedToken && cachedAddress) {
         try {
           if (cachedIsDev) {
-            const devProvider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-            const devPrivateKey = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
-            const devSigner = new ethers.Wallet(devPrivateKey, devProvider);
+            const cachedPrivateKey = localStorage.getItem("stockwave_private_key");
+            
+            const isFuji = targetChainId === 43113;
+            const rpcUrl = isFuji 
+              ? "https://api.avax-test.network/ext/bc/C/rpc"
+              : "http://127.0.0.1:8545";
+            
+            const privateKey = cachedPrivateKey || (
+              isFuji
+                ? "0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad"
+                : "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+            );
+            
+            const devProvider = new ethers.JsonRpcProvider(rpcUrl);
+            const devSigner = new ethers.Wallet(privateKey, devProvider);
             
             setProvider(devProvider);
             setSigner(devSigner);
-            setChainId(31337);
+            setChainId(targetChainId);
             setAddress(cachedAddress);
             setJwtToken(cachedToken);
             setIsDevAccount(true);
@@ -303,7 +358,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     checkAuthorized();
-  }, [disconnectWallet]);
+  }, [disconnectWallet, targetChainId]);
 
   return (
     <WalletContext.Provider
@@ -321,6 +376,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         switchNetwork,
         isCorrectNetwork,
         isDevAccount,
+        loginWithGoogle,
       }}
     >
       {children}

@@ -164,7 +164,7 @@ interface Stock {
 }
 
 export default function Page() {
-  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount } = useWallet();
+  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle } = useWallet();
 
   // Navigation
   const [tab, setTab] = useState<string>("home"); // home, markets, portfolio, wallet
@@ -172,6 +172,12 @@ export default function Page() {
   const [tradeSide, setTradeSide] = useState<"buy" | "sell" | null>(null);
   const [tradeQty, setTradeQty] = useState<string>("");
   const [isExecutingTrade, setIsExecutingTrade] = useState<boolean>(false);
+
+  // Google Auth states
+  const [showGoogleModal, setShowGoogleModal] = useState<boolean>(false);
+  const [googleEmail, setGoogleEmail] = useState<string>("");
+  const [googleName, setGoogleName] = useState<string>("");
+  const [isSubmittingGoogle, setIsSubmittingGoogle] = useState<boolean>(false);
 
   // Faucet state
   const [faucetAmount, setFaucetAmount] = useState<string>("1000");
@@ -688,12 +694,172 @@ export default function Page() {
                 Browse with Dev Account (No Extension)
               </button>
               
+              <button
+                type="button"
+                onClick={() => setShowGoogleModal(true)}
+                disabled={isConnecting}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  background: "transparent",
+                  color: C.ink,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 16,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  cursor: "pointer",
+                  marginTop: 12,
+                  boxShadow: "0 2px 4px rgba(12, 10, 9, 0.02)",
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path fill="#EA4335" d="M12 5.04c1.67 0 3.17.58 4.35 1.71l3.25-3.25C17.63 1.55 15.02.96 12 .96 7.28.96 3.25 3.68 1.25 7.63l3.88 3.01C6.07 7.74 8.79 5.04 12 5.04z" />
+                  <path fill="#4285F4" d="M23.52 12.27c0-.82-.07-1.61-.21-2.38H12v4.51h6.46c-.28 1.46-1.1 2.69-2.33 3.52l3.61 2.8c2.12-1.95 3.78-4.83 3.78-8.45z" />
+                  <path fill="#FBBC05" d="M5.13 14.36c-.24-.73-.38-1.52-.38-2.36s.14-1.63.38-2.36L1.25 6.63C.45 8.24 0 10.06 0 12s.45 3.76 1.25 5.37l3.88-3.01z" />
+                  <path fill="#34A853" d="M12 23.04c3.24 0 5.97-1.07 7.96-2.91l-3.61-2.8c-1.2.8-2.73 1.27-4.35 1.27-3.21 0-5.93-2.7-6.87-5.6L1.25 16c2 3.95 6.03 6.67 10.75 6.67z" />
+                </svg>
+                Sign in with Google (Embedded Wallet)
+              </button>
+              
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 16, fontSize: 11, color: C.inkMute }}>
                 <Shield size={12} /> Secure non-custodial login
               </div>
             </div>
           </div>
         </div>
+
+        {/* Google Authentication Dialog Overlay */}
+        {showGoogleModal && (
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(12, 10, 9, 0.4)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+            padding: 20,
+          }}>
+            <div style={{
+              background: C.bg,
+              borderRadius: 24,
+              width: "100%",
+              maxWidth: 320,
+              padding: "28px 24px",
+              border: `1px solid ${C.border}`,
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+            }}>
+              <div style={{ marginBottom: 16 }}>
+                <svg viewBox="0 0 24 24" width="28" height="28">
+                  <path fill="#EA4335" d="M12 5.04c1.67 0 3.17.58 4.35 1.71l3.25-3.25C17.63 1.55 15.02.96 12 .96 7.28.96 3.25 3.68 1.25 7.63l3.88 3.01C6.07 7.74 8.79 5.04 12 5.04z" />
+                  <path fill="#4285F4" d="M23.52 12.27c0-.82-.07-1.61-.21-2.38H12v4.51h6.46c-.28 1.46-1.1 2.69-2.33 3.52l3.61 2.8c2.12-1.95 3.78-4.83 3.78-8.45z" />
+                  <path fill="#FBBC05" d="M5.13 14.36c-.24-.73-.38-1.52-.38-2.36s.14-1.63.38-2.36L1.25 6.63C.45 8.24 0 10.06 0 12s.45 3.76 1.25 5.37l3.88-3.01z" />
+                  <path fill="#34A853" d="M12 23.04c3.24 0 5.97-1.07 7.96-2.91l-3.61-2.8c-1.2.8-2.73 1.27-4.35 1.27-3.21 0-5.93-2.7-6.87-5.6L1.25 16c2 3.95 6.03 6.67 10.75 6.67z" />
+                </svg>
+              </div>
+
+              <h4 style={{ fontSize: 18, color: C.ink, fontWeight: 600, margin: "0 0 4px 0" }}>Sign in with Google</h4>
+              <p style={{ fontSize: 12, color: C.inkMute, margin: "0 0 20px 0" }}>to continue to Nexora Stockwave</p>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                if (!googleEmail) return;
+                try {
+                  setIsSubmittingGoogle(true);
+                  await loginWithGoogle(googleEmail, googleName || "");
+                  setShowGoogleModal(false);
+                } catch (err) {
+                  console.error(err);
+                } finally {
+                  setIsSubmittingGoogle(false);
+                }
+              }} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
+                <input 
+                  type="email"
+                  placeholder="Email address"
+                  required
+                  value={googleEmail}
+                  onChange={(e) => setGoogleEmail(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px 14px",
+                    borderRadius: 12,
+                    border: `1px solid ${C.border}`,
+                    background: "transparent",
+                    color: C.ink,
+                    fontSize: 13,
+                    outline: "none",
+                  }}
+                />
+
+                <input 
+                  type="text"
+                  placeholder="Name (Optional)"
+                  value={googleName}
+                  onChange={(e) => setGoogleName(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px 14px",
+                    borderRadius: 12,
+                    border: `1px solid ${C.border}`,
+                    background: "transparent",
+                    color: C.ink,
+                    fontSize: 13,
+                    outline: "none",
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingGoogle}
+                  style={{
+                    background: C.ink,
+                    color: C.bg,
+                    border: "none",
+                    borderRadius: 12,
+                    padding: "12px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    marginTop: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {isSubmittingGoogle ? "Authenticating..." : "Continue"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowGoogleModal(false)}
+                  style={{
+                    background: "transparent",
+                    color: C.inkMute,
+                    border: "none",
+                    fontSize: 12,
+                    cursor: "pointer",
+                    marginTop: 4,
+                  }}
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
