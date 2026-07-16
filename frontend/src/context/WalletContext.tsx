@@ -181,9 +181,17 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const connectDevAccount = useCallback(async () => {
     try {
       setIsConnecting(true);
-      // Hardhat Account #1: pre-funded developer account
-      const devProvider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-      const devPrivateKey = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
+      
+      const isFuji = targetChainId === 43113;
+      const rpcUrl = isFuji 
+        ? "https://api.avax-test.network/ext/bc/C/rpc"
+        : "http://127.0.0.1:8545";
+      
+      const devPrivateKey = isFuji
+        ? "0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad" // Fuji deployer wallet
+        : "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"; // Localhost Hardhat Account #1
+
+      const devProvider = new ethers.JsonRpcProvider(rpcUrl);
       const devSigner = new ethers.Wallet(devPrivateKey, devProvider);
       
       const rawAddress = devSigner.address;
@@ -201,7 +209,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const { token } = loginResp.data;
       setProvider(devProvider);
       setSigner(devSigner);
-      setChainId(31337);
+      setChainId(targetChainId);
       setAddress(rawAddress);
       setJwtToken(token);
       setIsDevAccount(true);
@@ -213,11 +221,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsConnected(true);
     } catch (err) {
       console.error("❌ Dev Account connection failed:", err);
-      alert("Make sure the local Hardhat Node is running!");
+      alert("Dev Account connection failed. Verify the network RPC is accessible!");
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  }, [targetChainId]);
 
   useEffect(() => {
     if (isDevAccount) return; // Don't track window.ethereum events for dev accounts
