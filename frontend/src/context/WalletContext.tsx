@@ -19,6 +19,7 @@ interface WalletContextType {
   isCorrectNetwork: boolean;
   isDevAccount: boolean;
   loginWithGoogle: (email: string, name: string) => Promise<void>;
+  loginWithGoogleApi: (credential: string) => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -253,7 +254,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setChainId(targetChainId);
       setAddress(user.id);
       setJwtToken(token);
-      setIsDevAccount(true); // Treat embedded wallets as dev accounts so they don't look for window.ethereum
+      setIsDevAccount(true);
       
       localStorage.setItem("stockwave_jwt", token);
       localStorage.setItem("stockwave_address", user.id);
@@ -265,6 +266,46 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch (err) {
       console.error("❌ Google login failed:", err);
       alert("Google login failed. Please try again!");
+    } finally {
+      setIsConnecting(false);
+    }
+  }, [targetChainId]);
+
+  const loginWithGoogleApi = useCallback(async (credential: string) => {
+    try {
+      setIsConnecting(true);
+      
+      const loginResp = await axios.post(`${BACKEND_URL}/api/auth/google-api-login`, {
+        credential
+      });
+      
+      const { token, privateKey, user } = loginResp.data;
+      
+      const isFuji = targetChainId === 43113;
+      const rpcUrl = isFuji 
+        ? "https://api.avax-test.network/ext/bc/C/rpc"
+        : "http://127.0.0.1:8545";
+        
+      const devProvider = new ethers.JsonRpcProvider(rpcUrl);
+      const devSigner = new ethers.Wallet(privateKey, devProvider);
+      
+      setProvider(devProvider);
+      setSigner(devSigner);
+      setChainId(targetChainId);
+      setAddress(user.id);
+      setJwtToken(token);
+      setIsDevAccount(true);
+      
+      localStorage.setItem("stockwave_jwt", token);
+      localStorage.setItem("stockwave_address", user.id);
+      localStorage.setItem("stockwave_is_dev", "true");
+      localStorage.setItem("stockwave_private_key", privateKey);
+      
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setIsConnected(true);
+    } catch (err) {
+      console.error("❌ Google API login failed:", err);
+      alert("Google API Authentication failed. Please try again!");
     } finally {
       setIsConnecting(false);
     }
@@ -377,6 +418,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         isCorrectNetwork,
         isDevAccount,
         loginWithGoogle,
+        loginWithGoogleApi,
       }}
     >
       {children}

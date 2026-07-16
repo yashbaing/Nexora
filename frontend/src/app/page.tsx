@@ -164,7 +164,7 @@ interface Stock {
 }
 
 export default function Page() {
-  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle } = useWallet();
+  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle, loginWithGoogleApi } = useWallet();
 
   // Navigation
   const [tab, setTab] = useState<string>("home"); // home, markets, portfolio, wallet
@@ -178,6 +178,45 @@ export default function Page() {
   const [googleEmail, setGoogleEmail] = useState<string>("");
   const [googleName, setGoogleName] = useState<string>("");
   const [isSubmittingGoogle, setIsSubmittingGoogle] = useState<boolean>(false);
+
+  // Initialize official Google Identity Services button
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const initGoogleApiButton = () => {
+      const google = (window as any).google;
+      if (google && google.accounts && google.accounts.id) {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (res: any) => {
+            if (res.credential) {
+              try {
+                await loginWithGoogleApi(res.credential);
+              } catch (err) {
+                console.error("Google Sign-In callback error:", err);
+              }
+            }
+          }
+        });
+
+        const container = document.getElementById("google-official-btn");
+        if (container) {
+          google.accounts.id.renderButton(container, {
+            theme: "outline",
+            size: "large",
+            width: 298,
+            text: "signin_with",
+            shape: "pill"
+          });
+        }
+      } else {
+        setTimeout(initGoogleApiButton, 200);
+      }
+    };
+
+    initGoogleApiButton();
+  }, [loginWithGoogleApi, isConnected]);
 
   // Faucet state
   const [faucetAmount, setFaucetAmount] = useState<string>("1000");
@@ -693,6 +732,12 @@ export default function Page() {
               >
                 Browse with Dev Account (No Extension)
               </button>
+              
+              {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+                <div style={{ marginTop: 12, display: "flex", justifyContent: "center", width: "100%" }}>
+                  <div id="google-official-btn" />
+                </div>
+              )}
               
               <button
                 type="button"

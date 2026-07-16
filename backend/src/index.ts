@@ -181,6 +181,80 @@ app.post("/api/auth/google-login", async (req: Request, res: Response) => {
   }
 });
 
+app.post("/api/auth/google-api-login", async (req: Request, res: Response) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: "Missing credential" });
+    }
+
+    const parts = credential.split(".");
+    if (parts.length !== 3) {
+      return res.status(400).json({ error: "Invalid credential token format" });
+    }
+
+    const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
+    const email = payload.email;
+    const name = payload.name || email.split("@")[0];
+
+    if (!email) {
+      return res.status(400).json({ error: "Email not found in token" });
+    }
+
+    // Derive a deterministic private key from the Google email
+    const derivedKey = ethers.keccak256(ethers.toUtf8Bytes("google-account-key-derivation-salt-2026:" + email.toLowerCase()));
+    const wallet = new ethers.Wallet(derivedKey);
+    const walletAddress = wallet.address.toLowerCase();
+
+    // Check if user exists in database
+    const userRes = await pool.query("SELECT * FROM users WHERE id = $1", [walletAddress]);
+    let user = userRes.rows[0];
+
+    if (!user) {
+      // Auto register user in database
+      const insertRes = await pool.query(
+        "INSERT INTO users (id, name, email) VALUES ($1, $2, $3) RETURNING *",
+        [walletAddress, name, email.toLowerCase()]
+      );
+      user = insertRes.rows[0];
+
+      // Auto fund derived wallet with AVAX gas
+      try {
+        const deployerKey = process.env.ORACLE_PRIVATE_KEY;
+        if (deployerKey) {
+          const deployer = new ethers.Wallet(deployerKey, provider);
+          const balance = await provider.getBalance(walletAddress);
+          if (balance < ethers.parseEther("0.005")) {
+            console.log(`💸 Auto-funding Google API user embedded wallet (${walletAddress}) with 0.005 AVAX gas...`);
+            const tx = await deployer.sendTransaction({
+              to: walletAddress,
+              value: ethers.parseEther("0.005")
+            });
+            await tx.wait();
+            console.log(`✅ Funded Google API user ${email} successfully.`);
+          }
+        }
+      } catch (fundErr: any) {
+        console.warn("⚠️ Warning: Failed to auto-fund derived wallet with gas:", fundErr.message);
+      }
+    }
+
+    const token = jwt.sign({ address: walletAddress }, JWT_SECRET, { expiresIn: "7d" });
+    res.json({
+      message: "Logged in with Google API successfully",
+      token,
+      privateKey: derivedKey,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Stock Listing Routes ──────────────────────────────────────────────────────
 const normalizeSymbol = (sym: string): string => {
   if (!sym) return "";

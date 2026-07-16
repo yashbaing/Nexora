@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { WalletProvider } from "@/context/WalletContext";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -30,6 +31,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
         <WalletProvider>
           {children}
         </WalletProvider>
