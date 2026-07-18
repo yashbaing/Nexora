@@ -17,11 +17,11 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      chainId: 77777,
+      chainId: 31337,
     },
     localhost: {
       url: "http://127.0.0.1:8545",
-      chainId: 77777,
+      chainId: 31337,
     },
     fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",

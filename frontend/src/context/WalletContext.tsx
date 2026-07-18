@@ -131,6 +131,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
           rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
           blockExplorerUrls: ["https://testnet.snowtrace.io/"]
+        } : targetChainId === 31337 ? {
+          chainId: "0x7a69",
+          chainName: "Hardhat Localhost",
+          nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+          rpcUrls: ["http://127.0.0.1:8545"],
         } : targetChainId === 77777 ? {
           chainId: "0x12fcd",
           chainName: "Avalanche Custom L1",
