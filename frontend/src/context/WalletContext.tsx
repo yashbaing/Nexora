@@ -109,49 +109,49 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const switchNetwork = useCallback(async () => {
-    const ethereum = (window as any).ethereum;
-    if (!ethereum) return;
+    let rawProvider = (window as any).ethereum;
+    if (provider && (provider as any).provider) {
+      rawProvider = (provider as any).provider;
+    }
+    if (!rawProvider) return;
     
     const hexChainId = "0x" + targetChainId.toString(16);
     
     try {
-      await ethereum.request({
+      await rawProvider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: hexChainId }],
       });
     } catch (switchError: any) {
-      if (switchError.code === 4902) {
-        try {
-          const chainParams = targetChainId === 43113 ? {
-            chainId: "0xa869",
-            chainName: "Avalanche Fuji Testnet",
-            nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
-            rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
-            blockExplorerUrls: ["https://testnet.snowtrace.io/"]
-          } : targetChainId === 77777 ? {
-            chainId: "0x12fcd",
-            chainName: "Avalanche Custom L1",
-            nativeCurrency: { name: "STW", symbol: "STW", decimals: 18 },
-            rpcUrls: ["http://127.0.0.1:8545"],
-          } : {
-            chainId: hexChainId,
-            chainName: "Avalanche Custom L1",
-            nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
-            rpcUrls: [targetRpcUrl],
-          };
+      console.warn("Switch network failed, attempting to add network as fallback...", switchError);
+      try {
+        const chainParams = targetChainId === 43113 ? {
+          chainId: "0xa869",
+          chainName: "Avalanche Fuji Testnet",
+          nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
+          rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
+          blockExplorerUrls: ["https://testnet.snowtrace.io/"]
+        } : targetChainId === 77777 ? {
+          chainId: "0x12fcd",
+          chainName: "Avalanche Custom L1",
+          nativeCurrency: { name: "STW", symbol: "STW", decimals: 18 },
+          rpcUrls: ["http://127.0.0.1:8545"],
+        } : {
+          chainId: hexChainId,
+          chainName: "Avalanche Custom L1",
+          nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
+          rpcUrls: [targetRpcUrl],
+        };
 
-          await ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [chainParams],
-          });
-        } catch (addError) {
-          console.error("❌ Failed to add network:", addError);
-        }
-      } else {
-        console.error("❌ Failed to switch network:", switchError);
+        await rawProvider.request({
+          method: "wallet_addEthereumChain",
+          params: [chainParams],
+        });
+      } catch (addError) {
+        console.error("❌ Failed to add network:", addError);
       }
     }
-  }, [targetChainId, targetRpcUrl]);
+  }, [targetChainId, targetRpcUrl, provider]);
 
   const connectWallet = useCallback(async (selectedProvider?: EIP6963ProviderDetail) => {
     let walletProvider = (window as any).ethereum;
