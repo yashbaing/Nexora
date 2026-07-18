@@ -72,7 +72,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     const fetchTargetChain = async () => {
       try {
-        const resp = await fetch(`${BACKEND_URL}/deployed-addresses.json`);
+        const resp = await fetch(`${BACKEND_URL}/deployed-addresses.json?t=${Date.now()}`, {
+          cache: "no-store"
+        });
         if (resp.ok) {
           const data = await resp.json();
           if (data.chainId) {
