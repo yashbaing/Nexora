@@ -36,7 +36,7 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-const BACKEND_URL = "http://127.0.0.1:5001";
+const BACKEND_URL = "http://localhost:5001";
 
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [address, setAddress] = useState<string | null>(null);
@@ -50,6 +50,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [targetChainId, setTargetChainId] = useState<number>(43113); // Default to Fuji Testnet
   const [targetRpcUrl, setTargetRpcUrl] = useState<string>("https://api.avax-test.network/ext/bc/C/rpc");
   const [injectedProviders, setInjectedProviders] = useState<EIP6963ProviderDetail[]>([]);
+  const rawProviderRef = React.useRef<any>(null);
 
   // Listen for EIP-6963 wallet announcements
   useEffect(() => {
@@ -110,12 +111,17 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     delete axios.defaults.headers.common["Authorization"];
   }, []);
 
-  const switchNetwork = useCallback(async () => {
-    let rawProvider = (window as any).ethereum;
-    if (provider && (provider as any).provider) {
-      rawProvider = (provider as any).provider;
-    }
+  const switchNetwork = useCallback(async (overrideRawProvider?: any) => {
+    // Use the override (passed directly from connectWallet) or fall back to the stored ref
+    let rawProvider = overrideRawProvider || rawProviderRef.current || (window as any).ethereum;
     if (!rawProvider) return;
+    // If it's an ethers BrowserProvider wrapper, try to dig out the underlying EIP-1193 provider
+    if (rawProvider && typeof rawProvider.request !== "function") {
+      rawProvider = (rawProvider as any)._eip1193Provider ||
+                   (rawProvider as any).provider ||
+                   (window as any).ethereum;
+    }
+    if (!rawProvider || typeof rawProvider.request !== "function") return;
     
     const hexChainId = "0x" + targetChainId.toString(16);
     
@@ -142,7 +148,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           chainId: "0x12fcd",
           chainName: "Avalanche Custom L1",
           nativeCurrency: { name: "STW", symbol: "STW", decimals: 18 },
-          rpcUrls: ["http://127.0.0.1:8545"],
+          rpcUrls: ["http://localhost:8545"],
         } : {
           chainId: hexChainId,
           chainName: "Avalanche Custom L1",
@@ -158,7 +164,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         console.error("❌ Failed to add network:", addError);
       }
     }
-  }, [targetChainId, targetRpcUrl, provider]);
+  }, [targetChainId, targetRpcUrl]);
 
   const connectWallet = useCallback(async (selectedProvider?: EIP6963ProviderDetail) => {
     let walletProvider = (window as any).ethereum;
@@ -187,9 +193,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setSigner(tempSigner);
       setChainId(currentChainId);
       setIsDevAccount(false);
+      rawProviderRef.current = walletProvider;
 
       if (currentChainId !== targetChainId) {
-        await switchNetwork();
+        // Pass the raw walletProvider directly to avoid async state issue
+        await switchNetwork(walletProvider);
         const updatedNetwork = await browserProvider.getNetwork();
         setChainId(Number(updatedNetwork.chainId));
       }
