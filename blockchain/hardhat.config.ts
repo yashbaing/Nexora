@@ -28,6 +28,11 @@ const config: HardhatUserConfig = {
       chainId: 43113,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+    customL1: {
+      url: process.env.L1_RPC_URL || "http://127.0.0.1:9650/ext/bc/C/rpc",
+      chainId: process.env.L1_CHAIN_ID ? parseInt(process.env.L1_CHAIN_ID) : 12345,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
   },
 };
 

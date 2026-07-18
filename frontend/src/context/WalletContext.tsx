@@ -36,6 +36,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [jwtToken, setJwtToken] = useState<string | null>(null);
   const [isDevAccount, setIsDevAccount] = useState<boolean>(false);
   const [targetChainId, setTargetChainId] = useState<number>(43113); // Default to Fuji Testnet
+  const [targetRpcUrl, setTargetRpcUrl] = useState<string>("https://api.avax-test.network/ext/bc/C/rpc");
 
   useEffect(() => {
     const fetchTargetChain = async () => {
@@ -47,9 +48,13 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setTargetChainId(parseInt(data.chainId));
             console.log("🎯 Dynamic Target Chain ID set to:", data.chainId);
           }
+          if (data.rpcUrl) {
+            setTargetRpcUrl(data.rpcUrl);
+            console.log("🔌 Dynamic RPC URL set to:", data.rpcUrl);
+          }
         }
       } catch (e) {
-        console.warn("Could not fetch target chain ID from backend, default to 43113:", e);
+        console.warn("Could not fetch target chain ID or RPC URL from backend, default to Fuji:", e);
       }
     };
     fetchTargetChain();
@@ -92,11 +97,16 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
             rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
             blockExplorerUrls: ["https://testnet.snowtrace.io/"]
-          } : {
+          } : targetChainId === 31337 ? {
             chainId: "0x7a69",
             chainName: "Hardhat Localhost",
             nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
             rpcUrls: ["http://127.0.0.1:8545"],
+          } : {
+            chainId: hexChainId,
+            chainName: "Avalanche Custom L1",
+            nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
+            rpcUrls: [targetRpcUrl],
           };
 
           await ethereum.request({
@@ -110,7 +120,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         console.error("❌ Failed to switch network:", switchError);
       }
     }
-  }, [targetChainId]);
+  }, [targetChainId, targetRpcUrl]);
 
   const connectWallet = useCallback(async () => {
     const ethereum = (window as any).ethereum;
@@ -186,15 +196,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsConnecting(true);
       
       const isFuji = targetChainId === 43113;
-      const rpcUrl = isFuji 
-        ? "https://api.avax-test.network/ext/bc/C/rpc"
-        : "http://127.0.0.1:8545";
-      
       const devPrivateKey = isFuji
         ? "0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad" // Fuji deployer wallet
         : "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"; // Localhost Hardhat Account #1
 
-      const devProvider = new ethers.JsonRpcProvider(rpcUrl);
+      const devProvider = new ethers.JsonRpcProvider(targetRpcUrl);
       const devSigner = new ethers.Wallet(devPrivateKey, devProvider);
       
       const rawAddress = devSigner.address;
@@ -228,7 +234,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } finally {
       setIsConnecting(false);
     }
-  }, [targetChainId]);
+  }, [targetChainId, targetRpcUrl]);
 
   const loginWithGoogle = useCallback(async (email: string, name: string) => {
     try {
@@ -241,12 +247,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       
       const { token, privateKey, user } = loginResp.data;
       
-      const isFuji = targetChainId === 43113;
-      const rpcUrl = isFuji 
-        ? "https://api.avax-test.network/ext/bc/C/rpc"
-        : "http://127.0.0.1:8545";
-        
-      const devProvider = new ethers.JsonRpcProvider(rpcUrl);
+      const devProvider = new ethers.JsonRpcProvider(targetRpcUrl);
       const devSigner = new ethers.Wallet(privateKey, devProvider);
       
       setProvider(devProvider);
@@ -269,7 +270,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } finally {
       setIsConnecting(false);
     }
-  }, [targetChainId]);
+  }, [targetChainId, targetRpcUrl]);
 
   const loginWithGoogleApi = useCallback(async (credential: string) => {
     try {
@@ -281,12 +282,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       
       const { token, privateKey, user } = loginResp.data;
       
-      const isFuji = targetChainId === 43113;
-      const rpcUrl = isFuji 
-        ? "https://api.avax-test.network/ext/bc/C/rpc"
-        : "http://127.0.0.1:8545";
-        
-      const devProvider = new ethers.JsonRpcProvider(rpcUrl);
+      const devProvider = new ethers.JsonRpcProvider(targetRpcUrl);
       const devSigner = new ethers.Wallet(privateKey, devProvider);
       
       setProvider(devProvider);
@@ -309,7 +305,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } finally {
       setIsConnecting(false);
     }
-  }, [targetChainId]);
+  }, [targetChainId, targetRpcUrl]);
 
   useEffect(() => {
     if (isDevAccount) return; // Don't track window.ethereum events for dev accounts
@@ -351,17 +347,13 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             const cachedPrivateKey = localStorage.getItem("stockwave_private_key");
             
             const isFuji = targetChainId === 43113;
-            const rpcUrl = isFuji 
-              ? "https://api.avax-test.network/ext/bc/C/rpc"
-              : "http://127.0.0.1:8545";
-            
             const privateKey = cachedPrivateKey || (
               isFuji
                 ? "0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad"
                 : "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
             );
             
-            const devProvider = new ethers.JsonRpcProvider(rpcUrl);
+            const devProvider = new ethers.JsonRpcProvider(targetRpcUrl);
             const devSigner = new ethers.Wallet(privateKey, devProvider);
             
             setProvider(devProvider);
@@ -399,7 +391,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     checkAuthorized();
-  }, [disconnectWallet, targetChainId]);
+  }, [disconnectWallet, targetChainId, targetRpcUrl]);
 
   return (
     <WalletContext.Provider

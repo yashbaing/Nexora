@@ -59,6 +59,9 @@ async function main() {
     console.log(`📈 Registered ${s.symbol} at ${tokenAddr}`);
   }
 
+  const hre = require("hardhat");
+  const activeRpcUrl = hre.network.config.url || "http://127.0.0.1:8545";
+
   // Save addresses to JSON file
   const addresses = {
     MockUSDC: usdcAddr,
@@ -66,6 +69,7 @@ async function main() {
     OracleSigner: oracleAddress,
     stocks: deployedStocks,
     chainId: (await ethers.provider.getNetwork()).chainId.toString(),
+    rpcUrl: activeRpcUrl,
   };
 
   const outputPath = path.join(__dirname, "../../deployed-addresses.json");
