@@ -350,8 +350,12 @@ app.post("/api/trades/quote", verifyToken, async (req: AuthRequest, res: Respons
       return res.status(500).json({ error: "StockwavePlatform contract address not deployed yet" });
     }
 
-    const stock = priceCache[symbol.toUpperCase()];
-    if (!stock) return res.status(404).json({ error: "Stock not found" });
+    // Case-insensitive lookup — priceCache keys are like "xAAPL", not "XAAPL"
+    const symbolKey = Object.keys(priceCache).find(
+      (k) => k.toLowerCase() === symbol.toLowerCase()
+    );
+    const stock = symbolKey ? priceCache[symbolKey] : undefined;
+    if (!stock) return res.status(404).json({ error: `Stock "${symbol}" not found in price cache` });
 
     // 1. Fetch current price from cache, represent in 6 decimals for smart contract
     const currentPrice = stock.price;
