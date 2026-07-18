@@ -31,6 +31,7 @@ interface WalletContextType {
   loginWithGoogle: (email: string, name: string) => Promise<void>;
   loginWithGoogleApi: (credential: string) => Promise<void>;
   injectedProviders: EIP6963ProviderDetail[];
+  targetChainId: number;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -447,6 +448,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         loginWithGoogle,
         loginWithGoogleApi,
         injectedProviders,
+        targetChainId,
       }}
     >
       {children}

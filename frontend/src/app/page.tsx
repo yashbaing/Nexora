@@ -164,7 +164,7 @@ interface Stock {
 }
 
 export default function Page() {
-  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle, loginWithGoogleApi, injectedProviders } = useWallet();
+  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle, loginWithGoogleApi, injectedProviders, targetChainId } = useWallet();
 
   // Navigation
   const [tab, setTab] = useState<string>("home"); // home, markets, portfolio, wallet
@@ -1046,7 +1046,7 @@ export default function Page() {
             </div>
             <h3 style={{ ...serif, fontSize: 26, color: C.ink, fontWeight: 400, marginBottom: 12 }}>Wrong Network</h3>
             <p style={{ fontSize: 13, color: C.inkDim, lineHeight: 1.5, marginBottom: 32 }}>
-              Stockwave settles trades securely on Avalanche Localhost. Please switch your wallet network to proceed.
+              Stockwave settles trades securely on {targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 77777 ? "Avalanche Custom L1" : "Avalanche Custom L1"}. Please switch your wallet network to proceed.
             </p>
             <button
               type="button"
@@ -1063,7 +1063,7 @@ export default function Page() {
                 border: "none",
               }}
             >
-              Switch to Hardhat Network
+              Switch to {targetChainId === 43113 ? "Avalanche Fuji Testnet" : "Avalanche Custom L1"}
             </button>
           </div>
         </div>
