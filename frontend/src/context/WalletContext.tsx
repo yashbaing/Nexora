@@ -4,6 +4,16 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { ethers } from "ethers";
 import axios from "axios";
 
+export interface EIP6963ProviderDetail {
+  info: {
+    uuid: string;
+    name: string;
+    icon: string;
+    rdns: string;
+  };
+  provider: any;
+}
+
 interface WalletContextType {
   address: string | null;
   isConnected: boolean;
@@ -12,7 +22,7 @@ interface WalletContextType {
   provider: ethers.AbstractProvider | null;
   chainId: number | null;
   jwtToken: string | null;
-  connectWallet: () => Promise<void>;
+  connectWallet: (selectedProvider?: EIP6963ProviderDetail) => Promise<void>;
   connectDevAccount: () => Promise<void>;
   disconnectWallet: () => void;
   switchNetwork: () => Promise<void>;
@@ -20,6 +30,7 @@ interface WalletContextType {
   isDevAccount: boolean;
   loginWithGoogle: (email: string, name: string) => Promise<void>;
   loginWithGoogleApi: (credential: string) => Promise<void>;
+  injectedProviders: EIP6963ProviderDetail[];
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -37,6 +48,25 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isDevAccount, setIsDevAccount] = useState<boolean>(false);
   const [targetChainId, setTargetChainId] = useState<number>(43113); // Default to Fuji Testnet
   const [targetRpcUrl, setTargetRpcUrl] = useState<string>("https://api.avax-test.network/ext/bc/C/rpc");
+  const [injectedProviders, setInjectedProviders] = useState<EIP6963ProviderDetail[]>([]);
+
+  // Listen for EIP-6963 wallet announcements
+  useEffect(() => {
+    const handleAnnounce = (event: any) => {
+      const detail: EIP6963ProviderDetail = event.detail;
+      setInjectedProviders((prev) => {
+        if (prev.find((p) => p.info.uuid === detail.info.uuid)) return prev;
+        return [...prev, detail];
+      });
+    };
+
+    window.addEventListener("eip6963:announceProvider", handleAnnounce as EventListener);
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+    return () => {
+      window.removeEventListener("eip6963:announceProvider", handleAnnounce as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchTargetChain = async () => {
@@ -122,21 +152,25 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [targetChainId, targetRpcUrl]);
 
-  const connectWallet = useCallback(async () => {
-    const ethereum = (window as any).ethereum;
-    if (!ethereum) {
-      alert("Please install Core Wallet or MetaMask to use this application!");
+  const connectWallet = useCallback(async (selectedProvider?: EIP6963ProviderDetail) => {
+    let walletProvider = (window as any).ethereum;
+    if (selectedProvider) {
+      walletProvider = selectedProvider.provider;
+    }
+
+    if (!walletProvider) {
+      alert("Please install a Web3 Wallet (like MetaMask or Core Wallet) to continue!");
       return;
     }
 
     try {
       setIsConnecting(true);
       
-      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      const accounts = await walletProvider.request({ method: "eth_requestAccounts" });
       if (accounts.length === 0) throw new Error("No accounts found");
       
       const rawAddress = accounts[0];
-      const browserProvider = new ethers.BrowserProvider(ethereum);
+      const browserProvider = new ethers.BrowserProvider(walletProvider);
       const tempSigner = await browserProvider.getSigner();
       const network = await browserProvider.getNetwork();
       const currentChainId = Number(network.chainId);
@@ -365,6 +399,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             axios.defaults.headers.common["Authorization"] = `Bearer ${cachedToken}`;
             setIsConnected(true);
           } else {
+            // Pick MetaMask or default injected provider to auto-login
             const ethereum = (window as any).ethereum;
             if (!ethereum) return;
             const accounts = await ethereum.request({ method: "eth_accounts" });
@@ -411,6 +446,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         isDevAccount,
         loginWithGoogle,
         loginWithGoogleApi,
+        injectedProviders,
       }}
     >
       {children}

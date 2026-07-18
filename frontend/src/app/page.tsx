@@ -164,7 +164,7 @@ interface Stock {
 }
 
 export default function Page() {
-  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle, loginWithGoogleApi } = useWallet();
+  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle, loginWithGoogleApi, injectedProviders } = useWallet();
 
   // Navigation
   const [tab, setTab] = useState<string>("home"); // home, markets, portfolio, wallet
@@ -172,6 +172,9 @@ export default function Page() {
   const [tradeSide, setTradeSide] = useState<"buy" | "sell" | null>(null);
   const [tradeQty, setTradeQty] = useState<string>("");
   const [isExecutingTrade, setIsExecutingTrade] = useState<boolean>(false);
+
+  // Wallet Selection Modal state
+  const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
   // Google Auth states
   const [showGoogleModal, setShowGoogleModal] = useState<boolean>(false);
@@ -680,7 +683,7 @@ export default function Page() {
             <div style={{ marginBottom: 40 }}>
               <button
                 type="button"
-                onClick={connectWallet}
+                onClick={() => setShowWalletModal(true)}
                 disabled={isConnecting}
                 style={{
                   width: "100%",
@@ -704,7 +707,7 @@ export default function Page() {
                     <RefreshCw className="animate-spin" size={16} /> Connecting Wallet...
                   </>
                 ) : (
-                  <>Connect Core / MetaMask</>
+                  <>Connect Wallet</>
                 )}
               </button>
               
@@ -902,6 +905,129 @@ export default function Page() {
                   Cancel
                 </button>
               </form>
+            </div>
+          </div>
+        )}
+        {/* Custom Wallet Selection Modal Overlay */}
+        {showWalletModal && (
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(12, 10, 9, 0.4)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+            padding: 20,
+          }}>
+            <div style={{
+              background: C.bg,
+              borderRadius: 24,
+              width: "100%",
+              maxWidth: 320,
+              padding: "24px",
+              border: `1px solid ${C.border}`,
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              display: "flex",
+              flexDirection: "column",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <h4 style={{ fontSize: 16, color: C.ink, fontWeight: 600, margin: 0 }}>Connect Wallet</h4>
+                <button 
+                  onClick={() => setShowWalletModal(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: C.inkMute,
+                    fontSize: 18,
+                    cursor: "pointer",
+                    padding: 4,
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 300, overflowY: "auto", marginBottom: 12 }}>
+                {injectedProviders.length > 0 ? (
+                  injectedProviders.map((p) => (
+                    <button
+                      key={p.info.uuid}
+                      onClick={async () => {
+                        try {
+                          await connectWallet(p);
+                          setShowWalletModal(false);
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        background: "transparent",
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 14,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <img 
+                          src={p.info.icon} 
+                          alt={p.info.name} 
+                          style={{ width: 24, height: 24, borderRadius: 6 }} 
+                        />
+                        <span style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>
+                          {p.info.name}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: 10, background: C.gainSoft, color: C.gain, padding: "2px 6px", borderRadius: 10, fontWeight: 600 }}>
+                        Active
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await connectWallet();
+                          setShowWalletModal(false);
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        background: "transparent",
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 14,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <Shield size={20} style={{ color: C.ink }} />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>
+                        Default Injected Wallet
+                      </span>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div style={{ fontSize: 11, color: C.inkDim, textAlign: "center", borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
+                New to Web3? <a href="https://core.app/" target="_blank" rel="noreferrer" style={{ color: C.ink, textDecoration: "underline", fontWeight: 600 }}>Get Core Wallet</a>
+              </div>
             </div>
           </div>
         )}
