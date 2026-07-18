@@ -198,7 +198,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (currentChainId !== targetChainId) {
         // Pass the raw walletProvider directly to avoid async state issue
         await switchNetwork(walletProvider);
-        const updatedNetwork = await browserProvider.getNetwork();
+        // Create a fresh BrowserProvider — the old one has the old chain cached
+        const refreshedProvider = new ethers.BrowserProvider(walletProvider);
+        const updatedNetwork = await refreshedProvider.getNetwork();
+        setProvider(refreshedProvider);
+        setSigner(await refreshedProvider.getSigner());
         setChainId(Number(updatedNetwork.chainId));
       }
 

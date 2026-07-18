@@ -53,6 +53,18 @@ const loadAddresses = () => {
 };
 loadAddresses();
 
+// Serve deployed-addresses.json for frontend dynamic config
+app.get("/deployed-addresses.json", (_req: Request, res: Response) => {
+  const filePath = path.join(__dirname, "../../deployed-addresses.json");
+  if (fs.existsSync(filePath)) {
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Cache-Control", "no-store");
+    res.send(fs.readFileSync(filePath, "utf8"));
+  } else {
+    res.status(404).json({ error: "deployed-addresses.json not found" });
+  }
+});
+
 // Setup ethers provider
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
