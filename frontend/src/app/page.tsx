@@ -578,35 +578,15 @@ export default function Page() {
     };
   }, [portfolio, stocks]);
 
-  // Layout Styles (Identical to premium mobile mock shell)
-  const shellStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    background: "#e7e5e4",
-    padding: "20px 10px",
-    ...sans,
-  };
 
-  const phoneStyle: React.CSSProperties = {
-    width: "100%",
-    maxWidth: 420,
-    height: 840,
-    background: C.bg,
-    borderRadius: 40,
-    boxShadow: "0 24px 64px rgba(12, 10, 9, 0.15), 0 2px 8px rgba(12, 10, 9, 0.05)",
-    border: `8px solid ${C.ink}`,
-    position: "relative",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-  };
+  // Layout — CSS classes handle all responsive breakpoints via globals.css
+  // sw-shell: viewport-filling shell (centered on desktop, edge-to-edge on mobile)
+  // sw-phone: bordered frame on desktop, full-screen on mobile ≤480px
 
   const TabBar = () => (
     <div
       style={{
-        height: 76,
+        height: "var(--tab-h, 64px)",
         borderTop: `1px solid ${C.border}`,
         display: "flex",
         background: C.bg,
@@ -615,13 +595,14 @@ export default function Page() {
         left: 0,
         right: 0,
         zIndex: 20,
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
       {[
-        { id: "home", label: "Home", icon: <User size={20} /> },
-        { id: "markets", label: "Markets", icon: <TrendingUp size={20} /> },
-        { id: "portfolio", label: "Portfolio", icon: <Briefcase size={20} /> },
-        { id: "wallet", label: "Wallet", icon: <WalletIcon size={20} /> },
+        { id: "home", label: "Home", icon: <User size={18} /> },
+        { id: "markets", label: "Markets", icon: <TrendingUp size={18} /> },
+        { id: "portfolio", label: "Portfolio", icon: <Briefcase size={18} /> },
+        { id: "wallet", label: "Wallet", icon: <WalletIcon size={18} /> },
       ].map((t) => (
         <button
           key={t.id}
@@ -636,13 +617,14 @@ export default function Page() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: 4,
+            gap: 3,
             background: "none",
             border: "none",
             color: tab === t.id && !selectedStock ? C.ink : C.inkMute,
             cursor: "pointer",
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: tab === t.id ? 600 : 500,
+            padding: "4px 0",
           }}
         >
           {t.icon}
@@ -655,11 +637,9 @@ export default function Page() {
   // Wait until mounted on client to prevent hydration mismatches
   if (!hasMounted) {
     return (
-      <div style={shellStyle}>
-        <div style={phoneStyle}>
-          <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "40px 30px" }}>
-            <div style={{ color: C.ink, fontSize: 13, fontWeight: 500 }}>Loading Stockwave...</div>
-          </div>
+      <div className="sw-shell">
+        <div className="sw-phone" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+          <div style={{ color: C.ink, fontSize: 13, fontWeight: 500 }}>Loading Stockwave...</div>
         </div>
       </div>
     );
@@ -668,9 +648,9 @@ export default function Page() {
   // Authentication Required Screen
   if (!isConnected) {
     return (
-      <div style={shellStyle}>
-        <div style={phoneStyle}>
-          <div style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "40px 30px" }}>
+      <div className="sw-shell">
+        <div className="sw-phone" style={{ display: "flex", flexDirection: "column" }}>
+          <div className="sw-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "40px 28px" }}>
             <div style={{ marginTop: 60 }}>
               <div style={{ ...serif, fontSize: 44, color: C.ink, lineHeight: 1.1, fontWeight: 400, letterSpacing: "-0.04em" }}>
                 Stockwave.
@@ -1038,9 +1018,9 @@ export default function Page() {
   // Network Check Screen
   if (!isCorrectNetwork && !isDevAccount) {
     return (
-      <div style={shellStyle}>
-        <div style={phoneStyle}>
-          <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "40px 30px", textAlign: "center" }}>
+      <div className="sw-shell">
+        <div className="sw-phone" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+          <div style={{ padding: "40px 28px", textAlign: "center", width: "100%" }}>
             <div style={{ width: 64, height: 64, borderRadius: "50%", background: C.lossSoft, color: C.loss, display: "grid", placeItems: "center", marginBottom: 24 }}>
               <Shield size={32} />
             </div>
@@ -1075,9 +1055,9 @@ export default function Page() {
   const active = activeStock;
 
   return (
-    <div style={shellStyle}>
-      <div style={phoneStyle}>
-        <div style={{ height: "100%", overflowY: "auto", paddingBottom: 76 }}>
+    <div className="sw-shell">
+      <div className="sw-phone" style={{ display: "flex", flexDirection: "column" }}>
+        <div className="sw-scroll" style={{ flex: 1, paddingBottom: "calc(var(--tab-h, 64px) + env(safe-area-inset-bottom, 0px))" }}>
           {active ? (
             /* ════════════════════════════════════════════════════════════════════
                STOCK DETAIL VIEW
