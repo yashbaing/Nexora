@@ -750,7 +750,7 @@ export default function Page() {
                   <path fill="#FBBC05" d="M5.13 14.36c-.24-.73-.38-1.52-.38-2.36s.14-1.63.38-2.36L1.25 6.63C.45 8.24 0 10.06 0 12s.45 3.76 1.25 5.37l3.88-3.01z" />
                   <path fill="#34A853" d="M12 23.04c3.24 0 5.97-1.07 7.96-2.91l-3.61-2.8c-1.2.8-2.73 1.27-4.35 1.27-3.21 0-5.93-2.7-6.87-5.6L1.25 16c2 3.95 6.03 6.67 10.75 6.67z" />
                 </svg>
-                Sign in with Google (Embedded Wallet)
+                Sign in with Google
               </button>
               
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 16, fontSize: 11, color: C.inkMute }}>
