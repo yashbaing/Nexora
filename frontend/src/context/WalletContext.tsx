@@ -104,10 +104,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setChainId(null);
     setJwtToken(null);
     setIsDevAccount(false);
-    localStorage.removeItem("stockwave_jwt");
-    localStorage.removeItem("stockwave_address");
-    localStorage.removeItem("stockwave_is_dev");
-    localStorage.removeItem("stockwave_private_key");
+    localStorage.removeItem("nexora_jwt");
+    localStorage.removeItem("nexora_address");
+    localStorage.removeItem("nexora_is_dev");
+    localStorage.removeItem("nexora_private_key");
     delete axios.defaults.headers.common["Authorization"];
   }, []);
 
@@ -206,9 +206,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setChainId(Number(updatedNetwork.chainId));
       }
 
-      const cachedToken = localStorage.getItem("stockwave_jwt");
-      const cachedAddress = localStorage.getItem("stockwave_address");
-      const cachedIsDev = localStorage.getItem("stockwave_is_dev") === "true";
+      const cachedToken = localStorage.getItem("nexora_jwt");
+      const cachedAddress = localStorage.getItem("nexora_address");
+      const cachedIsDev = localStorage.getItem("nexora_is_dev") === "true";
       
       if (cachedToken && cachedAddress?.toLowerCase() === rawAddress.toLowerCase() && !cachedIsDev) {
         setAddress(rawAddress);
@@ -220,7 +220,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       const timestamp = Date.now();
-      const message = `Sign in to Stockwave Trading Platform\n\nWallet: ${rawAddress}\nTimestamp: ${timestamp}`;
+      const message = `Sign in to Nexora Trading Platform\n\nWallet: ${rawAddress}\nTimestamp: ${timestamp}`;
       const signature = await tempSigner.signMessage(message);
 
       const loginResp = await axios.post(`${BACKEND_URL}/api/auth/web3-login`, {
@@ -232,9 +232,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const { token } = loginResp.data;
       setAddress(rawAddress);
       setJwtToken(token);
-      localStorage.setItem("stockwave_jwt", token);
-      localStorage.setItem("stockwave_address", rawAddress);
-      localStorage.setItem("stockwave_is_dev", "false");
+      localStorage.setItem("nexora_jwt", token);
+      localStorage.setItem("nexora_address", rawAddress);
+      localStorage.setItem("nexora_is_dev", "false");
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setIsConnected(true);
     } catch (err) {
@@ -259,7 +259,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       
       const rawAddress = devSigner.address;
       const timestamp = Date.now();
-      const message = `Sign in to Stockwave Trading Platform\n\nWallet: ${rawAddress}\nTimestamp: ${timestamp}`;
+      const message = `Sign in to Nexora Trading Platform\n\nWallet: ${rawAddress}\nTimestamp: ${timestamp}`;
       const signature = await devSigner.signMessage(message);
 
       const loginResp = await axios.post(`${BACKEND_URL}/api/auth/web3-login`, {
@@ -277,9 +277,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setJwtToken(token);
       setIsDevAccount(true);
       
-      localStorage.setItem("stockwave_jwt", token);
-      localStorage.setItem("stockwave_address", rawAddress);
-      localStorage.setItem("stockwave_is_dev", "true");
+      localStorage.setItem("nexora_jwt", token);
+      localStorage.setItem("nexora_address", rawAddress);
+      localStorage.setItem("nexora_is_dev", "true");
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setIsConnected(true);
     } catch (err) {
@@ -311,10 +311,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setJwtToken(token);
       setIsDevAccount(true);
       
-      localStorage.setItem("stockwave_jwt", token);
-      localStorage.setItem("stockwave_address", user.id);
-      localStorage.setItem("stockwave_is_dev", "true");
-      localStorage.setItem("stockwave_private_key", privateKey);
+      localStorage.setItem("nexora_jwt", token);
+      localStorage.setItem("nexora_address", user.id);
+      localStorage.setItem("nexora_is_dev", "true");
+      localStorage.setItem("nexora_private_key", privateKey);
       
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setIsConnected(true);
@@ -346,10 +346,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setJwtToken(token);
       setIsDevAccount(true);
       
-      localStorage.setItem("stockwave_jwt", token);
-      localStorage.setItem("stockwave_address", user.id);
-      localStorage.setItem("stockwave_is_dev", "true");
-      localStorage.setItem("stockwave_private_key", privateKey);
+      localStorage.setItem("nexora_jwt", token);
+      localStorage.setItem("nexora_address", user.id);
+      localStorage.setItem("nexora_is_dev", "true");
+      localStorage.setItem("nexora_private_key", privateKey);
       
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setIsConnected(true);
@@ -391,14 +391,14 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     const checkAuthorized = async () => {
-      const cachedToken = localStorage.getItem("stockwave_jwt");
-      const cachedAddress = localStorage.getItem("stockwave_address");
-      const cachedIsDev = localStorage.getItem("stockwave_is_dev") === "true";
+      const cachedToken = localStorage.getItem("nexora_jwt");
+      const cachedAddress = localStorage.getItem("nexora_address");
+      const cachedIsDev = localStorage.getItem("nexora_is_dev") === "true";
 
       if (cachedToken && cachedAddress) {
         try {
           if (cachedIsDev) {
-            const cachedPrivateKey = localStorage.getItem("stockwave_private_key");
+            const cachedPrivateKey = localStorage.getItem("nexora_private_key");
             
             const isFuji = targetChainId === 43113;
             const privateKey = cachedPrivateKey || (

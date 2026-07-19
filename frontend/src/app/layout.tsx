@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stockwave - Web3 Tokenized Stocks",
-  description: "Trade tokenized equities on Avalanche C-Chain",
+  title: "Nexora - Web3 Tokenized Stocks",
+  description: "Trade tokenized equities on Avalanche C-Chain — Nexora, the premier Web3 equities platform.",
 };
 
 import { WalletProvider } from "@/context/WalletContext";
@@ -28,9 +28,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body>
         <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
         <WalletProvider>
           {children}

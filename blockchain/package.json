@@ -1,7 +1,7 @@
 {
-  "name": "stockwave-blockchain",
+  "name": "nexora-blockchain",
   "version": "1.0.0",
-  "description": "Smart contracts for Stockwave Web3 trading app",
+  "description": "Smart contracts for Nexora Web3 trading app",
   "scripts": {
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",

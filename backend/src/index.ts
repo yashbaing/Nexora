@@ -21,7 +21,7 @@ import { signTradeQuote } from "./signer";
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || "stockwave_web3_secret_2026";
+const JWT_SECRET = process.env.JWT_SECRET || "nexora_web3_secret_2026";
 const RPC_URL = process.env.RPC_URL || "http://127.0.0.1:8545";
 
 const app = express();
@@ -108,7 +108,7 @@ app.post("/api/auth/web3-login", async (req: Request, res: Response) => {
     if (!user) {
       // Auto register
       const userName = name || `Trader_${walletAddress.slice(2, 8)}`;
-      const email = `${walletAddress.slice(2, 10)}@stockwave.internal`;
+      const email = `${walletAddress.slice(2, 10)}@nexora.internal`;
       const insertRes = await pool.query(
         "INSERT INTO users (id, name, email) VALUES ($1, $2, $3) RETURNING *",
         [walletAddress, userName, email]
@@ -644,7 +644,7 @@ const startServer = async () => {
 
     // 3. Listen Express
     server.listen(PORT, () => {
-      console.log(`✅ Stockwave TypeScript Backend running on port ${PORT}`);
+      console.log(`✅ Nexora TypeScript Backend running on port ${PORT}`);
     });
   } catch (err) {
     console.error("❌ Server startup failed:", err);

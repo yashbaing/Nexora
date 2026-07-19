@@ -1,6 +1,6 @@
-# Stockwave Backend
+# Nexora Backend
 
-Express backend for the Stockwave trading application.
+Express backend for the Nexora trading application.
 
 ## Installation
 

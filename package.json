@@ -1,5 +1,5 @@
 {
-  "name": "stockwave-trading-app",
+  "name": "nexora-trading-app",
   "version": "1.0.0",
   "description": "Complete trading app for tokenized stocks with real-time data",
   "workspaces": [

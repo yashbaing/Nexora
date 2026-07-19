@@ -1,4 +1,4 @@
-# Stockwave - Complete Trading App
+# Nexora - Complete Trading App
 
 A full-featured React app for trading tokenized stocks with real-time data, multiple payment methods, and a complete backend.
 

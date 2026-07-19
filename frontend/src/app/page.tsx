@@ -639,7 +639,7 @@ export default function Page() {
     return (
       <div className="sw-shell">
         <div className="sw-phone" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-          <div style={{ color: C.ink, fontSize: 13, fontWeight: 500 }}>Loading Stockwave...</div>
+          <div style={{ color: C.ink, fontSize: 13, fontWeight: 500 }}>Loading Nexora...</div>
         </div>
       </div>
     );
@@ -653,7 +653,7 @@ export default function Page() {
           <div className="sw-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "40px 28px" }}>
             <div style={{ marginTop: 60 }}>
               <div style={{ ...serif, fontSize: 44, color: C.ink, lineHeight: 1.1, fontWeight: 400, letterSpacing: "-0.04em" }}>
-                Stockwave.
+                Nexora.
               </div>
               <div style={{ fontSize: 13, color: C.inkDim, marginTop: 12, lineHeight: 1.5 }}>
                 A premium, Avalanche-native Web3 equities platform settled securely in USDC with institutional liquidity powered by Hyperliquid.
@@ -799,7 +799,7 @@ export default function Page() {
               </div>
 
               <h4 style={{ fontSize: 18, color: C.ink, fontWeight: 600, margin: "0 0 4px 0" }}>Sign in with Google</h4>
-              <p style={{ fontSize: 12, color: C.inkMute, margin: "0 0 20px 0" }}>to continue to Nexora Stockwave</p>
+              <p style={{ fontSize: 12, color: C.inkMute, margin: "0 0 20px 0" }}>to continue to Nexora</p>
 
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -1026,7 +1026,7 @@ export default function Page() {
             </div>
             <h3 style={{ ...serif, fontSize: 26, color: C.ink, fontWeight: 400, marginBottom: 12 }}>Wrong Network</h3>
             <p style={{ fontSize: 13, color: C.inkDim, lineHeight: 1.5, marginBottom: 32 }}>
-              Stockwave settles trades securely on {targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}. Please switch your wallet network to proceed.
+              Nexora settles trades securely on {targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}. Please switch your wallet network to proceed.
             </p>
             <button
               type="button"

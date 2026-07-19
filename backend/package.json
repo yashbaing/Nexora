@@ -1,7 +1,7 @@
 {
-  "name": "stockwave-backend",
+  "name": "nexora-backend",
   "version": "1.0.0",
-  "description": "TypeScript backend for Stockwave trading app",
+  "description": "TypeScript backend for Nexora trading app",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
