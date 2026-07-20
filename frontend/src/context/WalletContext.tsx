@@ -249,9 +249,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       setIsConnecting(true);
       
-      const isFuji = targetChainId === 43113;
-      const devPrivateKey = isFuji
-        ? "0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad" // Fuji deployer wallet
+      const isL1OrFuji = targetChainId === 43113 || targetChainId === 66666;
+      const devPrivateKey = isL1OrFuji
+        ? "0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad" // Nexora L1 / Fuji deployer wallet
         : "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"; // Localhost Hardhat Account #1
 
       const devProvider = new ethers.JsonRpcProvider(targetRpcUrl);
@@ -400,9 +400,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           if (cachedIsDev) {
             const cachedPrivateKey = localStorage.getItem("nexora_private_key");
             
-            const isFuji = targetChainId === 43113;
+            const isL1OrFuji = targetChainId === 43113 || targetChainId === 66666;
             const privateKey = cachedPrivateKey || (
-              isFuji
+              isL1OrFuji
                 ? "0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad"
                 : "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
             );

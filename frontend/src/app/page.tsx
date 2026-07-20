@@ -426,6 +426,29 @@ export default function Page() {
     }
   };
 
+  const handleAddUsdcToMetaMask = async () => {
+    try {
+      const ethereum = (window as any).ethereum;
+      if (ethereum && deployedAddresses.MockUSDC) {
+        await ethereum.request({
+          method: "wallet_watchAsset",
+          params: {
+            type: "ERC20",
+            options: {
+              address: deployedAddresses.MockUSDC,
+              symbol: "USDC",
+              decimals: 6,
+            },
+          },
+        });
+      } else {
+        alert(`USDC Token Contract Address on Nexora L1:\n${deployedAddresses.MockUSDC}`);
+      }
+    } catch (e: any) {
+      console.warn("Could not add token to wallet:", e);
+    }
+  };
+
   // 6. On-chain Trade Execution
   const executeTrade = async () => {
     const stock = activeStock;
@@ -1646,7 +1669,28 @@ export default function Page() {
                   <div style={{ ...serif, fontSize: 36, color: C.ink, lineHeight: 1 }}>
                     {fmtUSD(portfolio.cash)}
                   </div>
-                  <div style={{ fontSize: 11, color: C.inkMute, marginTop: 8, ...mono }}>Avalanche C-Chain</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: C.inkMute, ...mono }}>Nexora L1 Settlement</div>
+                    <button
+                      type="button"
+                      onClick={handleAddUsdcToMetaMask}
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: C.ink,
+                        background: C.bg2,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 8,
+                        padding: "4px 8px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      🦊 Import USDC to MetaMask
+                    </button>
+                  </div>
                 </div>
 
                 {/* Local Faucet tool */}

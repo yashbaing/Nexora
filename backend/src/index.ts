@@ -116,6 +116,26 @@ app.post("/api/auth/web3-login", async (req: Request, res: Response) => {
       user = insertRes.rows[0];
     }
 
+    // Auto-fund connected user wallet with gas if balance < 0.1 NXR / AVAX
+    try {
+      const deployerKey = process.env.ORACLE_PRIVATE_KEY;
+      if (deployerKey) {
+        const deployer = new ethers.Wallet(deployerKey, provider);
+        const bal = await provider.getBalance(walletAddress);
+        if (bal < ethers.parseEther("0.1")) {
+          console.log(`💸 Auto-funding Web3 user wallet (${walletAddress}) with 1.0 NXR gas...`);
+          const fundTx = await deployer.sendTransaction({
+            to: walletAddress,
+            value: ethers.parseEther("1.0")
+          });
+          await fundTx.wait();
+          console.log(`✅ Auto-funded ${walletAddress} with 1.0 NXR gas.`);
+        }
+      }
+    } catch (fundErr: any) {
+      console.warn("⚠️ Auto-fund warning:", fundErr.message);
+    }
+
     const token = jwt.sign({ address: walletAddress }, JWT_SECRET, { expiresIn: "7d" });
     res.json({
       message: "Logged in successfully",
@@ -437,9 +457,9 @@ app.post("/api/trades/sync", verifyToken, async (req: AuthRequest, res: Response
               name: parsed.name,
               user: parsed.args[0].toLowerCase(),
               symbol: parsed.args[1],
-              qty: ethers.formatEther(parsed.args[2]), // qty parsed to string float
-              price: (Number(parsed.args[3]) / 10**6).toString(), // price in USD
-              amount: (Number(parsed.args[4]) / 10**6).toString(), // usdc spent/received
+              qty: ethers.formatEther(parsed.args[2]),
+              price: ethers.formatUnits(parsed.args[3], 6),
+              amount: ethers.formatUnits(parsed.args[4], 6),
               timestamp: new Date(Number(parsed.args[5]) * 1000),
             };
             break;
