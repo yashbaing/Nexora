@@ -47,8 +47,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [chainId, setChainId] = useState<number | null>(null);
   const [jwtToken, setJwtToken] = useState<string | null>(null);
   const [isDevAccount, setIsDevAccount] = useState<boolean>(false);
-  const [targetChainId, setTargetChainId] = useState<number>(43113); // Default to Fuji Testnet
-  const [targetRpcUrl, setTargetRpcUrl] = useState<string>("https://api.avax-test.network/ext/bc/C/rpc");
+  const [targetChainId, setTargetChainId] = useState<number>(66666); // Nexora Private L1
+  const [targetRpcUrl, setTargetRpcUrl] = useState<string>("http://127.0.0.1:9654/ext/bc/2M4yVQxvusf3M87KM5uDYVoGm7cum8XjjdVKPmoubmgAxgRerv/rpc");
   const [injectedProviders, setInjectedProviders] = useState<EIP6963ProviderDetail[]>([]);
   const rawProviderRef = React.useRef<any>(null);
 
@@ -88,7 +88,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           }
         }
       } catch (e) {
-        console.warn("Could not fetch target chain ID or RPC URL from backend, default to Fuji:", e);
+        console.warn("Could not fetch target chain ID or RPC URL from backend, defaulting to Nexora L1:", e);
       }
     };
     fetchTargetChain();
@@ -133,7 +133,12 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch (switchError: any) {
       console.warn("Switch network failed, attempting to add network as fallback...", switchError);
       try {
-        const chainParams = targetChainId === 43113 ? {
+        const chainParams = targetChainId === 66666 ? {
+          chainId: "0x1046A",
+          chainName: "Nexora L1",
+          nativeCurrency: { name: "NXR Token", symbol: "NXR", decimals: 18 },
+          rpcUrls: [targetRpcUrl],
+        } : targetChainId === 43113 ? {
           chainId: "0xa869",
           chainName: "Avalanche Fuji Testnet",
           nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
@@ -144,15 +149,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           chainName: "Hardhat Localhost",
           nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
           rpcUrls: ["http://localhost:8545"],
-        } : targetChainId === 77777 ? {
-          chainId: "0x12fcd",
-          chainName: "Avalanche Custom L1",
-          nativeCurrency: { name: "STW", symbol: "STW", decimals: 18 },
-          rpcUrls: ["http://localhost:8545"],
         } : {
           chainId: hexChainId,
-          chainName: "Avalanche Custom L1",
-          nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
+          chainName: "Nexora L1",
+          nativeCurrency: { name: "NXR Token", symbol: "NXR", decimals: 18 },
           rpcUrls: [targetRpcUrl],
         };
 

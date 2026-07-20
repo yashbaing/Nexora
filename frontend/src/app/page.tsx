@@ -1026,7 +1026,7 @@ export default function Page() {
             </div>
             <h3 style={{ ...serif, fontSize: 26, color: C.ink, fontWeight: 400, marginBottom: 12 }}>Wrong Network</h3>
             <p style={{ fontSize: 13, color: C.inkDim, lineHeight: 1.5, marginBottom: 32 }}>
-              Nexora settles trades securely on {targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}. Please switch your wallet network to proceed.
+              Nexora settles trades securely on its private {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}. Please switch your wallet network to proceed.
             </p>
             <button
               type="button"
@@ -1043,7 +1043,7 @@ export default function Page() {
                 border: "none",
               }}
             >
-              Switch to {targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}
+              Switch to {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}
             </button>
           </div>
         </div>
