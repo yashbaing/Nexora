@@ -403,14 +403,17 @@ export default function Page() {
 
   // 5. On-chain Faucet Claim
   const handleFaucetClaim = async () => {
-    if (!signer || !deployedAddresses.MockUSDC) return;
+    if (!signer || !deployedAddresses.MockUSDC) {
+      alert("Please connect your wallet or Dev account first!");
+      return;
+    }
     try {
       setIsFaucetLoading(true);
       
       const usdcAbi = ["function faucet(uint256) external"];
       const usdcContract = new ethers.Contract(deployedAddresses.MockUSDC, usdcAbi, signer);
 
-      const parsedAmount = ethers.parseUnits(faucetAmount, 6);
+      const parsedAmount = ethers.parseUnits(faucetAmount || "1000", 6);
       
       console.log(`Sending Faucet TX for ${faucetAmount} USDC...`);
       const tx = await usdcContract.faucet(parsedAmount);
@@ -420,7 +423,12 @@ export default function Page() {
       refreshUserData();
     } catch (err: any) {
       console.error("Faucet error:", err);
-      alert(`Faucet Error: ${err.reason || err.message}`);
+      const errMsg = err?.message || err?.reason || String(err);
+      if (errMsg.includes("-32002") || errMsg.includes("too many errors") || errMsg.includes("RPC endpoint")) {
+        alert("⚠️ RPC Connection Error (-32002): The RPC endpoint is rate-limiting or recovering. Please refresh the page or check your wallet network connection!");
+      } else {
+        alert(`Faucet Error: ${err.reason || err.message}`);
+      }
     } finally {
       setIsFaucetLoading(false);
     }
