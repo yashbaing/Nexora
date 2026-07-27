@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 
-const BACKEND_URL = "http://127.0.0.1:5001";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:5001";
 axios.defaults.baseURL = BACKEND_URL;
 
 /* ════════════════════════════════════════════════════════════════════

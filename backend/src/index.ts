@@ -40,9 +40,17 @@ app.use(express.json());
 setIoInstance(io);
 
 // Load deployed contract address mappings
+// In production (Railway): addresses come from DEPLOYED_ADDRESSES env var
+// In development: addresses come from local deployed-addresses.json file
 let addresses: any = {};
 const loadAddresses = () => {
   try {
+    // First try env var (production/Railway)
+    if (process.env.DEPLOYED_ADDRESSES) {
+      addresses = JSON.parse(process.env.DEPLOYED_ADDRESSES);
+      return;
+    }
+    // Fallback to local file (development)
     const filePath = path.join(__dirname, "../../deployed-addresses.json");
     if (fs.existsSync(filePath)) {
       addresses = JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -55,11 +63,11 @@ loadAddresses();
 
 // Serve deployed-addresses.json for frontend dynamic config
 app.get("/deployed-addresses.json", (_req: Request, res: Response) => {
-  const filePath = path.join(__dirname, "../../deployed-addresses.json");
-  if (fs.existsSync(filePath)) {
+  // Return current loaded addresses (works both locally and on Railway)
+  if (Object.keys(addresses).length > 0) {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Cache-Control", "no-store");
-    res.send(fs.readFileSync(filePath, "utf8"));
+    res.json(addresses);
   } else {
     res.status(404).json({ error: "deployed-addresses.json not found" });
   }

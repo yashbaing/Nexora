@@ -3,13 +3,19 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = new Pool({
-  user: process.env.PGUSER || "yashbaing",
-  host: process.env.PGHOST || "localhost",
-  database: process.env.PGDATABASE || "postgres",
-  password: process.env.PGPASSWORD || "",
-  port: parseInt(process.env.PGPORT || "5432"),
-});
+// Railway provides DATABASE_URL — use it if available, else use individual PG vars (local)
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+    })
+  : new Pool({
+      user: process.env.PGUSER || "yashbaing",
+      host: process.env.PGHOST || "localhost",
+      database: process.env.PGDATABASE || "postgres",
+      password: process.env.PGPASSWORD || "",
+      port: parseInt(process.env.PGPORT || "5432"),
+    });
 
 export const initDb = async () => {
   console.log("🐘 Connecting to PostgreSQL and initializing schema...");

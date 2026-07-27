@@ -1,0 +1,29 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# RAILWAY BACKEND ENVIRONMENT VARIABLES
+# Copy-paste these into Railway → Your Service → Variables tab
+# ─────────────────────────────────────────────────────────────────────────────
+
+PORT=5001
+NODE_ENV=production
+JWT_SECRET=nexora_secret_key_2026
+
+# Avalanche Fuji Testnet RPC (permanent, never resets)
+RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+
+# Oracle signer wallet (the Fuji deployer wallet)
+ORACLE_PRIVATE_KEY=0x1cafbb7bc3b2e1a38c05b9b9aa67e98039c5082ddb303c9ac8a4bac6e7fd7bee
+
+# Your Vercel frontend URL (update after Vercel deploys)
+FRONTEND_URL=https://nexora.vercel.app
+
+# PostgreSQL - Railway auto-fills these when you add PostgreSQL plugin:
+# PGHOST=<auto>
+# PGPORT=<auto>
+# PGUSER=<auto>
+# PGPASSWORD=<auto>
+# PGDATABASE=<auto>
+# (or Railway provides DATABASE_URL — see backend db.ts)
+
+# Deployed contract addresses (paste the JSON from deployed-addresses.json as one line)
+# After deploying to Fuji, paste the contents of deployed-addresses.json here:
+# DEPLOYED_ADDRESSES={"MockUSDC":"0x...","StockwavePlatform":"0x...","chainId":"43113","rpcUrl":"https://api.avax-test.network/ext/bc/C/rpc",...}
