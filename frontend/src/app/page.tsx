@@ -423,6 +423,10 @@ export default function Page() {
       refreshUserData();
     } catch (err: any) {
       console.error("Faucet error:", err);
+      if (err.code === "ACTION_REJECTED" || err?.info?.error?.code === 4001 || String(err).includes("user denied")) {
+        console.log("User cancelled transaction in wallet.");
+        return;
+      }
       const errMsg = err?.message || err?.reason || String(err);
       if (errMsg.includes("-32002") || errMsg.includes("too many errors") || errMsg.includes("RPC endpoint")) {
         alert("⚠️ RPC Connection Error (-32002): The RPC endpoint is rate-limiting or recovering. Please refresh the page or check your wallet network connection!");

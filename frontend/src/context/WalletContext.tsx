@@ -149,6 +149,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           chainName: "Hardhat Localhost",
           nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
           rpcUrls: ["http://localhost:8545"],
+        } : targetChainId === 77777 ? {
+          chainId: "0x12fd1",
+          chainName: "Nexora Localhost (77777)",
+          nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+          rpcUrls: [targetRpcUrl || "http://localhost:8545"],
         } : {
           chainId: hexChainId,
           chainName: "Nexora L1",
