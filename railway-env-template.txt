@@ -11,7 +11,7 @@ JWT_SECRET=nexora_secret_key_2026
 RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
 
 # Oracle signer wallet (the Fuji deployer wallet)
-ORACLE_PRIVATE_KEY=0x1cafbb7bc3b2e1a38c05b9b9aa67e98039c5082ddb303c9ac8a4bac6e7fd7bee
+ORACLE_PRIVATE_KEY=0x81e6a5e00cd5123be27dabf88639c9bd41a8d617c14d1858b26ad162362a54ad
 
 # Your Vercel frontend URL (update after Vercel deploys)
 FRONTEND_URL=https://nexora.vercel.app
