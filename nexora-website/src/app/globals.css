@@ -21,6 +21,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@keyframes modal-in {
+  0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-modal-in {
+  animation: modal-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
@@ -29,6 +38,15 @@ body {
 @keyframes ticker {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
 .animate-float {
@@ -61,7 +79,7 @@ body {
 }
 
 .dark-hero-glow {
-  background:
+  background-image:
     radial-gradient(ellipse 70% 55% at 50% -10%, rgba(234, 88, 12, 0.18), transparent),
     radial-gradient(ellipse 45% 40% at 88% 15%, rgba(22, 163, 74, 0.07), transparent);
 }

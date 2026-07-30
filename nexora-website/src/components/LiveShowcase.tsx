@@ -84,9 +84,9 @@ function HomeScreen({ tickers }: { tickers: Ticker[] }) {
         <span className="font-mono normal-case tracking-normal text-stone-500">0x6A63…453f</span>
       </div>
 
-      <div className="mt-3 flex gap-2 overflow-hidden">
-        {tickers.slice(3).map((t) => (
-          <div key={t.symbol} className="flex shrink-0 items-center gap-1 rounded-full bg-stone-100 px-2 py-1 font-mono text-[9px]">
+      <div className="mt-3 flex gap-1.5 overflow-hidden">
+        {tickers.slice(3, 6).map((t) => (
+          <div key={t.symbol} className="flex shrink-0 items-center gap-1 rounded-full bg-stone-100 px-2 py-1 font-mono text-[9px] whitespace-nowrap">
             <span className="font-semibold text-stone-700">{t.symbol}</span>
             <span className={t.change >= 0 ? "text-green-600" : "text-red-600"}>{fmtSigned(t.change)}</span>
           </div>
@@ -333,7 +333,7 @@ export default function LiveShowcase() {
   return (
     <section
       id="app"
-      className="relative overflow-hidden border-y border-stone-200 bg-stone-50 py-24"
+      className="relative overflow-hidden border-y border-stone-200 bg-stone-50 py-16 md:py-24"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -341,7 +341,7 @@ export default function LiveShowcase() {
         <div className="font-mono text-[11px] uppercase tracking-[0.35em] text-stone-400">
           [ A day with Nexora ]
         </div>
-        <h2 className="mt-6 font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
+        <h2 className="mt-5 font-serif text-3xl tracking-tight text-stone-950 md:mt-6 md:text-5xl">
           Every market. One on-chain loop.
         </h2>
         <p className="mt-3 text-sm text-stone-500">
@@ -349,7 +349,7 @@ export default function LiveShowcase() {
         </p>
       </div>
 
-      <div className="relative mx-auto mt-14 h-[500px] max-w-6xl md:h-[560px]">
+      <div className="relative mx-auto mt-10 h-[560px] max-w-6xl md:mt-14 md:h-[560px]">
         <MiniPreview
           scene={scenes[prev]}
           rotate={-9}
@@ -358,7 +358,7 @@ export default function LiveShowcase() {
           render={renderScene}
         />
 
-        <div className="absolute left-1/2 top-1/2 h-[500px] w-[232px] -translate-x-1/2 -translate-y-1/2 md:h-[560px] md:w-[260px]">
+        <div className="absolute left-1/2 top-1/2 h-[560px] w-[260px] -translate-x-1/2 -translate-y-1/2">
           <div className="h-full w-full overflow-hidden rounded-[2.4rem] border-[6px] border-stone-950 bg-stone-950 shadow-2xl shadow-stone-950/25">
             {renderScene(scenes[active].key)}
           </div>
@@ -373,12 +373,12 @@ export default function LiveShowcase() {
         />
       </div>
 
-      <div className="mx-auto mt-10 h-14 max-w-md px-6 text-center">
+      <div className="mx-auto mt-8 h-14 max-w-md px-6 text-center md:mt-10">
         <div className="text-base font-semibold text-stone-950">{scenes[active].title}</div>
         <p className="mt-1 text-sm leading-relaxed text-stone-500">{scenes[active].description}</p>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5 px-6">
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-2 px-6 md:mt-4 md:gap-2.5">
         {scenes.map((s, i) => (
           <button
             key={s.key}

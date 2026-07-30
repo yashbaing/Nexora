@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import JoinWaitlist from "@/components/JoinWaitlist";
 import LiveShowcase from "@/components/LiveShowcase";
+import ComingSoon from "@/components/ComingSoon";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -142,13 +143,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-6">
               <JoinWaitlist variant="hero" />
-              <Link
-                href={APP_URL}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-stone-300 transition hover:text-white"
-              >
-                Launch App
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <ComingSoon variant="hero" />
             </div>
             <p className="mt-6 text-xs text-stone-500">
               Free on testnet · Non-custodial · 12+ tokenized equities
@@ -318,14 +313,8 @@ export default function Home() {
             Connect your wallet, mint test USDC, and start trading tokenized equities in minutes.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href={APP_URL}
-              className="inline-flex items-center gap-2 rounded-2xl bg-stone-950 px-10 py-4 text-sm font-semibold text-white shadow-lg shadow-stone-950/10 transition hover:bg-stone-800"
-            >
-              Launch Nexora App
-              <ArrowRight className="h-4 w-4" />
-            </Link>
             <JoinWaitlist variant="cta" />
+            <ComingSoon variant="cta" />
           </div>
         </div>
       </section>
@@ -344,7 +333,7 @@ export default function Home() {
               <a href="#features" className="hover:text-stone-950">Features</a>
               <a href="#how-it-works" className="hover:text-stone-950">How it works</a>
               <a href="#markets" className="hover:text-stone-950">Markets</a>
-              <Link href={APP_URL} className="hover:text-stone-950">Trading App</Link>
+              <span className="text-stone-400">Trading App · Coming soon</span>
             </div>
           </div>
           <div className="mt-8 border-t border-stone-200 pt-8 text-xs text-stone-400">
