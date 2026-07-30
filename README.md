@@ -2,6 +2,59 @@
 
 A full-featured React app for trading tokenized stocks with real-time data, multiple payment methods, and a complete backend.
 
+## 🌐 Routes at a glance
+
+| Route | What it is |
+| --- | --- |
+| `/` | Marketing landing page with waitlist capture |
+| `/markets` | Public, filterable listing of every equity token |
+| `/how-it-works` | Explainer: tokenized stocks, self-custody, settlement pipeline |
+| `/faq` | Frequently asked questions |
+| `/legal/terms`, `/legal/privacy` | Legal pages |
+| `/app` | The wallet-gated trading app |
+
+The marketing site and the trading app are separate Next.js root layouts (route
+groups `(marketing)` and `(app)`), so their stylesheets never mix. Moving between
+them is a full page load, which is intentional.
+
+## 📬 Marketing site & waitlist
+
+The landing page collects signups through the backend. Positions are assigned in
+insertion order, and each successful referral moves a subscriber five places up
+the queue.
+
+| Endpoint | Auth | Purpose |
+| --- | --- | --- |
+| `POST /api/waitlist` | none | Sign up. Idempotent per email; accepts a `ref` referral code |
+| `GET /api/waitlist/stats` | none | Total signups, used for social proof |
+| `GET /api/waitlist/me?code=` | none | Look up a position by referral code (email is masked) |
+| `GET /api/waitlist/export` | `WAITLIST_ADMIN_TOKEN` | Download the waitlist as CSV |
+
+Signups live in the `waitlist` table, created automatically by `initDb()`.
+
+Export the list with:
+
+```bash
+curl -H "Authorization: Bearer $WAITLIST_ADMIN_TOKEN" \
+     http://localhost:5001/api/waitlist/export
+```
+
+`GET /api/waitlist/export` returns `404` unless `WAITLIST_ADMIN_TOKEN` is set, so
+the export stays disabled by default.
+
+### Configuring the site
+
+| Variable | Where | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | frontend | Absolute site URL for canonical tags, OG images and the sitemap. Defaults to `https://nexora.finance` |
+| `NEXT_PUBLIC_BACKEND_URL` | frontend | Backend origin the `/api/*` rewrite proxies to. Defaults to `http://localhost:5001` |
+| `WAITLIST_ADMIN_TOKEN` | backend | Enables the CSV export route |
+
+Copy, listings, FAQ entries, roadmap phases and the contract facts shown on the
+site all live in `frontend/src/lib/site.ts`. Social links in the footer are empty
+by default and are skipped rather than rendered as dead links — fill them in
+`socialLinks` in that same file.
+
 ## 🎯 Features
 
 ✅ **Authentication**
@@ -94,17 +147,24 @@ Use these to test the app:
 - Email: `test@example.com`
 - Password: `password123`
 
-## 📱 Pages Included
+## 📱 Screens Included
 
-1. **Login Page** - User authentication
-2. **Register Page** - New account creation
-3. **Home Page** - Dashboard with stock overview
-4. **Stock Detail Page** - Detailed stock info with live chart
-5. **Portfolio Page** - Holdings and investment summary
-6. **Wallet Page** - Fund management and balance
-7. **Deposit Page** - Payment methods (UPI, Crypto, Card)
-8. **Order History Page** - Trading history
-9. **Settings Page** - User preferences and profile
+**Marketing site** (`/`)
+
+1. **Landing Page** - Hero, waitlist capture, features, listings, roadmap, FAQ
+2. **Markets** - Every equity token with live prices and sector filters
+3. **How It Works** - Tokenized stocks, self-custody and the settlement pipeline
+4. **FAQ** - Product, custody, pricing and launch questions
+5. **Legal** - Terms of service and privacy policy
+
+**Trading app** (`/app`)
+
+6. **Login** - Wallet connect, dev account, or Google sign-in
+7. **Home** - Net worth, movers and on-chain history
+8. **Markets** - Searchable equity token list
+9. **Stock Detail** - Candlestick chart with buy and sell
+10. **Portfolio** - Holdings and allocation breakdown
+11. **Wallet** - USDC balance, faucet and contract diagnostics
 
 ## 🛠 Technology Stack
 

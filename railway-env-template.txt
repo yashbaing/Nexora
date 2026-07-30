@@ -18,3 +18,12 @@ DEPLOYED_ADDRESSES={"MockUSDC":"0xa95D5F58f7bDDD29fb945655D17E359df2F27B1B","Sto
 
 # PostgreSQL on Railway:
 # When you add PostgreSQL plugin in Railway, Railway automatically creates `DATABASE_URL`.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# WAITLIST (marketing site)
+# ─────────────────────────────────────────────────────────────────────────────
+# Optional. Set this to enable GET /api/waitlist/export, which returns the
+# waitlist as CSV. Without it that route returns 404 and the export is disabled.
+# Fetch with:  curl -H "Authorization: Bearer $WAITLIST_ADMIN_TOKEN" \
+#                   https://<backend>/api/waitlist/export
+# WAITLIST_ADMIN_TOKEN=generate_a_long_random_string
