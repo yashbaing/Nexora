@@ -18,6 +18,7 @@ import {
   initScaling,
 } from "./hyperliquid";
 import { signTradeQuote } from "./signer";
+import waitlistRouter from "./waitlist";
 
 dotenv.config();
 
@@ -35,6 +36,9 @@ const io = new SocketIOServer(server, {
 
 app.use(cors());
 app.use(express.json());
+
+// Marketing site waitlist (public, no auth)
+app.use(waitlistRouter);
 
 // Set socket io reference in Hyperliquid provider
 setIoInstance(io);
