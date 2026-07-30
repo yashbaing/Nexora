@@ -497,7 +497,7 @@ export default function Page() {
       ];
       const platformContract = new ethers.Contract(platformAddress, platformAbi, signer);
 
-      console.log(`Executing ${tradeSide} transaction on Avalanche C-Chain...`);
+      console.log(`Executing ${tradeSide} transaction on Nexora...`);
       let tx;
       if (tradeSide === "buy") {
         tx = await platformContract.buyStock(
@@ -668,7 +668,7 @@ export default function Page() {
                 Nexora.
               </div>
               <div style={{ fontSize: 13, color: C.inkDim, marginTop: 12, lineHeight: 1.5 }}>
-                A premium, Avalanche-native Web3 equities platform settled securely in USDC with institutional liquidity powered by Hyperliquid.
+                A premium, Nexora-native Web3 equities platform settled securely in USDC with institutional liquidity powered by Hyperliquid.
               </div>
             </div>
 
@@ -1038,7 +1038,7 @@ export default function Page() {
             </div>
             <h3 style={{ ...serif, fontSize: 26, color: C.ink, fontWeight: 400, marginBottom: 12 }}>Wrong Network</h3>
             <p style={{ fontSize: 13, color: C.inkDim, lineHeight: 1.5, marginBottom: 32 }}>
-              Nexora settles trades securely on its private {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}. Please switch your wallet network to proceed.
+              Nexora settles trades securely on its private {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Nexora Fuji Testnet" : targetChainId === 31337 ? "Localhost" : "Nexora Custom L1"}. Please switch your wallet network to proceed.
             </p>
             <button
               type="button"
@@ -1055,7 +1055,7 @@ export default function Page() {
                 border: "none",
               }}
             >
-              Switch to {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}
+              Switch to {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Nexora Fuji Testnet" : targetChainId === 31337 ? "Localhost" : "Nexora Custom L1"}
             </button>
           </div>
         </div>
@@ -1236,7 +1236,7 @@ export default function Page() {
                       ["Day high", fmtPrice(active.dayHigh || active.price, active.currency)],
                       ["Day low", fmtPrice(active.dayLow || active.price, active.currency)],
                       ["Token standard", "Solidity ERC-20"],
-                      ["Avalanche Contract Address", deployedAddresses.stocks?.[active.symbol]?.slice(0, 10) + "..."],
+                      ["Contract Address", deployedAddresses.stocks?.[active.symbol]?.slice(0, 10) + "..."],
                     ].map(([k, v], i, arr) => (
                       <div key={k} style={{
                         display: "flex", justifyContent: "space-between", padding: "14px 0",
@@ -1549,7 +1549,7 @@ export default function Page() {
             <>
               <div style={{ padding: "24px 22px 18px" }}>
                 <div style={{ ...serif, fontSize: 30, color: C.ink, lineHeight: 1, fontWeight: 400 }}>Portfolio</div>
-                <div style={{ fontSize: 11, color: C.inkMute, marginTop: 4 }}>Your tokenized positions on Avalanche</div>
+                <div style={{ fontSize: 11, color: C.inkMute, marginTop: 4 }}>Your tokenized positions on Nexora</div>
               </div>
 
               <div style={{ padding: "0 22px 24px" }}>
@@ -1668,7 +1668,7 @@ export default function Page() {
                 }}>
                   <h4 style={{ ...serif, fontSize: 16, color: C.ink, fontWeight: 500, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
                     <Sparkles size={16} color={C.ember} />
-                    Avalanche USDC Faucet
+                    Nexora USDC Faucet
                   </h4>
                   <p style={{ fontSize: 11, color: C.inkDim, lineHeight: 1.5, marginBottom: 16 }}>
                     Obtain mock USDC to your wallet to test tokenized stock purchases locally.

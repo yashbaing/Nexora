@@ -41,7 +41,7 @@ const features = [
     icon: Layers,
     title: "Tokenized equities",
     description:
-      "Each stock is an ERC-20 on Avalanche — xAAPL, xTSLA, xNVDA and more, backed by oracle-signed quotes.",
+      "Each stock is an ERC-20 on Nexora — xAAPL, xTSLA, xNVDA and more, backed by oracle-signed quotes.",
   },
   {
     icon: Wallet,
@@ -57,9 +57,9 @@ const features = [
   },
   {
     icon: Zap,
-    title: "Avalanche-native",
+    title: "Nexora-native",
     description:
-      "Built for Avalanche Fuji and Nexora L1 — fast finality, low fees, and EVM compatibility.",
+      "Built for Nexora Fuji testnet and Nexora L1 — fast finality, low fees, and EVM compatibility.",
   },
 ];
 
@@ -77,7 +77,7 @@ const steps = [
   {
     step: "03",
     title: "Trade tokenized stocks",
-    description: "Browse markets, place buy/sell orders, and settle trades on Avalanche in seconds.",
+    description: "Browse markets, place buy/sell orders, and settle trades on Nexora in seconds.",
   },
 ];
 
@@ -136,7 +136,7 @@ export default function Home() {
             <div>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-1.5 text-xs font-medium text-stone-600">
                 <Sparkles className="h-3.5 w-3.5 text-orange-600" />
-                Web3 equities on Avalanche
+                Web3 equities on Nexora
               </div>
               <h1 className="font-serif text-5xl leading-[1.05] tracking-tight text-stone-950 md:text-6xl lg:text-7xl">
                 Trade stocks.
@@ -145,7 +145,7 @@ export default function Home() {
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600">
                 Nexora is a premium tokenized equities platform. Real-time Hyperliquid pricing,
-                USDC settlement, and non-custodial trading on Avalanche — built for the next era
+                USDC settlement, and non-custodial trading on Nexora — built for the next era
                 of capital markets.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
@@ -345,13 +345,13 @@ export default function Home() {
                 Built on proven infrastructure
               </h2>
               <p className="mt-4 text-lg text-stone-400 leading-relaxed">
-                Nexora combines Avalanche&apos;s high-performance L1, Hyperliquid&apos;s institutional
+                Nexora combines a high-performance L1, Hyperliquid&apos;s institutional
                 liquidity feeds, and Solidity smart contracts with oracle-signed trade quotes.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: "Network", value: "Avalanche C-Chain" },
+                { label: "Network", value: "Nexora L1" },
                 { label: "Settlement", value: "USDC (ERC-20)" },
                 { label: "Price feed", value: "Hyperliquid WS" },
                 { label: "Contracts", value: "Solidity 0.8.26" },
@@ -373,7 +373,7 @@ export default function Home() {
         <div className="mx-auto max-w-3xl px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-4 py-1.5 text-xs font-medium text-stone-600 mb-6">
             <Globe className="h-3.5 w-3.5" />
-            Open beta on Avalanche Fuji testnet
+            Open beta on Nexora Fuji testnet
           </div>
           <h2 className="font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
             Ready to trade on-chain?
@@ -398,7 +398,7 @@ export default function Home() {
             <div>
               <div className="font-serif text-2xl text-stone-950">Nexora.</div>
               <p className="mt-2 text-sm text-stone-500">
-                Tokenized equities platform on Avalanche.
+                Tokenized equities platform on Nexora.
               </p>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-stone-600">

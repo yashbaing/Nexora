@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nexora — Tokenized Equities on Avalanche",
+  title: "Nexora — Tokenized Equities On-Chain",
   description:
-    "Trade tokenized stocks settled in USDC on Avalanche. Real-time pricing from Hyperliquid, non-custodial wallet login, and on-chain settlement.",
+    "Trade tokenized stocks settled in USDC on Nexora. Real-time pricing from Hyperliquid, non-custodial wallet login, and on-chain settlement.",
   openGraph: {
-    title: "Nexora — Tokenized Equities on Avalanche",
+    title: "Nexora — Tokenized Equities On-Chain",
     description:
       "A premium Web3 equities platform with institutional liquidity and USDC settlement.",
     type: "website",

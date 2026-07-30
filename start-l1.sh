@@ -15,7 +15,7 @@ echo "🔗 Starting Nexora Private L1..."
 if curl -sf "http://127.0.0.1:9654/ext/health" > /dev/null 2>&1; then
   echo "✅ Nexora L1 node already running at http://127.0.0.1:9654"
 else
-  echo "🚀 Launching local Avalanche network with Nexora L1..."
+  echo "🚀 Launching local Nexora network with Nexora L1..."
   $AVALANCHE_CLI network start --snapshot-name $NETWORK_NAME 2>&1 || \
   $AVALANCHE_CLI blockchain deploy $NETWORK_NAME --local 2>&1
 fi

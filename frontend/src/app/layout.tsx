@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Nexora - Web3 Tokenized Stocks",
-  description: "Trade tokenized equities on Avalanche C-Chain — Nexora, the premier Web3 equities platform.",
+  description: "Trade tokenized equities on Nexora — the premier Web3 equities platform.",
 };
 
 import { WalletProvider } from "@/context/WalletContext";

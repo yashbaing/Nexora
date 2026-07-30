@@ -140,7 +140,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           rpcUrls: [targetRpcUrl],
         } : targetChainId === 43113 ? {
           chainId: "0xa869",
-          chainName: "Avalanche Fuji Testnet",
+          chainName: "Nexora Fuji Testnet",
           nativeCurrency: { name: "AVAX", symbol: "AVAX", decimals: 18 },
           rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
           blockExplorerUrls: ["https://testnet.snowtrace.io/"]
