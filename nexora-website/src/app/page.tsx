@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   BarChart3,
@@ -64,6 +65,29 @@ const features = [
   },
 ];
 
+const appScreens = [
+  {
+    src: "/screens/home.png",
+    title: "Home dashboard",
+    description: "Total value, top movers, and on-chain history at a glance.",
+  },
+  {
+    src: "/screens/markets.png",
+    title: "Live markets",
+    description: "Real-time tokenized equity quotes streamed from Hyperliquid.",
+  },
+  {
+    src: "/screens/stock.png",
+    title: "Stock detail",
+    description: "Candlestick charts, token stats, and one-tap buy or sell.",
+  },
+  {
+    src: "/screens/wallet.png",
+    title: "USDC wallet",
+    description: "Settlement balance, test faucet, and contract diagnostics.",
+  },
+];
+
 const steps = [
   {
     step: "01",
@@ -92,6 +116,7 @@ function Nav() {
         <nav className="hidden items-center gap-8 text-sm text-stone-600 md:flex">
           <a href="#features" className="transition hover:text-stone-950">Features</a>
           <a href="#how-it-works" className="transition hover:text-stone-950">How it works</a>
+          <a href="#app" className="transition hover:text-stone-950">App</a>
           <a href="#markets" className="transition hover:text-stone-950">Markets</a>
         </nav>
         <div className="flex items-center gap-3">
@@ -291,8 +316,41 @@ export default function Home() {
         </div>
       </section>
 
+      {/* App screens */}
+      <section id="app" className="py-24 bg-white">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
+              Inside the app
+            </h2>
+            <p className="mt-4 text-lg text-stone-600">
+              Real screens from the Nexora trading app — built mobile-first, from live
+              markets to on-chain settlement.
+            </p>
+          </div>
+
+          <div className="mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {appScreens.map((s) => (
+              <div key={s.title} className="flex flex-col items-center text-center">
+                <div className="w-full max-w-[240px] rounded-[2.25rem] border-[5px] border-stone-950 bg-stone-950 shadow-xl shadow-stone-950/15 transition duration-300 hover:-translate-y-2">
+                  <Image
+                    src={s.src}
+                    alt={s.title}
+                    width={780}
+                    height={1688}
+                    className="w-full rounded-[1.9rem]"
+                  />
+                </div>
+                <h3 className="mt-6 text-base font-semibold text-stone-950">{s.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-stone-600">{s.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Markets */}
-      <section id="markets" className="py-24 bg-white">
+      <section id="markets" className="py-24 bg-stone-50 border-y border-stone-200">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
