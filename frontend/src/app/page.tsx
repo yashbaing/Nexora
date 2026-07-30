@@ -182,6 +182,14 @@ export default function Page() {
   const [googleName, setGoogleName] = useState<string>("");
   const [isSubmittingGoogle, setIsSubmittingGoogle] = useState<boolean>(false);
 
+  // Waitlist states
+  const [showWaitlistModal, setShowWaitlistModal] = useState<boolean>(false);
+  const [waitlistEmail, setWaitlistEmail] = useState<string>("");
+  const [waitlistName, setWaitlistName] = useState<string>("");
+  const [isSubmittingWaitlist, setIsSubmittingWaitlist] = useState<boolean>(false);
+  const [waitlistMessage, setWaitlistMessage] = useState<string>("");
+  const [waitlistJoined, setWaitlistJoined] = useState<boolean>(false);
+
   // Initialize official Google Identity Services button
   useEffect(() => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -702,6 +710,34 @@ export default function Page() {
                   <>Connect Wallet</>
                 )}
               </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setWaitlistMessage("");
+                  setWaitlistJoined(false);
+                  setShowWaitlistModal(true);
+                }}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  background: "transparent",
+                  color: C.ink,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 16,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  cursor: "pointer",
+                  marginTop: 12,
+                  boxShadow: "0 2px 4px rgba(12, 10, 9, 0.02)",
+                }}
+              >
+                <Sparkles size={16} /> Join Waitlist
+              </button>
               
               <button
                 type="button"
@@ -897,6 +933,191 @@ export default function Page() {
                   Cancel
                 </button>
               </form>
+            </div>
+          </div>
+        )}
+        {/* Join Waitlist Modal Overlay */}
+        {showWaitlistModal && (
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(12, 10, 9, 0.4)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+            padding: 20,
+          }}>
+            <div style={{
+              background: C.bg,
+              borderRadius: 24,
+              width: "100%",
+              maxWidth: 320,
+              padding: "28px 24px",
+              border: `1px solid ${C.border}`,
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+            }}>
+              {waitlistJoined ? (
+                <>
+                  <div style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: "50%",
+                    background: C.gainSoft,
+                    color: C.gain,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 16,
+                  }}>
+                    <Check size={24} />
+                  </div>
+                  <h4 style={{ fontSize: 18, color: C.ink, fontWeight: 600, margin: "0 0 4px 0" }}>You&apos;re on the list</h4>
+                  <p style={{ fontSize: 12, color: C.inkMute, margin: "0 0 20px 0" }}>{waitlistMessage || "We'll email you when it's your turn."}</p>
+                  <button
+                    type="button"
+                    onClick={() => setShowWaitlistModal(false)}
+                    style={{
+                      width: "100%",
+                      background: C.ink,
+                      color: C.bg,
+                      border: "none",
+                      borderRadius: 12,
+                      padding: "12px",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Done
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: "50%",
+                    background: C.accentSoft,
+                    color: C.ink,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 16,
+                  }}>
+                    <Sparkles size={22} />
+                  </div>
+                  <h4 style={{ fontSize: 18, color: C.ink, fontWeight: 600, margin: "0 0 4px 0" }}>Join the Waitlist</h4>
+                  <p style={{ fontSize: 12, color: C.inkMute, margin: "0 0 20px 0" }}>Be first to know when Nexora opens up.</p>
+
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!waitlistEmail) return;
+                      try {
+                        setIsSubmittingWaitlist(true);
+                        const res = await axios.post("/api/waitlist", {
+                          email: waitlistEmail,
+                          name: waitlistName || undefined,
+                        });
+                        setWaitlistMessage(res.data?.message || "You're on the waitlist!");
+                        setWaitlistJoined(true);
+                      } catch (err) {
+                        const fallback = "Something went wrong. Please try again.";
+                        setWaitlistMessage(
+                          axios.isAxiosError(err) ? err.response?.data?.error || fallback : fallback
+                        );
+                      } finally {
+                        setIsSubmittingWaitlist(false);
+                      }
+                    }}
+                    style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}
+                  >
+                    <input
+                      type="email"
+                      placeholder="Email address"
+                      required
+                      value={waitlistEmail}
+                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        borderRadius: 12,
+                        border: `1px solid ${C.border}`,
+                        background: "transparent",
+                        color: C.ink,
+                        fontSize: 13,
+                        outline: "none",
+                      }}
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Name (Optional)"
+                      value={waitlistName}
+                      onChange={(e) => setWaitlistName(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        borderRadius: 12,
+                        border: `1px solid ${C.border}`,
+                        background: "transparent",
+                        color: C.ink,
+                        fontSize: 13,
+                        outline: "none",
+                      }}
+                    />
+
+                    {waitlistMessage && (
+                      <div style={{ fontSize: 11, color: C.loss, textAlign: "left" }}>{waitlistMessage}</div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmittingWaitlist}
+                      style={{
+                        background: C.ink,
+                        color: C.bg,
+                        border: "none",
+                        borderRadius: 12,
+                        padding: "12px",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        marginTop: 8,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {isSubmittingWaitlist ? "Joining..." : "Join Waitlist"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowWaitlistModal(false)}
+                      style={{
+                        background: "transparent",
+                        color: C.inkMute,
+                        border: "none",
+                        fontSize: 12,
+                        cursor: "pointer",
+                        marginTop: 4,
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         )}

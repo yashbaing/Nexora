@@ -159,6 +159,33 @@ app.post("/api/auth/web3-login", async (req: Request, res: Response) => {
   }
 });
 
+// ── Waitlist Route ────────────────────────────────────────────────────────────
+app.post("/api/waitlist", async (req: Request, res: Response) => {
+  try {
+    const { email, name } = req.body;
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "A valid email address is required" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await pool.query("SELECT id FROM waitlist WHERE email = $1", [normalizedEmail]);
+
+    if (existing.rows.length > 0) {
+      return res.json({ message: "You're already on the waitlist!", alreadyJoined: true });
+    }
+
+    await pool.query(
+      "INSERT INTO waitlist (email, name) VALUES ($1, $2)",
+      [normalizedEmail, name ? String(name).trim().slice(0, 100) : null]
+    );
+
+    res.json({ message: "You're on the waitlist! We'll be in touch soon.", alreadyJoined: false });
+  } catch (err: any) {
+    console.error("❌ Waitlist signup error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post("/api/auth/google-login", async (req: Request, res: Response) => {
   try {
     const { email, name } = req.body;
