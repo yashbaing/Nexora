@@ -4,13 +4,16 @@
   "description": "Complete trading app for tokenized stocks with real-time data",
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "website"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
-    "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
+    "dev:website": "npm run dev --workspace=website",
+    "dev:all": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\" \"npm run dev --workspace=website\"",
+    "build": "npm run build --workspace=frontend && npm run build --workspace=backend && npm run build --workspace=website",
     "install-all": "npm install"
   },
   "devDependencies": {
