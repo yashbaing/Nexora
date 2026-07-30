@@ -5,13 +5,13 @@
   "workspaces": [
     "frontend",
     "backend",
-    "website"
+    "nexora-website"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\" \"npm run dev --workspace=website\"",
+    "dev": "concurrently \"npm run dev --workspace=nexora-website\" \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
-    "dev:website": "npm run dev --workspace=website",
+    "dev:website": "npm run dev --workspace=nexora-website",
     "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
     "install-all": "npm install"
   },

@@ -4,7 +4,7 @@ A separate marketing and landing site for Nexora, distinct from the trading appl
 
 ## Purpose
 
-- **This site** (`website/`) — public landing page, product overview, and CTA to launch the app
+- **This site** (`nexora-website/`) — public landing page, product overview, Join Waitlist signup, and CTA to launch the app
 - **Trading app** (`frontend/`) — wallet-connected trading interface at port 3000
 
 ## Quick Start
@@ -22,11 +22,12 @@ Open **http://localhost:3001**
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | URL for "Launch App" / "Start Trading" links |
+| `NEXT_PUBLIC_BACKEND_URL` | `http://localhost:5001` | Backend API used by the Join Waitlist form (`/api/waitlist`) |
 
 ## Run everything
 
 ```bash
-npm run dev:all
+npm run dev
 ```
 
 | Service | Port |
@@ -38,5 +39,5 @@ npm run dev:all
 ## Build
 
 ```bash
-npm run build --workspace=website
+npm run build --workspace=nexora-website
 ```
