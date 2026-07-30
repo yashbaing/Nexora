@@ -1,1724 +1,1161 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import axios from "axios";
-import { io, Socket } from "socket.io-client";
-import { ethers } from "ethers";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  ComposedChart,
-  Line,
-} from "recharts";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
+import { motion, useInView } from "framer-motion";
 import {
   TrendingUp,
-  Briefcase,
-  Wallet as WalletIcon,
-  User,
-  Search,
-  ArrowUpRight,
-  ArrowDownRight,
-  Bell,
-  ChevronRight,
-  ChevronLeft,
-  Smartphone,
-  Copy,
-  Check,
-  Star,
-  Eye,
-  EyeOff,
-  Globe,
+  Zap,
   Shield,
-  LogOut,
+  Globe,
+  Wallet,
+  Layers,
+  Clock,
+  ArrowRight,
+  ChevronDown,
+  Check,
   Sparkles,
-  Plus,
-  RefreshCw,
+  CircleDollarSign,
+  LineChart,
+  Lock,
 } from "lucide-react";
-import { useWallet } from "@/context/WalletContext";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:5001";
-axios.defaults.baseURL = BACKEND_URL;
 
 /* ════════════════════════════════════════════════════════════════════
-   PALETTE — clean white minimal (same as mockup)
+   THEME
    ════════════════════════════════════════════════════════════════════ */
-const C = {
-  bg: "#ffffff",
-  bg2: "#fafaf9",
-  card: "#f5f5f4",
-  cardHi: "#e7e5e4",
-  border: "#e7e5e4",
-  borderHi: "#d6d3d1",
-  ink: "#0c0a09",
-  inkDim: "#57534e",
-  inkMute: "#a8a29e",
-  accent: "#0c0a09",
-  accentSoft: "rgba(12, 10, 9, 0.06)",
-  accentInk: "#ffffff",
-  gain: "#16a34a",
-  gainSoft: "rgba(22, 163, 74, 0.08)",
-  loss: "#dc2626",
-  lossSoft: "rgba(220, 38, 38, 0.08)",
-  ember: "#ea580c",
-  shellBg: "#e7e5e4",
+const T = {
+  bg: "#060607",
+  bg2: "#0b0b0d",
+  ink: "#fafaf9",
+  dim: "rgba(250, 250, 249, 0.62)",
+  mute: "rgba(250, 250, 249, 0.4)",
+  border: "rgba(255, 255, 255, 0.08)",
+  red: "#e84142",
+  amber: "#ffb45f",
+  gain: "#34d399",
+  loss: "#f87171",
 };
 
-const sans = { fontFamily: "var(--font-geist-sans), -apple-system, sans-serif" };
-const serif = { fontFamily: "Georgia, serif", letterSpacing: "-0.025em" };
-const mono = { fontFamily: "var(--font-geist-mono), monospace" };
+const serif: React.CSSProperties = { fontFamily: "Georgia, 'Times New Roman', serif", letterSpacing: "-0.03em" };
+const mono: React.CSSProperties = { fontFamily: "var(--font-geist-mono), monospace" };
 
-// Currency formatter
-const fmtUSD = (n: number) =>
-  "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/* ════════════════════════════════════════════════════════════════════
+   MOCK MARKET DATA (deterministic — safe for SSR hydration)
+   ════════════════════════════════════════════════════════════════════ */
+const STOCKS = [
+  { symbol: "AAPL", name: "Apple Inc.", price: 254.61, change: +1.84, sector: "Technology" },
+  { symbol: "NVDA", name: "NVIDIA Corp.", price: 187.32, change: +3.42, sector: "Semiconductors" },
+  { symbol: "TSLA", name: "Tesla Inc.", price: 431.08, change: -1.27, sector: "Automotive" },
+  { symbol: "MSFT", name: "Microsoft", price: 512.44, change: +0.92, sector: "Technology" },
+  { symbol: "AMZN", name: "Amazon.com", price: 233.15, change: +2.11, sector: "E-Commerce" },
+  { symbol: "GOOGL", name: "Alphabet", price: 201.77, change: +0.63, sector: "Technology" },
+  { symbol: "META", name: "Meta Platforms", price: 744.20, change: -0.48, sector: "Social Media" },
+  { symbol: "JPM", name: "JPMorgan Chase", price: 289.51, change: +1.05, sector: "Finance" },
+];
 
-const fmtPrice = (price: number, currency: string) => {
-  if (currency === "INR") {
-    return "₹" + (price * 84.5).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+/** Deterministic pseudo-random sparkline points (no Math.random → no hydration mismatch) */
+function sparkline(seed: number, up: boolean): string {
+  const pts: number[] = [];
+  let v = 34;
+  for (let i = 0; i < 24; i++) {
+    const wave = Math.sin((i + seed * 3.7) * 0.9) * 6 + Math.sin((i + seed) * 0.35) * 8;
+    const drift = (up ? -0.85 : 0.85) * i;
+    pts.push(Math.min(58, Math.max(6, v + wave + drift * 0.55)));
   }
-  return fmtUSD(price);
-};
-
-// UI Components
-const Pill = ({ children, active, onClick }: { children: React.ReactNode; active: boolean; onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    type="button"
-    style={{
-      padding: "8px 16px",
-      borderRadius: 999,
-      border: `1px solid ${active ? C.ink : C.border}`,
-      background: active ? C.ink : "transparent",
-      color: active ? C.bg : C.inkDim,
-      fontSize: 12,
-      fontWeight: 500,
-      letterSpacing: "0.02em",
-      transition: "all .15s",
-      whiteSpace: "nowrap",
-      cursor: "pointer",
-    }}
-  >
-    {children}
-  </button>
-);
-
-const Delta = ({ value, big = false }: { value: number; big?: boolean }) => {
-  const up = value >= 0;
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 3,
-        color: up ? C.gain : C.loss,
-        fontSize: big ? 14 : 11,
-        fontWeight: 600,
-        ...mono,
-      }}
-    >
-      {up ? "▲" : "▼"} {up ? "+" : ""}
-      {value.toFixed(2)}%
-    </span>
-  );
-};
-
-const Row = ({ label, val, valColor, bold }: { label: string; val: string; valColor?: string; bold?: boolean }) => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      padding: "12px 0",
-      borderBottom: `1px solid ${C.border}`,
-      fontSize: bold ? 14 : 12,
-      color: bold ? C.ink : C.inkDim,
-      fontWeight: bold ? 600 : 400,
-    }}
-  >
-    <span>{label}</span>
-    <span style={{ ...mono, color: valColor || C.ink, fontWeight: 500 }}>{val}</span>
-  </div>
-);
-
-// Stock metadata interface
-interface Stock {
-  symbol: string;
-  name: string;
-  sector: string;
-  currency: string;
-  region: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  marketCap: string;
-  volume: string;
-  dayHigh: number;
-  dayLow: number;
+  return pts.map((y, i) => `${(i / 23) * 100},${y}`).join(" ");
 }
 
-export default function Page() {
-  const { address, isConnected, isConnecting, connectWallet, connectDevAccount, disconnectWallet, provider, signer, isCorrectNetwork, switchNetwork, isDevAccount, loginWithGoogle, loginWithGoogleApi, injectedProviders, targetChainId } = useWallet();
-
-  // Navigation
-  const [tab, setTab] = useState<string>("home"); // home, markets, portfolio, wallet
-  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
-  const [tradeSide, setTradeSide] = useState<"buy" | "sell" | null>(null);
-  const [tradeQty, setTradeQty] = useState<string>("");
-  const [isExecutingTrade, setIsExecutingTrade] = useState<boolean>(false);
-
-  // Wallet Selection Modal state
-  const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
-
-  // Google Auth states
-  const [showGoogleModal, setShowGoogleModal] = useState<boolean>(false);
-  const [googleEmail, setGoogleEmail] = useState<string>("");
-  const [googleName, setGoogleName] = useState<string>("");
-  const [isSubmittingGoogle, setIsSubmittingGoogle] = useState<boolean>(false);
-
-  // Initialize official Google Identity Services button
-  useEffect(() => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    if (!clientId) return;
-
-    const initGoogleApiButton = () => {
-      const google = (window as any).google;
-      if (google && google.accounts && google.accounts.id) {
-        google.accounts.id.initialize({
-          client_id: clientId,
-          callback: async (res: any) => {
-            if (res.credential) {
-              try {
-                await loginWithGoogleApi(res.credential);
-              } catch (err) {
-                console.error("Google Sign-In callback error:", err);
-              }
-            }
-          }
-        });
-
-        const container = document.getElementById("google-official-btn");
-        if (container) {
-          google.accounts.id.renderButton(container, {
-            theme: "outline",
-            size: "large",
-            width: 298,
-            text: "signin_with",
-            shape: "pill"
-          });
-        }
-      } else {
-        setTimeout(initGoogleApiButton, 200);
-      }
-    };
-
-    initGoogleApiButton();
-  }, [loginWithGoogleApi, isConnected]);
-
-  // Faucet state
-  const [faucetAmount, setFaucetAmount] = useState<string>("1000");
-  const [isFaucetLoading, setIsFaucetLoading] = useState<boolean>(false);
-
-  // Watchlist & Stock list
-  const [stocks, setStocks] = useState<Stock[]>([]);
-  const [watchlist, setWatchlist] = useState<string[]>([]);
-  const [portfolio, setPortfolio] = useState<{ holdings: any[]; cash: number; web3: any }>({ holdings: [], cash: 0, web3: null });
-  const [transactions, setTransactions] = useState<any[]>([]);
-
-  // Candle Chart State
-  const [chartInterval, setChartInterval] = useState<string>("1h");
-  const [candles, setCandles] = useState<any[]>([]);
-  const [isChartLoading, setIsChartLoading] = useState<boolean>(false);
-
-  // Search & Filter
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sectorFilter, setSectorFilter] = useState("All");
-
-  const [balanceVisible, setBalanceVisible] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
-  
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  // Deployed Contract Addresses loaded dynamically
-  const [deployedAddresses, setDeployedAddresses] = useState<any>({});
-
-  // 1. Fetch static addresses config
-  const fetchAddresses = async () => {
-    try {
-      const resp = await axios.get("/api/stocks"); // proxy call is fine, or we can fetch direct addresses
-      // We will load dynamically from our backend
-      const addrsResp = await fetch(`${BACKEND_URL}/deployed-addresses.json`);
-      if (addrsResp.ok) {
-        const data = await addrsResp.json();
-        setDeployedAddresses(data);
-      }
-    } catch (e) {
-      console.warn("Could not load addresses file.");
-    }
-  };
-
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
-
-  // 2. HTTP fetches for stocks list, watchlist, portfolio, and transactions
-  const fetchStocksList = async () => {
-    try {
-      const resp = await axios.get("/api/stocks");
-      setStocks(resp.data);
-    } catch (e) {
-      console.error("Error fetching stocks list:", e);
-    }
-  };
-
-  const fetchWatchlist = async () => {
-    if (!isConnected) return;
-    try {
-      const resp = await axios.get("/api/user/watchlist");
-      setWatchlist(resp.data);
-    } catch (e) {
-      console.error("Error fetching watchlist:", e);
-    }
-  };
-
-  const fetchPortfolio = async () => {
-    if (!isConnected) return;
-    try {
-      const resp = await axios.get("/api/portfolio");
-      setPortfolio(resp.data);
-    } catch (e) {
-      console.error("Error fetching portfolio:", e);
-    }
-  };
-
-  const fetchTransactions = async () => {
-    if (!isConnected) return;
-    try {
-      const resp = await axios.get("/api/trades/history");
-      setTransactions(resp.data);
-    } catch (e) {
-      console.error("Error fetching transactions:", e);
-    }
-  };
-
-  const refreshUserData = useCallback(async () => {
-    if (!isConnected) return;
-    await Promise.all([fetchWatchlist(), fetchPortfolio(), fetchTransactions()]);
-  }, [isConnected]);
-
-  // Initial load
-  useEffect(() => {
-    fetchStocksList();
-  }, []);
-
-  useEffect(() => {
-    if (isConnected) {
-      refreshUserData();
-    }
-  }, [isConnected, refreshUserData]);
-
-  // 3. WebSocket Realtime Prices
-  useEffect(() => {
-    const socket = io(BACKEND_URL);
-
-    socket.on("connect", () => {
-      console.log("⚡ Connected to real-time price socket");
-    });
-
-    socket.on("prices_update", (updates: { [symbol: string]: any }) => {
-      setStocks((prevStocks) =>
-        prevStocks.map((stock) => {
-          const update = updates[stock.symbol];
-          if (update) {
-            return {
-              ...stock,
-              price: update.price,
-              change: update.change,
-              changePercent: update.changePercent,
-              dayHigh: update.dayHigh,
-              dayLow: update.dayLow,
-            };
-          }
-          return stock;
-        })
-      );
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  // Sync selected stock updates
-  const activeStock = useMemo(() => {
-    if (!selectedStock) return null;
-    return stocks.find((s) => s.symbol === selectedStock.symbol) || selectedStock;
-  }, [selectedStock, stocks]);
-
-  // 4. Fetch OHLC Candles for selected stock
-  const fetchCandles = useCallback(async () => {
-    if (!selectedStock) return;
-    try {
-      setIsChartLoading(true);
-      const resp = await axios.get(`/api/stocks/${selectedStock.symbol}/candles`, {
-        params: { interval: chartInterval, limit: 120 },
-      });
-      setCandles(resp.data);
-    } catch (e) {
-      console.error("Error fetching candles chart:", e);
-    } finally {
-      setIsChartLoading(false);
-    }
-  }, [selectedStock, chartInterval]);
-
-  useEffect(() => {
-    if (selectedStock) {
-      fetchCandles();
-    }
-  }, [selectedStock, chartInterval, fetchCandles]);
-
-  // Toggle watchlist item
-  const handleToggleWatchlist = async (symbol: string) => {
-    if (!isConnected) return connectWallet();
-    try {
-      const resp = await axios.post("/api/user/watchlist/toggle", { symbol });
-      if (resp.data.status === "added") {
-        setWatchlist((w) => [...w, symbol]);
-      } else {
-        setWatchlist((w) => w.filter((x) => x !== symbol));
-      }
-    } catch (e) {
-      console.error("Error toggling watchlist:", e);
-    }
-  };
-
-  // 5. On-chain Faucet Claim
-  const handleFaucetClaim = async () => {
-    if (!signer || !deployedAddresses.MockUSDC) {
-      alert("Please connect your wallet or Dev account first!");
-      return;
-    }
-    try {
-      setIsFaucetLoading(true);
-      
-      const usdcAbi = ["function faucet(uint256) external"];
-      const usdcContract = new ethers.Contract(deployedAddresses.MockUSDC, usdcAbi, signer);
-
-      const parsedAmount = ethers.parseUnits(faucetAmount || "1000", 6);
-      
-      console.log(`Sending Faucet TX for ${faucetAmount} USDC...`);
-      const tx = await usdcContract.faucet(parsedAmount);
-      await tx.wait();
-
-      alert(`✅ Successfully claimed ${faucetAmount} USDC!`);
-      refreshUserData();
-    } catch (err: any) {
-      console.error("Faucet error:", err);
-      if (err.code === "ACTION_REJECTED" || err?.info?.error?.code === 4001 || String(err).includes("user denied")) {
-        console.log("User cancelled transaction in wallet.");
-        return;
-      }
-      const errMsg = err?.message || err?.reason || String(err);
-      if (errMsg.includes("-32002") || errMsg.includes("too many errors") || errMsg.includes("RPC endpoint")) {
-        alert("⚠️ RPC Connection Error (-32002): The RPC endpoint is rate-limiting or recovering. Please refresh the page or check your wallet network connection!");
-      } else {
-        alert(`Faucet Error: ${err.reason || err.message}`);
-      }
-    } finally {
-      setIsFaucetLoading(false);
-    }
-  };
-
-  // 6. On-chain Trade Execution
-  const executeTrade = async () => {
-    const stock = activeStock;
-    if (!signer || !stock || !tradeQty || !deployedAddresses.StockwavePlatform) return;
-    
-    try {
-      setIsExecutingTrade(true);
-      
-      // Calculate costs
-      const qtyFloat = parseFloat(tradeQty);
-      const usdcCost = qtyFloat * stock.price;
-      
-      const platformAddress = deployedAddresses.StockwavePlatform;
-      const usdcAddress = deployedAddresses.MockUSDC;
-
-      // Check allowance & approve USDC if buying
-      const usdcAbi = [
-        "function balanceOf(address) view returns (uint256)",
-        "function allowance(address, address) view returns (uint256)",
-        "function approve(address, uint256) returns (bool)"
-      ];
-      const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
-
-      const userBalance = await usdcContract.balanceOf(address);
-      const costInUnits = ethers.parseUnits(usdcCost.toFixed(6), 6);
-
-      if (tradeSide === "buy") {
-        if (userBalance < costInUnits) {
-          alert(`❌ Insufficient USDC balance! You need $${usdcCost.toFixed(2)} USDC.`);
-          setIsExecutingTrade(false);
-          return;
-        }
-
-        const allowance = await usdcContract.allowance(address, platformAddress);
-        if (allowance < costInUnits) {
-          console.log("Approving USDC spend...");
-          const approveTx = await usdcContract.approve(platformAddress, ethers.MaxUint256);
-          await approveTx.wait();
-          console.log("USDC Spend Approved!");
-        }
-      }
-
-      // Request Signed Quote from Backend Signer
-      console.log("Requesting trade signature from backend oracle...");
-      const quoteResp = await axios.post("/api/trades/quote", {
-        symbol: stock.symbol,
-        qty: tradeQty,
-        side: tradeSide,
-      });
-
-      const { contractQty, contractPrice, deadline, signature } = quoteResp.data;
-
-      // Instantiate Platform Contract
-      const platformAbi = [
-        "function buyStock(string symbol, uint256 qty, uint256 price, uint256 deadline, bytes signature) external",
-        "function sellStock(string symbol, uint256 qty, uint256 price, uint256 deadline, bytes signature) external"
-      ];
-      const platformContract = new ethers.Contract(platformAddress, platformAbi, signer);
-
-      console.log(`Executing ${tradeSide} transaction on Avalanche C-Chain...`);
-      let tx;
-      if (tradeSide === "buy") {
-        tx = await platformContract.buyStock(
-          stock.symbol,
-          contractQty,
-          contractPrice,
-          deadline,
-          signature
-        );
-      } else {
-        tx = await platformContract.sellStock(
-          stock.symbol,
-          contractQty,
-          contractPrice,
-          deadline,
-          signature
-        );
-      }
-
-      console.log("Waiting for confirmation on-chain...");
-      await tx.wait();
-      
-      console.log("Transaction confirmed on-chain! Synchronizing backend...");
-      
-      // Trigger sync in postgres
-      await axios.post("/api/trades/sync", { txHash: tx.hash });
-      console.log("DB Synchronized!");
-
-      alert(`🎉 Trade executed successfully!`);
-      setTradeQty("");
-      setTradeSide(null);
-      refreshUserData();
-    } catch (err: any) {
-      console.error("Trade transaction failed:", err);
-      alert(`Trade failed: ${err.reason || err.message}`);
-    } finally {
-      setIsExecutingTrade(false);
-    }
-  };
-
-  // Copy wallet address helper
-  const copyAddress = () => {
-    if (!address) return;
-    navigator.clipboard.writeText(address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Search filter lists
-  const filteredStocks = useMemo(() => {
-    return stocks.filter(
-      (s) =>
-        (sectorFilter === "All" || s.sector === sectorFilter) &&
-        (s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  }, [stocks, searchQuery, sectorFilter]);
-
-  // Enriched portfolio metrics in INR and USD
-  const enrichedPortfolio = useMemo(() => {
-    const holdings = portfolio.holdings.map((h) => {
-      const s = stocks.find((x) => x.symbol === h.symbol);
-      if (!s) return { ...h, currentPrice: h.avgPrice, valueUSD: h.qty * h.avgPrice, pnlPercent: 0 };
-      const currentPrice = s.price;
-      const valueUSD = h.qty * currentPrice;
-      const costUSD = h.qty * h.avgPrice;
-      const pnlPercent = h.avgPrice > 0 ? ((currentPrice - h.avgPrice) / h.avgPrice) * 100 : 0;
-      return {
-        ...h,
-        currentPrice,
-        valueUSD,
-        pnlPercent,
-      };
-    });
-
-    const totalHoldingsUSD = holdings.reduce((a, h) => a + h.valueUSD, 0);
-    const totalUSD = totalHoldingsUSD + portfolio.cash;
-
-    // mock P&L
-    const totalCost = holdings.reduce((a, h) => a + h.qty * h.avgPrice, 0);
-    const totalPnlUSD = totalHoldingsUSD - totalCost;
-    const totalPnlPercent = totalCost > 0 ? (totalPnlUSD / totalCost) * 100 : 0;
-
-    return {
-      holdings,
-      totalUSD,
-      totalHoldingsUSD,
-      totalPnlUSD,
-      totalPnlPercent,
-    };
-  }, [portfolio, stocks]);
-
-
-  // Layout — CSS classes handle all responsive breakpoints via globals.css
-  // sw-shell: viewport-filling shell (centered on desktop, edge-to-edge on mobile)
-  // sw-phone: bordered frame on desktop, full-screen on mobile ≤480px
-
-  const TabBar = () => (
-    <div
-      style={{
-        height: "var(--tab-h, 64px)",
-        borderTop: `1px solid ${C.border}`,
-        display: "flex",
-        background: C.bg,
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 20,
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      }}
+/* ════════════════════════════════════════════════════════════════════
+   SCROLL REVEAL WRAPPER
+   ════════════════════════════════════════════════════════════════════ */
+function Reveal({ children, delay = 0, y = 28 }: { children: React.ReactNode; delay?: number; y?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay, ease: [0.21, 0.6, 0.35, 1] }}
     >
-      {[
-        { id: "home", label: "Home", icon: <User size={18} /> },
-        { id: "markets", label: "Markets", icon: <TrendingUp size={18} /> },
-        { id: "portfolio", label: "Portfolio", icon: <Briefcase size={18} /> },
-        { id: "wallet", label: "Wallet", icon: <WalletIcon size={18} /> },
-      ].map((t) => (
-        <button
-          key={t.id}
-          type="button"
-          onClick={() => {
-            setTab(t.id);
-            setSelectedStock(null);
-          }}
+      {children}
+    </motion.div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   WAITLIST FORM
+   ════════════════════════════════════════════════════════════════════ */
+function WaitlistForm({ id, compact = false }: { id: string; compact?: boolean }) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || status === "loading") return;
+    setStatus("loading");
+    try {
+      const resp = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: id }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.ok) {
+        setStatus("success");
+        setMessage(
+          data.position
+            ? `You're #${data.position.toLocaleString()} on the list. Watch your inbox.`
+            : "You're on the list. Watch your inbox."
+        );
+      } else if (resp.status === 409) {
+        setStatus("success");
+        setMessage("You're already on the list — we've got you.");
+      } else {
+        throw new Error(data.error || "Request failed");
+      }
+    } catch {
+      // Backend unreachable (e.g. static preview) — queue locally so signups aren't lost
+      try {
+        const key = "nexora_waitlist_pending";
+        const pending = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!pending.includes(email)) pending.push(email);
+        localStorage.setItem(key, JSON.stringify(pending));
+        setStatus("success");
+        setMessage("You're on the list. Watch your inbox.");
+      } catch {
+        setStatus("error");
+        setMessage("Something went wrong — please try again.");
+      }
+    }
+  };
+
+  if (status === "success") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: compact ? "14px 18px" : "18px 22px",
+          borderRadius: 16,
+          background: "rgba(52, 211, 153, 0.08)",
+          border: "1px solid rgba(52, 211, 153, 0.3)",
+          maxWidth: 480,
+        }}
+      >
+        <span
           style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 3,
-            background: "none",
-            border: "none",
-            color: tab === t.id && !selectedStock ? C.ink : C.inkMute,
-            cursor: "pointer",
-            fontSize: 9,
-            fontWeight: tab === t.id ? 600 : 500,
-            padding: "4px 0",
+            width: 30,
+            height: 30,
+            borderRadius: "50%",
+            background: "rgba(52, 211, 153, 0.18)",
+            display: "grid",
+            placeItems: "center",
+            flexShrink: 0,
           }}
         >
-          {t.icon}
-          {t.label}
-        </button>
-      ))}
-    </div>
-  );
-
-  // Wait until mounted on client to prevent hydration mismatches
-  if (!hasMounted) {
-    return (
-      <div className="sw-shell">
-        <div className="sw-phone" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-          <div style={{ color: C.ink, fontSize: 13, fontWeight: 500 }}>Loading Nexora...</div>
-        </div>
-      </div>
+          <Check size={16} color={T.gain} />
+        </span>
+        <span style={{ fontSize: 14, color: T.ink, fontWeight: 500 }}>{message}</span>
+      </motion.div>
     );
   }
-
-  // Authentication Required Screen
-  if (!isConnected) {
-    return (
-      <div className="sw-shell">
-        <div className="sw-phone" style={{ display: "flex", flexDirection: "column" }}>
-          <div className="sw-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "40px 28px" }}>
-            <div style={{ marginTop: 60 }}>
-              <div style={{ ...serif, fontSize: 44, color: C.ink, lineHeight: 1.1, fontWeight: 400, letterSpacing: "-0.04em" }}>
-                Nexora.
-              </div>
-              <div style={{ fontSize: 13, color: C.inkDim, marginTop: 12, lineHeight: 1.5 }}>
-                A premium, Avalanche-native Web3 equities platform settled securely in USDC with institutional liquidity powered by Hyperliquid.
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 40 }}>
-              <button
-                type="button"
-                onClick={() => setShowWalletModal(true)}
-                disabled={isConnecting}
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  background: C.ink,
-                  color: C.bg,
-                  borderRadius: 16,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 10,
-                  cursor: "pointer",
-                  border: "none",
-                  boxShadow: "0 4px 12px rgba(12, 10, 9, 0.15)",
-                }}
-              >
-                {isConnecting ? (
-                  <>
-                    <RefreshCw className="animate-spin" size={16} /> Connecting Wallet...
-                  </>
-                ) : (
-                  <>Connect Wallet</>
-                )}
-              </button>
-              
-              <button
-                type="button"
-                onClick={connectDevAccount}
-                disabled={isConnecting}
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  background: "transparent",
-                  color: C.ink,
-                  border: `1px solid ${C.border}`,
-                  borderRadius: 16,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 10,
-                  cursor: "pointer",
-                  marginTop: 12,
-                  boxShadow: "0 2px 4px rgba(12, 10, 9, 0.02)",
-                }}
-              >
-                Browse with Dev Account (No Extension)
-              </button>
-              
-              {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
-                <div style={{ marginTop: 12, display: "flex", justifyContent: "center", width: "100%" }}>
-                  <div id="google-official-btn" />
-                </div>
-              )}
-              
-              <button
-                type="button"
-                onClick={() => setShowGoogleModal(true)}
-                disabled={isConnecting}
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  background: "transparent",
-                  color: C.ink,
-                  border: `1px solid ${C.border}`,
-                  borderRadius: 16,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 10,
-                  cursor: "pointer",
-                  marginTop: 12,
-                  boxShadow: "0 2px 4px rgba(12, 10, 9, 0.02)",
-                }}
-              >
-                <svg viewBox="0 0 24 24" width="16" height="16">
-                  <path fill="#EA4335" d="M12 5.04c1.67 0 3.17.58 4.35 1.71l3.25-3.25C17.63 1.55 15.02.96 12 .96 7.28.96 3.25 3.68 1.25 7.63l3.88 3.01C6.07 7.74 8.79 5.04 12 5.04z" />
-                  <path fill="#4285F4" d="M23.52 12.27c0-.82-.07-1.61-.21-2.38H12v4.51h6.46c-.28 1.46-1.1 2.69-2.33 3.52l3.61 2.8c2.12-1.95 3.78-4.83 3.78-8.45z" />
-                  <path fill="#FBBC05" d="M5.13 14.36c-.24-.73-.38-1.52-.38-2.36s.14-1.63.38-2.36L1.25 6.63C.45 8.24 0 10.06 0 12s.45 3.76 1.25 5.37l3.88-3.01z" />
-                  <path fill="#34A853" d="M12 23.04c3.24 0 5.97-1.07 7.96-2.91l-3.61-2.8c-1.2.8-2.73 1.27-4.35 1.27-3.21 0-5.93-2.7-6.87-5.6L1.25 16c2 3.95 6.03 6.67 10.75 6.67z" />
-                </svg>
-                Sign in with Google
-              </button>
-              
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 16, fontSize: 11, color: C.inkMute }}>
-                <Shield size={12} /> Secure non-custodial login
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Google Authentication Dialog Overlay */}
-        {showGoogleModal && (
-          <div style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(12, 10, 9, 0.4)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 999,
-            padding: 20,
-          }}>
-            <div style={{
-              background: C.bg,
-              borderRadius: 24,
-              width: "100%",
-              maxWidth: 320,
-              padding: "28px 24px",
-              border: `1px solid ${C.border}`,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-            }}>
-              <div style={{ marginBottom: 16 }}>
-                <svg viewBox="0 0 24 24" width="28" height="28">
-                  <path fill="#EA4335" d="M12 5.04c1.67 0 3.17.58 4.35 1.71l3.25-3.25C17.63 1.55 15.02.96 12 .96 7.28.96 3.25 3.68 1.25 7.63l3.88 3.01C6.07 7.74 8.79 5.04 12 5.04z" />
-                  <path fill="#4285F4" d="M23.52 12.27c0-.82-.07-1.61-.21-2.38H12v4.51h6.46c-.28 1.46-1.1 2.69-2.33 3.52l3.61 2.8c2.12-1.95 3.78-4.83 3.78-8.45z" />
-                  <path fill="#FBBC05" d="M5.13 14.36c-.24-.73-.38-1.52-.38-2.36s.14-1.63.38-2.36L1.25 6.63C.45 8.24 0 10.06 0 12s.45 3.76 1.25 5.37l3.88-3.01z" />
-                  <path fill="#34A853" d="M12 23.04c3.24 0 5.97-1.07 7.96-2.91l-3.61-2.8c-1.2.8-2.73 1.27-4.35 1.27-3.21 0-5.93-2.7-6.87-5.6L1.25 16c2 3.95 6.03 6.67 10.75 6.67z" />
-                </svg>
-              </div>
-
-              <h4 style={{ fontSize: 18, color: C.ink, fontWeight: 600, margin: "0 0 4px 0" }}>Sign in with Google</h4>
-              <p style={{ fontSize: 12, color: C.inkMute, margin: "0 0 20px 0" }}>to continue to Nexora</p>
-
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                if (!googleEmail) return;
-                try {
-                  setIsSubmittingGoogle(true);
-                  await loginWithGoogle(googleEmail, googleName || "");
-                  setShowGoogleModal(false);
-                } catch (err) {
-                  console.error(err);
-                } finally {
-                  setIsSubmittingGoogle(false);
-                }
-              }} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
-                <input 
-                  type="email"
-                  placeholder="Email address"
-                  required
-                  value={googleEmail}
-                  onChange={(e) => setGoogleEmail(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "12px 14px",
-                    borderRadius: 12,
-                    border: `1px solid ${C.border}`,
-                    background: "transparent",
-                    color: C.ink,
-                    fontSize: 13,
-                    outline: "none",
-                  }}
-                />
-
-                <input 
-                  type="text"
-                  placeholder="Name (Optional)"
-                  value={googleName}
-                  onChange={(e) => setGoogleName(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "12px 14px",
-                    borderRadius: 12,
-                    border: `1px solid ${C.border}`,
-                    background: "transparent",
-                    color: C.ink,
-                    fontSize: 13,
-                    outline: "none",
-                  }}
-                />
-
-                <button
-                  type="submit"
-                  disabled={isSubmittingGoogle}
-                  style={{
-                    background: C.ink,
-                    color: C.bg,
-                    border: "none",
-                    borderRadius: 12,
-                    padding: "12px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    marginTop: 8,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {isSubmittingGoogle ? "Authenticating..." : "Continue"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowGoogleModal(false)}
-                  style={{
-                    background: "transparent",
-                    color: C.inkMute,
-                    border: "none",
-                    fontSize: 12,
-                    cursor: "pointer",
-                    marginTop: 4,
-                  }}
-                >
-                  Cancel
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-        {/* Custom Wallet Selection Modal Overlay */}
-        {showWalletModal && (
-          <div style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(12, 10, 9, 0.4)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 999,
-            padding: 20,
-          }}>
-            <div style={{
-              background: C.bg,
-              borderRadius: 24,
-              width: "100%",
-              maxWidth: 320,
-              padding: "24px",
-              border: `1px solid ${C.border}`,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              display: "flex",
-              flexDirection: "column",
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <h4 style={{ fontSize: 16, color: C.ink, fontWeight: 600, margin: 0 }}>Connect Wallet</h4>
-                <button 
-                  onClick={() => setShowWalletModal(false)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: C.inkMute,
-                    fontSize: 18,
-                    cursor: "pointer",
-                    padding: 4,
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 300, overflowY: "auto", marginBottom: 12 }}>
-                {injectedProviders.length > 0 ? (
-                  injectedProviders.map((p) => (
-                    <button
-                      key={p.info.uuid}
-                      onClick={async () => {
-                        try {
-                          await connectWallet(p);
-                          setShowWalletModal(false);
-                        } catch (err) {
-                          console.error(err);
-                        }
-                      }}
-                      style={{
-                        width: "100%",
-                        padding: "12px 14px",
-                        background: "transparent",
-                        border: `1px solid ${C.border}`,
-                        borderRadius: 14,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        cursor: "pointer",
-                        transition: "all 0.15s ease",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <img 
-                          src={p.info.icon} 
-                          alt={p.info.name} 
-                          style={{ width: 24, height: 24, borderRadius: 6 }} 
-                        />
-                        <span style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>
-                          {p.info.name}
-                        </span>
-                      </div>
-                      <span style={{ fontSize: 10, background: C.gainSoft, color: C.gain, padding: "2px 6px", borderRadius: 10, fontWeight: 600 }}>
-                        Active
-                      </span>
-                    </button>
-                  ))
-                ) : (
-                  <>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await connectWallet();
-                          setShowWalletModal(false);
-                        } catch (err) {
-                          console.error(err);
-                        }
-                      }}
-                      style={{
-                        width: "100%",
-                        padding: "12px 14px",
-                        background: "transparent",
-                        border: `1px solid ${C.border}`,
-                        borderRadius: 14,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Shield size={20} style={{ color: C.ink }} />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>
-                        Default Injected Wallet
-                      </span>
-                    </button>
-                  </>
-                )}
-              </div>
-
-              <div style={{ fontSize: 11, color: C.inkDim, textAlign: "center", borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
-                New to Web3? <a href="https://core.app/" target="_blank" rel="noreferrer" style={{ color: C.ink, textDecoration: "underline", fontWeight: 600 }}>Get Core Wallet</a>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Network Check Screen
-  if (!isCorrectNetwork && !isDevAccount) {
-    return (
-      <div className="sw-shell">
-        <div className="sw-phone" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-          <div style={{ padding: "40px 28px", textAlign: "center", width: "100%" }}>
-            <div style={{ width: 64, height: 64, borderRadius: "50%", background: C.lossSoft, color: C.loss, display: "grid", placeItems: "center", marginBottom: 24 }}>
-              <Shield size={32} />
-            </div>
-            <h3 style={{ ...serif, fontSize: 26, color: C.ink, fontWeight: 400, marginBottom: 12 }}>Wrong Network</h3>
-            <p style={{ fontSize: 13, color: C.inkDim, lineHeight: 1.5, marginBottom: 32 }}>
-              Nexora settles trades securely on its private {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}. Please switch your wallet network to proceed.
-            </p>
-            <button
-              type="button"
-              onClick={switchNetwork}
-              style={{
-                width: "100%",
-                padding: "16px",
-                background: C.ink,
-                color: C.bg,
-                borderRadius: 16,
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-                border: "none",
-              }}
-            >
-              Switch to {targetChainId === 66666 ? "Nexora L1" : targetChainId === 43113 ? "Avalanche Fuji Testnet" : targetChainId === 31337 ? "Avalanche Localhost" : "Avalanche Custom L1"}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Core Render
-  const active = activeStock;
 
   return (
-    <div className="sw-shell">
-      <div className="sw-phone" style={{ display: "flex", flexDirection: "column" }}>
-        <div className="sw-scroll" style={{ flex: 1, paddingBottom: "calc(var(--tab-h, 64px) + env(safe-area-inset-bottom, 0px))" }}>
-          {active ? (
-            /* ════════════════════════════════════════════════════════════════════
-               STOCK DETAIL VIEW
-               ════════════════════════════════════════════════════════════════════ */
-            <>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "24px 22px 18px", position: "sticky", top: 0, zIndex: 10,
-                background: `linear-gradient(to bottom, ${C.bg} 88%, ${C.bg}f0 100%)`,
-                backdropFilter: "blur(8px)",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <button onClick={() => { setSelectedStock(null); setTradeSide(null); }} type="button" style={{
-                    width: 36, height: 36, borderRadius: 12,
-                    background: C.card, border: `1px solid ${C.border}`,
-                    display: "grid", placeItems: "center", color: C.ink,
-                    cursor: "pointer",
-                  }}><ChevronLeft size={18} /></button>
-                  <div>
-                    <div style={{ fontSize: 10, color: C.inkMute, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600 }}>{active.name}</div>
-                    <div style={{ ...serif, fontSize: 26, color: C.ink, lineHeight: 1, fontWeight: 400 }}>{active.symbol}</div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleToggleWatchlist(active.symbol)}
-                  style={{
-                    width: 36, height: 36, borderRadius: 12,
-                    background: watchlist.includes(active.symbol) ? C.accentSoft : C.card,
-                    border: `1px solid ${watchlist.includes(active.symbol) ? C.ink : C.border}`,
-                    display: "grid", placeItems: "center",
-                    color: watchlist.includes(active.symbol) ? C.ink : C.inkMute,
-                    cursor: "pointer",
-                  }}
-                >
-                  <Star size={15} fill={watchlist.includes(active.symbol) ? C.ink : "none"} />
-                </button>
-              </div>
-
-              <div style={{ padding: "0 22px 24px" }}>
-                {/* Real-time price update indicator */}
-                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 6 }}>
-                  <div style={{ ...serif, fontSize: 52, color: C.ink, lineHeight: 1, letterSpacing: "-0.04em" }}>
-                    {fmtPrice(active.price, active.currency)}
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <Delta value={active.changePercent} big />
-                    <div style={{ ...mono, fontSize: 9, color: C.inkMute, marginTop: 2, letterSpacing: "0.04em" }}>LIVE HYPERLIQUID Feed</div>
-                  </div>
-                </div>
-
-                {/* TradingView-Style Candlestick Recharts Chart */}
-                <div style={{ height: 220, marginLeft: -22, marginRight: -22, marginTop: 18, position: "relative" }}>
-                  {isChartLoading ? (
-                    <div style={{ height: "100%", display: "grid", placeItems: "center", color: C.inkMute, fontSize: 11 }}>
-                      Loading candles...
-                    </div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={candles} margin={{ top: 10, bottom: 5, left: 10, right: 10 }}>
-                        <XAxis dataKey="time" hide />
-                        <YAxis domain={["auto", "auto"]} hide />
-                        <Tooltip
-                          content={({ active: isTooltipActive, payload }) => {
-                            if (isTooltipActive && payload && payload.length) {
-                              const data = payload[0].payload;
-                              return (
-                                <div style={{ background: C.ink, color: C.bg, padding: "8px 12px", borderRadius: 8, fontSize: 10, ...mono }}>
-                                  <div>O: {fmtPrice(data.open, active.currency)}</div>
-                                  <div>H: {fmtPrice(data.high, active.currency)}</div>
-                                  <div>L: {fmtPrice(data.low, active.currency)}</div>
-                                  <div>C: {fmtPrice(data.close, active.currency)}</div>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        {/* Candlestick Wicks (High to Low line) */}
-                        <Bar dataKey="high" fill="#b91c1c" radius={0} maxBarSize={1} />
-                        {/* Candlestick Body */}
-                        <Bar
-                          dataKey="close"
-                          maxBarSize={8}
-                          shape={(props: any) => {
-                            const { x, y, width, height, payload } = props;
-                            const isUp = payload.close >= payload.open;
-                            const fill = isUp ? C.gain : C.loss;
-                            // Calculate body heights
-                            const top = Math.min(props.y, props.y + props.height) || y;
-                            return (
-                              <rect
-                                x={x}
-                                y={top}
-                                width={width}
-                                height={Math.max(2, Math.abs(height))}
-                                fill={fill}
-                              />
-                            );
-                          }}
-                        />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  )}
-                </div>
-
-                {/* Range Selectors */}
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 14, padding: 4, background: C.card, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                  {["1m", "5m", "15m", "1h", "1d"].map((r) => (
-                    <button key={r} type="button" onClick={() => setChartInterval(r)} style={{
-                      flex: 1, padding: "8px 0", fontSize: 11, fontWeight: 600,
-                      color: chartInterval === r ? C.bg : C.inkDim,
-                      background: chartInterval === r ? C.ink : "transparent",
-                      borderRadius: 8, ...mono, transition: "all .2s",
-                      border: "none", cursor: "pointer",
-                    }}>{r.toUpperCase()}</button>
-                  ))}
-                </div>
-
-                {/* Position detail */}
-                {enrichedPortfolio.holdings.find(h => h.symbol === active.symbol) && (
-                  <div style={{
-                    marginTop: 26, padding: 18, borderRadius: 16,
-                    background: C.card, border: `1px solid ${C.border}`,
-                  }}>
-                    <div style={{ fontSize: 10, color: C.inkMute, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 14, fontWeight: 600 }}>Your position</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, rowGap: 16 }}>
-                      <div>
-                        <div style={{ fontSize: 10, color: C.inkMute, textTransform: "uppercase", marginBottom: 4, fontWeight: 600 }}>Holdings</div>
-                        <div style={{ ...serif, fontSize: 24, color: C.ink, lineHeight: 1 }}>
-                          {enrichedPortfolio.holdings.find(h => h.symbol === active.symbol).qty}
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 10, color: C.inkMute, textTransform: "uppercase", marginBottom: 4, fontWeight: 600 }}>Value</div>
-                        <div style={{ ...serif, fontSize: 24, color: C.ink, lineHeight: 1 }}>
-                          {fmtPrice(enrichedPortfolio.holdings.find(h => h.symbol === active.symbol).valueUSD, active.currency)}
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 10, color: C.inkMute, textTransform: "uppercase", marginBottom: 4, fontWeight: 600 }}>Avg cost</div>
-                        <div style={{ ...mono, fontSize: 13, color: C.ink, fontWeight: 500 }}>
-                          {fmtPrice(enrichedPortfolio.holdings.find(h => h.symbol === active.symbol).avgPrice, active.currency)}
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 10, color: C.inkMute, textTransform: "uppercase", marginBottom: 4, fontWeight: 600 }}>P&L</div>
-                        <div style={{ marginTop: 2 }}>
-                          <Delta value={enrichedPortfolio.holdings.find(h => h.symbol === active.symbol).pnlPercent} big />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* About metrics */}
-                <div style={{ marginTop: 26 }}>
-                  <h3 style={{ ...serif, fontSize: 20, color: C.ink, margin: "0 0 14px", fontWeight: 400 }}>About Token</h3>
-                  <div>
-                    {[
-                      ["Sector", active.sector],
-                      ["Market cap", active.marketCap || "N/A"],
-                      ["24h volume", active.volume || "N/A"],
-                      ["Day high", fmtPrice(active.dayHigh || active.price, active.currency)],
-                      ["Day low", fmtPrice(active.dayLow || active.price, active.currency)],
-                      ["Token standard", "Solidity ERC-20"],
-                      ["Avalanche Contract Address", deployedAddresses.stocks?.[active.symbol]?.slice(0, 10) + "..."],
-                    ].map(([k, v], i, arr) => (
-                      <div key={k} style={{
-                        display: "flex", justifyContent: "space-between", padding: "14px 0",
-                        borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : "none",
-                      }}>
-                        <span style={{ fontSize: 13, color: C.inkMute }}>{k}</span>
-                        <span style={{ fontSize: 13, color: C.ink, ...mono, fontWeight: 500 }}>{v}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Execution Bar */}
-              <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0,
-                padding: "16px 22px", background: C.bg,
-                borderTop: `1px solid ${C.border}`, display: "flex", flexDirection: "column", gap: 12,
-                zIndex: 30,
-              }}>
-                {tradeSide ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <div style={{ display: "flex", justifySelf: "center", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ fontSize: 12, color: C.inkDim, fontWeight: 600 }}>
-                        {tradeSide.toUpperCase()} shares
-                      </div>
-                      <button
-                        onClick={() => { setTradeSide(null); setTradeQty(""); }}
-                        style={{ background: "none", border: "none", color: C.inkMute, cursor: "pointer", fontSize: 12 }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                      <input
-                        type="number"
-                        placeholder="Shares Qty"
-                        value={tradeQty}
-                        onChange={(e) => setTradeQty(e.target.value)}
-                        style={{
-                          flex: 1, padding: "12px", border: `1px solid ${C.border}`, borderRadius: 12,
-                          background: C.bg2, color: C.ink, outline: "none", fontSize: 14, ...mono,
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={executeTrade}
-                        disabled={isExecutingTrade || !tradeQty}
-                        style={{
-                          padding: "12px 24px", borderRadius: 12,
-                          background: tradeSide === "buy" ? C.gain : C.loss,
-                          color: C.bg, border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                        }}
-                      >
-                        {isExecutingTrade ? "Settle..." : `Confirm ${tradeSide === "buy" ? "Buy" : "Sell"}`}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button type="button" onClick={() => setTradeSide("sell")} style={{
-                      flex: 1, padding: "15px", borderRadius: 14,
-                      background: "transparent", color: C.loss,
-                      border: `1px solid ${C.loss}40`,
-                      fontSize: 14, fontWeight: 600, cursor: "pointer",
-                    }}>Sell</button>
-                    <button type="button" onClick={() => setTradeSide("buy")} style={{
-                      flex: 1.5, padding: "15px", borderRadius: 14,
-                      background: C.gain, color: C.bg, border: "none",
-                      fontSize: 14, fontWeight: 600, cursor: "pointer",
-                    }}>Buy {active.symbol}</button>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : tab === "home" ? (
-            /* ════════════════════════════════════════════════════════════════════
-               HOME VIEW
-               ════════════════════════════════════════════════════════════════════ */
-            <>
-              <div style={{
-                display: "flex", alignItems: "flex-start", justifyContent: "space-between",
-                padding: "24px 22px 18px", position: "sticky", top: 0, zIndex: 10,
-                background: `linear-gradient(to bottom, ${C.bg} 88%, ${C.bg}f0 100%)`,
-                backdropFilter: "blur(8px)",
-              }}>
-                <div>
-                  <div style={{ fontSize: 10, color: C.inkMute, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 4, fontWeight: 600 }}>Active Wallet</div>
-                  <div style={{ ...serif, fontSize: 24, color: C.ink, lineHeight: 1, fontWeight: 400, display: "flex", alignItems: "center", gap: 6 }}>
-                    {address?.slice(0, 6) + "..." + address?.slice(-4)}
-                    <button onClick={copyAddress} style={{ background: "none", border: "none", color: C.inkMute, cursor: "pointer" }}>
-                      {copied ? <Check size={14} color={C.gain} /> : <Copy size={14} />}
-                    </button>
-                  </div>
-                </div>
-                <button
-                  onClick={disconnectWallet}
-                  style={{
-                    width: 36, height: 36, borderRadius: 12,
-                    background: C.card, border: `1px solid ${C.border}`,
-                    display: "grid", placeItems: "center", color: C.ink,
-                    cursor: "pointer",
-                  }}
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
-
-              {/* Ticker Tape */}
-              <div style={{ borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, overflow: "hidden", position: "relative", background: C.bg2 }}>
-                <div className="animate-ticker" style={{ display: "flex", gap: 28, padding: "10px 0", whiteSpace: "nowrap", width: "max-content" }}>
-                  {[...stocks.slice(0, 6), ...stocks.slice(0, 6), ...stocks.slice(0, 6)].map((s, i) => (
-                    <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 8, ...mono, fontSize: 11 }}>
-                      <span style={{ color: C.inkDim }}>{s.symbol}</span>
-                      <span style={{ color: C.ink }}>{fmtUSD(s.price)}</span>
-                      <span style={{ color: s.changePercent >= 0 ? C.gain : C.loss }}>
-                        {s.changePercent >= 0 ? "+" : ""}
-                        {s.changePercent.toFixed(2)}%
-                      </span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ padding: "24px 22px 24px" }}>
-                {/* Net worth card */}
-                <div style={{ marginBottom: 32 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <div style={{ fontSize: 11, color: C.inkMute, letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 600 }}>Total Value</div>
-                    <button type="button" onClick={() => setBalanceVisible(!balanceVisible)} style={{ color: C.inkMute, fontSize: 11, display: "flex", alignItems: "center", gap: 4, cursor: "pointer", background: "none", border: "none" }}>
-                      {balanceVisible ? <Eye size={12} /> : <EyeOff size={12} />}
-                      {balanceVisible ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                  <div style={{ ...serif, fontSize: 58, color: C.ink, lineHeight: 0.95, marginTop: 12, marginBottom: 4, letterSpacing: "-0.04em" }}>
-                    {balanceVisible ? fmtUSD(enrichedPortfolio.totalUSD) : "••••••"}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <Delta value={enrichedPortfolio.totalPnlPercent} big />
-                    <span style={{ fontSize: 11, color: C.inkMute, letterSpacing: "0.04em" }}>
-                      <span style={{ color: enrichedPortfolio.totalPnlUSD >= 0 ? C.gain : C.loss, ...mono }}>
-                        {enrichedPortfolio.totalPnlUSD >= 0 ? "+" : ""}
-                        {fmtUSD(enrichedPortfolio.totalPnlUSD)}
-                      </span>{" "}
-                      all-time P&L
-                    </span>
-                  </div>
-                </div>
-
-                {/* Dashboard wiggles */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 32 }}>
-                  <button type="button" onClick={() => setTab("wallet")} style={{
-                    padding: "16px", background: C.ink, color: C.bg,
-                    borderRadius: 14, fontSize: 13, fontWeight: 600,
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                    cursor: "pointer", border: "none",
-                  }}>
-                    <Plus size={14} /> Deposit USDC
-                  </button>
-                  <button type="button" onClick={() => setTab("markets")} style={{
-                    padding: "16px", background: C.bg, color: C.ink,
-                    border: `1px solid ${C.border}`, borderRadius: 14,
-                    fontSize: 13, fontWeight: 500, cursor: "pointer",
-                  }}>Markets</button>
-                </div>
-
-                {/* Movers section */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                  <h3 style={{ ...serif, fontSize: 22, color: C.ink, margin: 0, fontWeight: 400 }}>Movers</h3>
-                  <button type="button" onClick={() => setTab("markets")} style={{
-                    fontSize: 11, color: C.ink, letterSpacing: "0.08em", textTransform: "uppercase",
-                    display: "flex", alignItems: "center", gap: 2, fontWeight: 600,
-                    cursor: "pointer", background: "none", border: "none",
-                  }}>All markets <ChevronRight size={11} /></button>
-                </div>
-                <div style={{ display: "flex", gap: 10, overflowX: "auto", margin: "0 -22px", padding: "4px 22px 4px", scrollbarWidth: "none" }}>
-                  {stocks.slice(0, 4).map((s) => (
-                    <button key={s.symbol} type="button" onClick={() => setSelectedStock(s)} style={{
-                      minWidth: 150, background: C.bg, border: `1px solid ${C.border}`,
-                      borderRadius: 18, padding: 16, textAlign: "left", cursor: "pointer",
-                    }}>
-                      <div style={{ ...mono, fontSize: 11, color: C.inkDim, marginBottom: 2, fontWeight: 500 }}>{s.symbol}</div>
-                      <div style={{ ...serif, fontSize: 24, color: C.ink, lineHeight: 1, marginBottom: 4 }}>
-                        {fmtUSD(s.price)}
-                      </div>
-                      <Delta value={s.changePercent} />
-                    </button>
-                  ))}
-                </div>
-
-                {/* Recent transaction history listing */}
-                <div style={{ marginTop: 32 }}>
-                  <h3 style={{ ...serif, fontSize: 22, color: C.ink, margin: "0 0 14px", fontWeight: 400 }}>On-Chain History</h3>
-                  {transactions.slice(0, 4).map((tx, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", padding: "14px 0", borderBottom: i < 3 ? `1px solid ${C.border}` : "none" }}>
-                      <div style={{
-                        width: 38, height: 38, borderRadius: 12,
-                        background: tx.type === "deposit" ? C.gainSoft : tx.type === "buy" ? C.accentSoft : C.lossSoft,
-                        color: tx.type === "deposit" ? C.gain : tx.type === "buy" ? C.ink : C.loss,
-                        display: "grid", placeItems: "center", marginRight: 14,
-                      }}>
-                        {tx.type === "deposit" ? <Plus size={16} /> : tx.type === "buy" ? <ArrowDownRight size={16} /> : <ArrowUpRight size={16} />}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, color: C.ink, fontWeight: 500 }}>
-                          {tx.type === "deposit" ? "USDC Deposit" : tx.type === "buy" ? `Bought ${tx.symbol}` : `Sold ${tx.symbol}`}
-                        </div>
-                        <div style={{ fontSize: 10, color: C.inkMute, marginTop: 2 }}>{tx.when}</div>
-                      </div>
-                      <div style={{ ...mono, fontSize: 13, color: C.ink, fontWeight: 500 }}>
-                        {tx.type === "deposit" ? fmtUSD(tx.amount) : `${tx.qty} shares`}
-                      </div>
-                    </div>
-                  ))}
-                  {transactions.length === 0 && (
-                    <div style={{ textAlign: "center", padding: "30px", color: C.inkMute, fontSize: 12 }}>No transactions yet.</div>
-                  )}
-                </div>
-              </div>
-            </>
-          ) : tab === "markets" ? (
-            /* ════════════════════════════════════════════════════════════════════
-               MARKETS VIEW
-               ════════════════════════════════════════════════════════════════════ */
-            <>
-              <div style={{ padding: "24px 22px 18px" }}>
-                <div style={{ ...serif, fontSize: 30, color: C.ink, lineHeight: 1, fontWeight: 400 }}>Markets</div>
-                <div style={{ fontSize: 11, color: C.inkMute, marginTop: 4 }}>Real-time quotes powered by Hyperliquid</div>
-              </div>
-
-              <div style={{ padding: "0 22px 24px" }}>
-                {/* Search bar */}
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  background: C.card, border: `1px solid ${C.border}`, borderRadius: 14,
-                  padding: "14px 16px", marginBottom: 16,
-                }}>
-                  <Search size={16} color={C.inkMute} />
-                  <input
-                    value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by symbol or name"
-                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: C.ink, fontSize: 14 }}
-                  />
-                </div>
-
-                {/* Filter pills */}
-                <div style={{ display: "flex", gap: 8, overflowX: "auto", margin: "0 -22px", padding: "0 22px 18px", scrollbarWidth: "none" }}>
-                  {["All", "Tech", "Finance", "Auto", "Energy", "Consumer"].map((f) => (
-                    <Pill key={f} active={sectorFilter === f} onClick={() => setSectorFilter(f)}>
-                      {f}
-                    </Pill>
-                  ))}
-                </div>
-
-                {/* Table Header */}
-                <div style={{
-                  display: "grid", gridTemplateColumns: "1fr 90px",
-                  gap: 12, padding: "0 4px 8px",
-                  fontSize: 9, color: C.inkMute, letterSpacing: "0.18em", textTransform: "uppercase",
-                  borderBottom: `1px solid ${C.border}`, marginBottom: 4, fontWeight: 600,
-                }}>
-                  <span>Equity Token</span>
-                  <span style={{ textAlign: "right" }}>Price & 24h</span>
-                </div>
-
-                {/* Stock Listing */}
-                <div>
-                  {filteredStocks.map((s, i) => (
-                    <button
-                      key={s.symbol}
-                      type="button"
-                      onClick={() => setSelectedStock(s)}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 90px",
-                        alignItems: "center",
-                        width: "100%",
-                        padding: "14px 4px",
-                        background: "transparent",
-                        border: "none",
-                        borderBottom: i < filteredStocks.length - 1 ? `1px solid ${C.border}` : "none",
-                        textAlign: "left",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 14, color: C.ink, fontWeight: 600 }}>{s.symbol}</span>
-                          <span style={{ fontSize: 10, color: C.inkMute }}>{s.name}</span>
-                        </div>
-                        <div style={{ ...mono, fontSize: 11, color: C.inkMute, marginTop: 2 }}>{s.sector}</div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ ...mono, fontSize: 13, color: C.ink, fontWeight: 500 }}>
-                          {fmtPrice(s.price, s.currency)}
-                        </div>
-                        <div style={{ marginTop: 2 }}>
-                          <Delta value={s.changePercent} />
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : tab === "portfolio" ? (
-            /* ════════════════════════════════════════════════════════════════════
-               PORTFOLIO VIEW
-               ════════════════════════════════════════════════════════════════════ */
-            <>
-              <div style={{ padding: "24px 22px 18px" }}>
-                <div style={{ ...serif, fontSize: 30, color: C.ink, lineHeight: 1, fontWeight: 400 }}>Portfolio</div>
-                <div style={{ fontSize: 11, color: C.inkMute, marginTop: 4 }}>Your tokenized positions on Avalanche</div>
-              </div>
-
-              <div style={{ padding: "0 22px 24px" }}>
-                <div style={{ marginBottom: 26 }}>
-                  <div style={{ fontSize: 10, color: C.inkMute, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>Total Portfolio Value</div>
-                  <div style={{ ...serif, fontSize: 44, color: C.ink, lineHeight: 1, letterSpacing: "-0.04em" }}>
-                    {fmtUSD(enrichedPortfolio.totalHoldingsUSD)}
-                  </div>
-                </div>
-
-                {/* Allocation Pie Chart */}
-                {enrichedPortfolio.holdings.length > 0 && (
-                  <div style={{
-                    padding: 18, background: C.card, border: `1px solid ${C.border}`,
-                    borderRadius: 16, display: "flex", alignItems: "center", gap: 18, marginBottom: 26,
-                  }}>
-                    <div style={{ width: 100, height: 100, flexShrink: 0 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={enrichedPortfolio.holdings} dataKey="valueUSD" innerRadius={30} outerRadius={46} paddingAngle={2} stroke="none" isAnimationActive={false}>
-                            {enrichedPortfolio.holdings.map((_, i) => (
-                              <Cell key={i} fill={["#0c0a09", "#16a34a", "#ea580c", "#7c3aed"][i % 4]} />
-                            ))}
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 10, color: C.inkMute, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>Allocation</div>
-                      {enrichedPortfolio.holdings.map((h, i) => (
-                        <div key={h.symbol} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, marginBottom: 4 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: 2, background: ["#0c0a09", "#16a34a", "#ea580c", "#7c3aed"][i % 4] }} />
-                          <span style={{ ...mono, color: C.inkDim, flex: 1 }}>{h.symbol}</span>
-                          <span style={{ ...mono, color: C.ink, fontWeight: 500 }}>
-                            {((h.valueUSD / (enrichedPortfolio.totalHoldingsUSD || 1)) * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <h3 style={{ ...serif, fontSize: 20, color: C.ink, margin: "0 0 14px", fontWeight: 400 }}>Holdings</h3>
-                <div>
-                  {enrichedPortfolio.holdings.map((h) => {
-                    const matchedStock = stocks.find(s => s.symbol === h.symbol);
-                    return (
-                      <button
-                        key={h.symbol}
-                        type="button"
-                        onClick={() => matchedStock && setSelectedStock(matchedStock)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          width: "100%",
-                          padding: "14px 4px",
-                          background: "transparent",
-                          border: "none",
-                          borderBottom: `1px solid ${C.border}`,
-                          textAlign: "left",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 14, color: C.ink, fontWeight: 600 }}>{h.symbol}</div>
-                          <div style={{ fontSize: 11, color: C.inkMute, marginTop: 2 }}>
-                            {h.qty} shares · Avg {fmtUSD(h.avgPrice)}
-                          </div>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <div style={{ ...mono, fontSize: 13, color: C.ink, fontWeight: 500 }}>
-                            {fmtUSD(h.valueUSD)}
-                          </div>
-                          <div style={{ marginTop: 2 }}>
-                            <Delta value={h.pnlPercent} />
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                  {enrichedPortfolio.holdings.length === 0 && (
-                    <div style={{ textAlign: "center", padding: "40px", color: C.inkMute, fontSize: 12 }}>
-                      No stock holdings. Buy shares under Markets!
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          ) : (
-            /* ════════════════════════════════════════════════════════════════════
-               WALLET VIEW & FAUCET
-               ════════════════════════════════════════════════════════════════════ */
-            <>
-              <div style={{ padding: "24px 22px 18px" }}>
-                <div style={{ ...serif, fontSize: 30, color: C.ink, lineHeight: 1, fontWeight: 400 }}>Wallet</div>
-                <div style={{ fontSize: 11, color: C.inkMute, marginTop: 4 }}>Fund account & check USDC balances</div>
-              </div>
-
-              <div style={{ padding: "0 22px 24px" }}>
-                {/* On-chain balance */}
-                <div style={{
-                  padding: 20, borderRadius: 16, background: C.card,
-                  border: `1px solid ${C.border}`, marginBottom: 26,
-                }}>
-                  <div style={{ fontSize: 10, color: C.inkMute, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>USDC Settlement Balance</div>
-                  <div style={{ ...serif, fontSize: 36, color: C.ink, lineHeight: 1 }}>
-                    {fmtUSD(portfolio.cash)}
-                  </div>
-                  <div style={{ fontSize: 11, color: C.inkMute, marginTop: 8, ...mono }}>Nexora L1 Settlement</div>
-                </div>
-
-                {/* Local Faucet tool */}
-                <div style={{
-                  padding: 20, borderRadius: 16, border: `1px dashed ${C.border}`,
-                  background: C.bg2, marginBottom: 26,
-                }}>
-                  <h4 style={{ ...serif, fontSize: 16, color: C.ink, fontWeight: 500, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                    <Sparkles size={16} color={C.ember} />
-                    Avalanche USDC Faucet
-                  </h4>
-                  <p style={{ fontSize: 11, color: C.inkDim, lineHeight: 1.5, marginBottom: 16 }}>
-                    Obtain mock USDC to your wallet to test tokenized stock purchases locally.
-                  </p>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <input
-                      type="number"
-                      value={faucetAmount}
-                      onChange={(e) => setFaucetAmount(e.target.value)}
-                      style={{
-                        width: 100, padding: "10px", border: `1px solid ${C.border}`,
-                        borderRadius: 10, background: C.bg, outline: "none", fontSize: 13, ...mono,
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleFaucetClaim}
-                      disabled={isFaucetLoading || !faucetAmount}
-                      style={{
-                        flex: 1, padding: "10px", borderRadius: 10,
-                        background: C.ink, color: C.bg, fontWeight: 600, fontSize: 12, cursor: "pointer", border: "none",
-                      }}
-                    >
-                      {isFaucetLoading ? "Claiming..." : "Mint Mock USDC"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Deployed Address Info */}
-                <div>
-                  <h4 style={{ ...serif, fontSize: 16, color: C.ink, fontWeight: 500, marginBottom: 12 }}>Contract Diagnostics</h4>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {[
-                      ["Platform Contract", deployedAddresses.StockwavePlatform],
-                      ["USDC Token Contract", deployedAddresses.MockUSDC],
-                      ["Backend Signer", deployedAddresses.OracleSigner],
-                    ].map(([label, addr]) => (
-                      <div key={label} style={{ padding: "10px 12px", background: C.card, borderRadius: 8, fontSize: 11, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ color: C.inkDim, fontWeight: 500 }}>{label}</span>
-                        <span style={{ ...mono, color: C.inkMute }}>{addr ? addr.slice(0, 8) + "..." + addr.slice(-6) : "Not Loaded"}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-        <TabBar />
+    <form onSubmit={submit} style={{ maxWidth: 480 }}>
+      <div className="lp-waitlist-form" style={{ display: "flex", gap: 10 }}>
+        <input
+          className="lp-input"
+          type="email"
+          required
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{
+            flex: 1,
+            padding: compact ? "13px 16px" : "16px 20px",
+            borderRadius: 14,
+            fontSize: 14,
+          }}
+        />
+        <button
+          type="submit"
+          className="lp-cta-btn"
+          disabled={status === "loading"}
+          style={{
+            padding: compact ? "13px 22px" : "16px 28px",
+            borderRadius: 14,
+            border: "none",
+            cursor: "pointer",
+            background: `linear-gradient(120deg, ${T.red}, #ff7a3d)`,
+            color: "#fff",
+            fontSize: 14,
+            fontWeight: 700,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            whiteSpace: "nowrap",
+            transition: "transform .2s ease, box-shadow .2s ease",
+            boxShadow: "0 8px 24px rgba(232, 65, 66, 0.35)",
+          }}
+        >
+          {status === "loading" ? "Joining..." : "Join the Waitlist"}
+          {status !== "loading" && <ArrowRight size={15} />}
+        </button>
       </div>
+      {status === "error" && (
+        <div style={{ marginTop: 10, fontSize: 12, color: T.loss }}>{message}</div>
+      )}
+      <div style={{ marginTop: 12, fontSize: 12, color: T.mute, display: "flex", alignItems: "center", gap: 6 }}>
+        <Lock size={11} /> No spam. Early access invites roll out weekly.
+      </div>
+    </form>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   PHONE MOCKUP — miniature preview of the Nexora app
+   ════════════════════════════════════════════════════════════════════ */
+function PhoneMockup() {
+  return (
+    <div className="lp-float" style={{ position: "relative", width: 300 }}>
+      {/* glow */}
+      <div
+        style={{
+          position: "absolute",
+          inset: -40,
+          background: `radial-gradient(circle at 50% 40%, rgba(232,65,66,0.28), transparent 65%)`,
+          filter: "blur(30px)",
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          borderRadius: 40,
+          border: "1px solid rgba(255,255,255,0.14)",
+          background: "linear-gradient(165deg, #131316, #09090b)",
+          padding: 10,
+          boxShadow: "0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
+        }}
+      >
+        <div style={{ borderRadius: 32, overflow: "hidden", background: "#0c0c0e", padding: "22px 18px 18px" }}>
+          {/* status row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div style={{ ...serif, fontSize: 17, color: T.ink }}>Nexora.</div>
+            <span
+              className="lp-pulse"
+              style={{
+                fontSize: 9,
+                ...mono,
+                color: T.gain,
+                border: "1px solid rgba(52,211,153,0.35)",
+                padding: "3px 8px",
+                borderRadius: 99,
+                background: "rgba(52,211,153,0.08)",
+              }}
+            >
+              ● LIVE
+            </span>
+          </div>
+          {/* balance */}
+          <div style={{ fontSize: 9, ...mono, color: T.mute, letterSpacing: "0.16em", textTransform: "uppercase" }}>
+            Portfolio Value
+          </div>
+          <div style={{ ...serif, fontSize: 34, color: T.ink, margin: "6px 0 2px" }}>$48,392.14</div>
+          <div style={{ fontSize: 12, color: T.gain, ...mono, marginBottom: 18 }}>▲ +12.4% all-time</div>
+          {/* chart */}
+          <svg viewBox="0 0 100 64" style={{ width: "100%", height: 90, display: "block" }} preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lp-chart-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={T.gain} stopOpacity="0.35" />
+                <stop offset="100%" stopColor={T.gain} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <polyline
+              points={sparkline(4, true)}
+              fill="none"
+              stroke={T.gain}
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            <polygon points={`0,64 ${sparkline(4, true)} 100,64`} fill="url(#lp-chart-fill)" />
+          </svg>
+          {/* holdings */}
+          <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 9 }}>
+            {STOCKS.slice(0, 3).map((s) => (
+              <div
+                key={s.symbol}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 12px",
+                  borderRadius: 12,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.ink }}>{s.symbol}</div>
+                  <div style={{ fontSize: 9, color: T.mute }}>{s.name}</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 12, ...mono, color: T.ink }}>${s.price.toFixed(2)}</div>
+                  <div style={{ fontSize: 10, ...mono, color: s.change >= 0 ? T.gain : T.loss }}>
+                    {s.change >= 0 ? "+" : ""}
+                    {s.change.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* floating chips */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1, duration: 0.7 }}
+        style={{
+          position: "absolute",
+          top: 78,
+          right: -78,
+          zIndex: 2,
+          padding: "10px 14px",
+          borderRadius: 14,
+          background: "rgba(20,20,23,0.92)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+        }}
+      >
+        <div style={{ fontSize: 9, color: T.mute, ...mono, textTransform: "uppercase", letterSpacing: "0.1em" }}>Settled in</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: T.ink, display: "flex", alignItems: "center", gap: 6 }}>
+          <CircleDollarSign size={14} color="#2775ca" /> USDC
+        </div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.25, duration: 0.7 }}
+        style={{
+          position: "absolute",
+          bottom: 96,
+          left: -84,
+          zIndex: 2,
+          padding: "10px 14px",
+          borderRadius: 14,
+          background: "rgba(20,20,23,0.92)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+        }}
+      >
+        <div style={{ fontSize: 9, color: T.mute, ...mono, textTransform: "uppercase", letterSpacing: "0.1em" }}>Powered by</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: T.ink, display: "flex", alignItems: "center", gap: 6 }}>
+          <Zap size={14} color={T.red} /> Avalanche
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   FAQ ITEM
+   ════════════════════════════════════════════════════════════════════ */
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      style={{
+        border: `1px solid ${open ? "rgba(255,143,87,0.3)" : T.border}`,
+        borderRadius: 16,
+        background: open ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
+        transition: "all .25s ease",
+        overflow: "hidden",
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 16,
+          padding: "20px 24px",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          textAlign: "left",
+        }}
+      >
+        <span style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>{q}</span>
+        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }} style={{ flexShrink: 0, color: T.mute }}>
+          <ChevronDown size={18} />
+        </motion.span>
+      </button>
+      <motion.div
+        initial={false}
+        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: [0.21, 0.6, 0.35, 1] }}
+        style={{ overflow: "hidden" }}
+      >
+        <p style={{ padding: "0 24px 20px", margin: 0, fontSize: 14, lineHeight: 1.7, color: T.dim }}>{a}</p>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   PAGE
+   ════════════════════════════════════════════════════════════════════ */
+export default function LandingPage() {
+  const [scrolled, setScrolled] = useState(false);
+  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const onScroll = () => setScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/waitlist/count")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && typeof d.count === "number") setWaitlistCount(d.count);
+      })
+      .catch(() => {});
+  }, []);
+
+  const tickerItems = useMemo(() => [...STOCKS, ...STOCKS], []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const features = [
+    {
+      icon: <Layers size={20} />,
+      title: "Real Stocks, Tokenized",
+      body: "Every share is a fully-backed ERC-20 token on Avalanche. AAPL, NVDA, TSLA and more — own them on-chain, verifiable block by block.",
+    },
+    {
+      icon: <Zap size={20} />,
+      title: "Sub-2s Settlement",
+      body: "No T+2. Trades settle on the Avalanche C-Chain in under two seconds, with finality you can point to on the explorer.",
+    },
+    {
+      icon: <Clock size={20} />,
+      title: "Markets That Never Sleep",
+      body: "Trade 24/7/365. Weekends, holidays, 3am — tokenized markets don't ring a closing bell.",
+    },
+    {
+      icon: <CircleDollarSign size={20} />,
+      title: "Settled in USDC",
+      body: "Deposit and settle in USDC. No banking rails, no wire delays, no currency games — just stable dollars on-chain.",
+    },
+    {
+      icon: <LineChart size={20} />,
+      title: "Institutional Price Feeds",
+      body: "Live quotes streamed from Hyperliquid's institutional-grade oracle, signed and verified before every trade executes.",
+    },
+    {
+      icon: <Shield size={20} />,
+      title: "Non-Custodial by Design",
+      body: "Your keys, your shares. Assets live in your wallet — not on our balance sheet. Connect MetaMask, Core, or sign in with Google.",
+    },
+  ];
+
+  const steps = [
+    {
+      n: "01",
+      icon: <Wallet size={22} />,
+      title: "Connect your wallet",
+      body: "MetaMask, Core Wallet, or one-tap Google sign-in. Non-custodial from the first click — no forms, no paperwork.",
+    },
+    {
+      n: "02",
+      icon: <CircleDollarSign size={22} />,
+      title: "Fund with USDC",
+      body: "Deposit USDC straight to your wallet. Your balance is on-chain, visible, and always withdrawable.",
+    },
+    {
+      n: "03",
+      icon: <TrendingUp size={22} />,
+      title: "Trade tokenized stocks",
+      body: "Buy AAPL at 2am on a Sunday. Every fill is signed by our price oracle and settled on Avalanche in seconds.",
+    },
+  ];
+
+  const faqs = [
+    {
+      q: "What exactly is a tokenized stock?",
+      a: "A tokenized stock is an ERC-20 token that mirrors the price of a real-world equity like Apple or NVIDIA. On Nexora, each token is minted and burned by audited smart contracts on Avalanche, priced by a live institutional oracle feed, and settled in USDC. You get stock-market exposure with crypto-market speed.",
+    },
+    {
+      q: "When does Nexora launch?",
+      a: "We're rolling out early access in waves. Our smart contracts (all 14 of them) are already live on the Avalanche Fuji testnet, and waitlist members get first access to the mainnet beta — earliest sign-ups get in first.",
+    },
+    {
+      q: "Do I need to know anything about crypto?",
+      a: "No. You can sign in with Google and Nexora handles the wallet plumbing for you. If you're a crypto native, connect MetaMask or Core Wallet and stay fully non-custodial. Either way, the experience feels like a modern brokerage app.",
+    },
+    {
+      q: "Is Nexora custodial? Who holds my assets?",
+      a: "You do. Nexora is non-custodial: your tokenized shares and USDC live in your own wallet. Trades execute through smart contracts with oracle-signed price quotes — we never take possession of your funds.",
+    },
+    {
+      q: "What does it cost?",
+      a: "Waitlist members trade commission-free during the beta. You only pay Avalanche network gas, which is typically a fraction of a cent per transaction.",
+    },
+    {
+      q: "Which stocks can I trade?",
+      a: "At launch: AAPL, NVDA, TSLA, MSFT, AMZN, GOOGL, META, JPM and more — with new listings added continuously based on community demand. Waitlist members vote on what lists next.",
+    },
+  ];
+
+  return (
+    <div ref={rootRef} className="lp-root">
+      {/* ── NAV ─────────────────────────────────────────── */}
+      <nav
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 clamp(20px, 5vw, 56px)",
+          height: 68,
+          background: scrolled ? "rgba(6,6,7,0.82)" : "transparent",
+          backdropFilter: scrolled ? "blur(14px)" : "none",
+          borderBottom: `1px solid ${scrolled ? T.border : "transparent"}`,
+          transition: "all .3s ease",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 9,
+              background: `linear-gradient(135deg, ${T.red}, #ff7a3d)`,
+              display: "grid",
+              placeItems: "center",
+              boxShadow: "0 4px 14px rgba(232,65,66,0.4)",
+            }}
+          >
+            <TrendingUp size={16} color="#fff" strokeWidth={2.5} />
+          </div>
+          <span style={{ ...serif, fontSize: 21, color: T.ink }}>Nexora.</span>
+        </div>
+
+        <div className="lp-nav-links" style={{ display: "flex", alignItems: "center", gap: 30, fontSize: 13.5, fontWeight: 500 }}>
+          {[
+            ["Features", "features"],
+            ["Markets", "markets"],
+            ["How it works", "how"],
+            ["FAQ", "faq"],
+          ].map(([label, id]) => (
+            <button
+              key={id}
+              type="button"
+              className="lp-nav-link"
+              onClick={() => scrollTo(id)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 500 }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Link
+            href="/app"
+            className="lp-nav-link"
+            style={{ fontSize: 13.5, fontWeight: 600, textDecoration: "none", padding: "9px 14px" }}
+          >
+            Launch App
+          </Link>
+          <button
+            type="button"
+            onClick={() => scrollTo("waitlist")}
+            className="lp-cta-btn"
+            style={{
+              padding: "10px 18px",
+              borderRadius: 12,
+              border: "none",
+              cursor: "pointer",
+              background: `linear-gradient(120deg, ${T.red}, #ff7a3d)`,
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 700,
+              transition: "transform .2s ease, box-shadow .2s ease",
+            }}
+          >
+            Join Waitlist
+          </button>
+        </div>
+      </nav>
+
+      {/* ── HERO ─────────────────────────────────────────── */}
+      <header id="waitlist" style={{ position: "relative", paddingTop: 150, overflow: "hidden" }}>
+        {/* grid + glow background */}
+        <div className="lp-grid-bg" style={{ position: "absolute", inset: 0, zIndex: 0 }} />
+        <div
+          style={{
+            position: "absolute",
+            top: -220,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 900,
+            height: 560,
+            background: `radial-gradient(ellipse, rgba(232,65,66,0.22), rgba(255,143,87,0.08) 45%, transparent 70%)`,
+            filter: "blur(48px)",
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          className="lp-hero-grid"
+          style={{
+            position: "relative",
+            zIndex: 1,
+            maxWidth: 1200,
+            margin: "0 auto",
+            padding: "0 clamp(20px, 5vw, 56px) 90px",
+            display: "grid",
+            gridTemplateColumns: "1.15fr 0.85fr",
+            gap: 48,
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "7px 14px",
+                borderRadius: 99,
+                border: "1px solid rgba(255,143,87,0.3)",
+                background: "rgba(232,65,66,0.08)",
+                fontSize: 12,
+                fontWeight: 600,
+                color: T.amber,
+                marginBottom: 26,
+              }}
+            >
+              <Sparkles size={13} />
+              14 smart contracts live on Avalanche — Early access opening soon
+            </motion.div>
+
+            <motion.h1
+              className="lp-h1"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              style={{
+                ...serif,
+                fontSize: "clamp(44px, 6.2vw, 76px)",
+                lineHeight: 1.04,
+                margin: "0 0 22px",
+                fontWeight: 400,
+                color: T.ink,
+              }}
+            >
+              Wall Street,
+              <br />
+              <span className="lp-gradient-text">tokenized.</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              style={{ fontSize: 17, lineHeight: 1.65, color: T.dim, maxWidth: 520, margin: "0 0 34px" }}
+            >
+              Nexora puts real stocks on-chain. Trade tokenized AAPL, NVDA and TSLA around the clock —
+              settled in USDC on Avalanche in under two seconds, with your keys in your pocket.
+            </motion.p>
+
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}>
+              <WaitlistForm id="hero" />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 30 }}
+            >
+              <div style={{ display: "flex" }}>
+                {["#e84142", "#ff7a3d", "#ffb45f", "#34d399"].map((c, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: "50%",
+                      background: `linear-gradient(135deg, ${c}, ${c}88)`,
+                      border: "2px solid #060607",
+                      marginLeft: i === 0 ? 0 : -9,
+                      display: "grid",
+                      placeItems: "center",
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#fff",
+                    }}
+                  >
+                    {["Y", "A", "R", "+"][i]}
+                  </div>
+                ))}
+              </div>
+              <span style={{ fontSize: 13, color: T.dim }}>
+                <strong style={{ color: T.ink }}>
+                  {waitlistCount !== null ? waitlistCount.toLocaleString() : "2,400"}+
+                </strong>{" "}
+                traders already in line
+              </span>
+            </motion.div>
+          </div>
+
+          <motion.div
+            className="lp-hero-phone"
+            initial={{ opacity: 0, y: 40, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.9, delay: 0.35 }}
+            style={{ display: "flex", justifyContent: "center" }}
+          >
+            <PhoneMockup />
+          </motion.div>
+        </div>
+
+        {/* ── TICKER TAPE ────────────────────────────────── */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            borderTop: `1px solid ${T.border}`,
+            borderBottom: `1px solid ${T.border}`,
+            background: "rgba(255,255,255,0.015)",
+            overflow: "hidden",
+          }}
+        >
+          <div className="lp-marquee" style={{ display: "flex", gap: 44, padding: "14px 0", width: "max-content" }}>
+            {tickerItems.map((s, i) => (
+              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 10, ...mono, fontSize: 12.5 }}>
+                <span style={{ color: T.mute, fontWeight: 600 }}>{s.symbol}</span>
+                <span style={{ color: T.ink }}>${s.price.toFixed(2)}</span>
+                <span style={{ color: s.change >= 0 ? T.gain : T.loss }}>
+                  {s.change >= 0 ? "▲" : "▼"} {Math.abs(s.change).toFixed(2)}%
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* ── STATS ─────────────────────────────────────────── */}
+      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "80px clamp(20px, 5vw, 56px) 40px" }}>
+        <Reveal>
+          <div
+            className="lp-stats-grid"
+            style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}
+          >
+            {[
+              ["<2s", "on-chain settlement"],
+              ["24/7", "markets, never closed"],
+              ["$0", "commissions in beta"],
+              ["14", "live smart contracts"],
+            ].map(([big, small]) => (
+              <div key={small} style={{ textAlign: "center", padding: "28px 12px", borderRadius: 20, border: `1px solid ${T.border}`, background: "rgba(255,255,255,0.02)" }}>
+                <div style={{ ...serif, fontSize: 40, color: T.ink, lineHeight: 1 }}>{big}</div>
+                <div style={{ fontSize: 12.5, color: T.mute, marginTop: 10 }}>{small}</div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ── FEATURES ─────────────────────────────────────── */}
+      <section id="features" style={{ maxWidth: 1200, margin: "0 auto", padding: "70px clamp(20px, 5vw, 56px)" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <div style={{ fontSize: 12, ...mono, color: T.amber, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 16 }}>
+              Why Nexora
+            </div>
+            <h2 className="lp-h2" style={{ ...serif, fontSize: "clamp(30px, 4vw, 46px)", margin: "0 0 16px", fontWeight: 400, color: T.ink }}>
+              The brokerage, rebuilt on-chain
+            </h2>
+            <p style={{ fontSize: 16, color: T.dim, maxWidth: 560, margin: "0 auto", lineHeight: 1.65 }}>
+              Everything you expect from a modern trading app — with the transparency, speed and self-custody only a blockchain can deliver.
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="lp-feature-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+          {features.map((f, i) => (
+            <Reveal key={f.title} delay={i * 0.08}>
+              <div className="lp-card" style={{ padding: 28, height: "100%" }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 13,
+                    background: "linear-gradient(135deg, rgba(232,65,66,0.18), rgba(255,143,87,0.1))",
+                    border: "1px solid rgba(255,143,87,0.25)",
+                    display: "grid",
+                    placeItems: "center",
+                    color: T.amber,
+                    marginBottom: 18,
+                  }}
+                >
+                  {f.icon}
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: T.ink, margin: "0 0 10px" }}>{f.title}</h3>
+                <p style={{ fontSize: 13.5, lineHeight: 1.65, color: T.dim, margin: 0 }}>{f.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── MARKETS SHOWCASE ─────────────────────────────── */}
+      <section id="markets" style={{ position: "relative", padding: "70px 0", background: T.bg2, borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 clamp(20px, 5vw, 56px)" }}>
+          <Reveal>
+            <div className="lp-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "end", marginBottom: 48 }}>
+              <div>
+                <div style={{ fontSize: 12, ...mono, color: T.amber, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 16 }}>
+                  Launch Markets
+                </div>
+                <h2 className="lp-h2" style={{ ...serif, fontSize: "clamp(30px, 4vw, 46px)", margin: 0, fontWeight: 400, color: T.ink }}>
+                  Blue chips, on the chain
+                </h2>
+              </div>
+              <p style={{ fontSize: 15, color: T.dim, lineHeight: 1.65, margin: 0 }}>
+                Eight flagship equities at launch, streamed live from Hyperliquid's oracle. New listings added continuously — waitlist members vote on what lists next.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="lp-stocks-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+            {STOCKS.map((s, i) => {
+              const up = s.change >= 0;
+              return (
+                <Reveal key={s.symbol} delay={i * 0.06}>
+                  <div className="lp-card" style={{ padding: 20 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: T.ink }}>{s.symbol}</div>
+                        <div style={{ fontSize: 10.5, color: T.mute, marginTop: 2 }}>{s.name}</div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          ...mono,
+                          fontWeight: 700,
+                          color: up ? T.gain : T.loss,
+                          background: up ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)",
+                          padding: "3px 8px",
+                          borderRadius: 99,
+                        }}
+                      >
+                        {up ? "+" : ""}
+                        {s.change.toFixed(2)}%
+                      </span>
+                    </div>
+                    <svg viewBox="0 0 100 64" style={{ width: "100%", height: 44, display: "block", margin: "10px 0" }} preserveAspectRatio="none">
+                      <polyline
+                        points={sparkline(i + 1, up)}
+                        fill="none"
+                        stroke={up ? T.gain : T.loss}
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                        opacity="0.9"
+                      />
+                    </svg>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ ...mono, fontSize: 15, color: T.ink, fontWeight: 600 }}>${s.price.toFixed(2)}</span>
+                      <span style={{ fontSize: 10, color: T.mute }}>{s.sector}</span>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ─────────────────────────────────── */}
+      <section id="how" style={{ maxWidth: 1200, margin: "0 auto", padding: "90px clamp(20px, 5vw, 56px)" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <div style={{ fontSize: 12, ...mono, color: T.amber, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 16 }}>
+              How it works
+            </div>
+            <h2 className="lp-h2" style={{ ...serif, fontSize: "clamp(30px, 4vw, 46px)", margin: 0, fontWeight: 400, color: T.ink }}>
+              From zero to your first trade
+              <br />
+              in three minutes
+            </h2>
+          </div>
+        </Reveal>
+
+        <div className="lp-steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+          {steps.map((s, i) => (
+            <Reveal key={s.n} delay={i * 0.12}>
+              <div style={{ position: "relative", padding: "32px 28px", borderRadius: 20, border: `1px solid ${T.border}`, background: "rgba(255,255,255,0.02)", height: "100%" }}>
+                <div style={{ ...serif, fontSize: 60, color: "rgba(255,255,255,0.06)", position: "absolute", top: 14, right: 22, lineHeight: 1 }}>
+                  {s.n}
+                </div>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    background: `linear-gradient(135deg, ${T.red}, #ff7a3d)`,
+                    display: "grid",
+                    placeItems: "center",
+                    color: "#fff",
+                    marginBottom: 20,
+                    boxShadow: "0 8px 22px rgba(232,65,66,0.35)",
+                  }}
+                >
+                  {s.icon}
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: T.ink, margin: "0 0 10px" }}>{s.title}</h3>
+                <p style={{ fontSize: 14, lineHeight: 1.65, color: T.dim, margin: 0 }}>{s.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── TRUST / TECH ─────────────────────────────────── */}
+      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "20px clamp(20px, 5vw, 56px) 90px" }}>
+        <Reveal>
+          <div
+            style={{
+              borderRadius: 28,
+              border: `1px solid ${T.border}`,
+              background: `linear-gradient(140deg, rgba(232,65,66,0.1), rgba(255,143,87,0.04) 45%, rgba(255,255,255,0.02))`,
+              padding: "clamp(32px, 5vw, 60px)",
+            }}
+          >
+            <div className="lp-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: 12, ...mono, color: T.amber, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 16 }}>
+                  Built different
+                </div>
+                <h2 className="lp-h2" style={{ ...serif, fontSize: "clamp(28px, 3.4vw, 40px)", margin: "0 0 18px", fontWeight: 400, color: T.ink }}>
+                  Verifiable, not vibes
+                </h2>
+                <p style={{ fontSize: 15, color: T.dim, lineHeight: 1.7, margin: 0 }}>
+                  Every Nexora trade is an on-chain transaction you can audit yourself. Price quotes are
+                  cryptographically signed by our oracle before execution, positions are ERC-20 balances
+                  in your own wallet, and the entire platform — all 14 contracts — is already deployed
+                  and running on Avalanche.
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {[
+                  [<Zap key="z" size={17} />, "Avalanche C-Chain", "Sub-second finality, near-zero gas fees"],
+                  [<CircleDollarSign key="c" size={17} />, "USDC settlement", "Stable, transparent, instantly withdrawable"],
+                  [<Globe key="g" size={17} />, "Hyperliquid oracle", "Institutional-grade live price feeds"],
+                  [<Shield key="s" size={17} />, "Non-custodial", "Your keys, your shares — always"],
+                ].map(([icon, title, sub]) => (
+                  <div
+                    key={title as string}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: "14px 18px",
+                      borderRadius: 14,
+                      background: "rgba(6,6,7,0.5)",
+                      border: `1px solid ${T.border}`,
+                    }}
+                  >
+                    <span style={{ color: T.amber, flexShrink: 0 }}>{icon}</span>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: T.ink }}>{title}</div>
+                      <div style={{ fontSize: 12, color: T.mute, marginTop: 2 }}>{sub}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────── */}
+      <section id="faq" style={{ maxWidth: 780, margin: "0 auto", padding: "20px clamp(20px, 5vw, 56px) 100px" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 44 }}>
+            <div style={{ fontSize: 12, ...mono, color: T.amber, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 16 }}>
+              FAQ
+            </div>
+            <h2 className="lp-h2" style={{ ...serif, fontSize: "clamp(30px, 4vw, 46px)", margin: 0, fontWeight: 400, color: T.ink }}>
+              Questions, answered
+            </h2>
+          </div>
+        </Reveal>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {faqs.map((f, i) => (
+            <Reveal key={f.q} delay={i * 0.05} y={16}>
+              <FaqItem q={f.q} a={f.a} />
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ────────────────────────────────────── */}
+      <section style={{ position: "relative", overflow: "hidden", borderTop: `1px solid ${T.border}` }}>
+        <div
+          style={{
+            position: "absolute",
+            bottom: -260,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 1000,
+            height: 500,
+            background: `radial-gradient(ellipse, rgba(232,65,66,0.25), rgba(255,143,87,0.08) 45%, transparent 70%)`,
+            filter: "blur(52px)",
+            pointerEvents: "none",
+          }}
+        />
+        <div style={{ position: "relative", maxWidth: 760, margin: "0 auto", padding: "110px clamp(20px, 5vw, 56px)", textAlign: "center" }}>
+          <Reveal>
+            <h2 style={{ ...serif, fontSize: "clamp(36px, 5vw, 60px)", margin: "0 0 20px", fontWeight: 400, color: T.ink, lineHeight: 1.08 }}>
+              The market never closes.
+              <br />
+              <span className="lp-gradient-text">Neither should you.</span>
+            </h2>
+            <p style={{ fontSize: 16, color: T.dim, lineHeight: 1.65, margin: "0 auto 38px", maxWidth: 480 }}>
+              Join the waitlist today and lock in early access, zero-commission beta trading, and a vote on which stocks we tokenize next.
+            </p>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <WaitlistForm id="footer" compact />
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── FOOTER ───────────────────────────────────────── */}
+      <footer style={{ borderTop: `1px solid ${T.border}`, background: T.bg2 }}>
+        <div
+          className="lp-footer-grid"
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            padding: "56px clamp(20px, 5vw, 56px) 40px",
+            display: "grid",
+            gridTemplateColumns: "2fr 1fr 1fr 1fr",
+            gap: 40,
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: `linear-gradient(135deg, ${T.red}, #ff7a3d)`,
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <TrendingUp size={14} color="#fff" strokeWidth={2.5} />
+              </div>
+              <span style={{ ...serif, fontSize: 19, color: T.ink }}>Nexora.</span>
+            </div>
+            <p style={{ fontSize: 13, color: T.mute, lineHeight: 1.65, maxWidth: 300, margin: 0 }}>
+              The Web3-native brokerage. Tokenized equities on Avalanche, settled in USDC, streaming
+              live from institutional price feeds.
+            </p>
+          </div>
+
+          {(
+            [
+              ["Product", [["Features", "#features"], ["Markets", "#markets"], ["How it works", "#how"], ["Launch App", "/app"]]],
+              ["Company", [["FAQ", "#faq"], ["Waitlist", "#waitlist"], ["GitHub", "https://github.com/yashbaing/Nexora"]]],
+              ["Network", [["Avalanche", "https://www.avax.network"], ["USDC", "https://www.circle.com/usdc"], ["Hyperliquid", "https://hyperliquid.xyz"]]],
+            ] as [string, [string, string][]][]
+          ).map(([heading, links]) => (
+            <div key={heading}>
+              <div style={{ fontSize: 12, ...mono, color: T.mute, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 16 }}>
+                {heading}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {links.map(([label, href]) =>
+                  href.startsWith("#") ? (
+                    <button
+                      key={label}
+                      type="button"
+                      className="lp-nav-link"
+                      onClick={() => scrollTo(href.slice(1))}
+                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13.5, textAlign: "left", padding: 0 }}
+                    >
+                      {label}
+                    </button>
+                  ) : href.startsWith("/") ? (
+                    <Link key={label} href={href} className="lp-nav-link" style={{ fontSize: 13.5, textDecoration: "none" }}>
+                      {label}
+                    </Link>
+                  ) : (
+                    <a key={label} href={href} target="_blank" rel="noreferrer" className="lp-nav-link" style={{ fontSize: 13.5, textDecoration: "none" }}>
+                      {label}
+                    </a>
+                  )
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div
+          style={{
+            borderTop: `1px solid ${T.border}`,
+            padding: "20px clamp(20px, 5vw, 56px)",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 12,
+            justifyContent: "space-between",
+            alignItems: "center",
+            maxWidth: 1200,
+            margin: "0 auto",
+          }}
+        >
+          <span style={{ fontSize: 12, color: T.mute }}>© 2026 Nexora Labs. All rights reserved.</span>
+          <span style={{ fontSize: 11.5, color: T.mute, maxWidth: 560, lineHeight: 1.5 }}>
+            Tokenized assets involve risk. Nexora is currently in testnet beta — nothing here is financial advice.
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }

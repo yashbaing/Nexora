@@ -13,8 +13,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nexora - Web3 Tokenized Stocks",
-  description: "Trade tokenized equities on Avalanche C-Chain — Nexora, the premier Web3 equities platform.",
+  title: "Nexora — Wall Street, Tokenized",
+  description:
+    "Trade tokenized stocks like AAPL, NVDA and TSLA 24/7 on Avalanche. Settled in USDC in under 2 seconds, fully non-custodial. Join the waitlist for early access.",
+  openGraph: {
+    title: "Nexora — Wall Street, Tokenized",
+    description:
+      "Trade tokenized stocks 24/7 on Avalanche. Settled in USDC in under 2 seconds, fully non-custodial. Join the waitlist for early access.",
+    siteName: "Nexora",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nexora — Wall Street, Tokenized",
+    description:
+      "Trade tokenized stocks 24/7 on Avalanche. Settled in USDC in under 2 seconds, fully non-custodial.",
+  },
 };
 
 import { WalletProvider } from "@/context/WalletContext";

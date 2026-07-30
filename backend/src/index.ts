@@ -76,6 +76,46 @@ app.get("/deployed-addresses.json", (_req: Request, res: Response) => {
 // Setup ethers provider
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
+// ── Waitlist Routes (public — used by the marketing landing page) ─────────────
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+app.post("/api/waitlist", async (req: Request, res: Response) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const source = String(req.body?.source || "landing").slice(0, 50);
+
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ error: "Please provide a valid email address." });
+    }
+
+    const insertRes = await pool.query(
+      `INSERT INTO waitlist (email, source) VALUES ($1, $2)
+       ON CONFLICT (email) DO NOTHING
+       RETURNING id`,
+      [email, source]
+    );
+
+    if (insertRes.rows.length === 0) {
+      return res.status(409).json({ error: "This email is already on the waitlist." });
+    }
+
+    const countRes = await pool.query("SELECT COUNT(*)::int AS count FROM waitlist");
+    return res.status(201).json({ success: true, position: countRes.rows[0].count });
+  } catch (e) {
+    console.error("Waitlist signup error:", e);
+    return res.status(500).json({ error: "Could not join the waitlist right now." });
+  }
+});
+
+app.get("/api/waitlist/count", async (_req: Request, res: Response) => {
+  try {
+    const countRes = await pool.query("SELECT COUNT(*)::int AS count FROM waitlist");
+    res.json({ count: countRes.rows[0].count });
+  } catch (e) {
+    res.status(500).json({ error: "Unavailable" });
+  }
+});
+
 // ── Auth middleware ───────────────────────────────────────────────────────────
 export interface AuthRequest extends Request {
   userId?: string; // wallet address

@@ -128,3 +128,136 @@ input[type="number"] { -moz-appearance: textfield; }
 .text-xs   { font-size: 11px; }
 .text-sm   { font-size: 12px; }
 .gap-compact { gap: 6px; }
+
+/* ════════════════════════════════════════════════════════
+   LANDING PAGE (lp-*) — scoped styles for the marketing site
+   ════════════════════════════════════════════════════════ */
+.lp-root {
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #060607;
+  color: #fafaf9;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.lp-root::selection,
+.lp-root *::selection {
+  background: rgba(232, 65, 66, 0.35);
+  color: #fff;
+}
+
+@keyframes lp-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.lp-marquee { animation: lp-marquee 42s linear infinite; }
+.lp-marquee:hover { animation-play-state: paused; }
+
+@keyframes lp-float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-14px); }
+}
+.lp-float { animation: lp-float 7s ease-in-out infinite; }
+
+@keyframes lp-pulse-glow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.lp-pulse { animation: lp-pulse-glow 3.2s ease-in-out infinite; }
+
+@keyframes lp-orbit {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes lp-grad-move {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.lp-gradient-text {
+  background: linear-gradient(100deg, #ff5f57, #ffb45f, #ff5f57, #e84142);
+  background-size: 250% 250%;
+  animation: lp-grad-move 6s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+@keyframes lp-shimmer {
+  0%   { transform: translateX(-150%) skewX(-18deg); }
+  100% { transform: translateX(250%) skewX(-18deg); }
+}
+
+.lp-cta-btn { position: relative; overflow: hidden; }
+.lp-cta-btn::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: lp-shimmer 3.4s ease-in-out infinite;
+}
+.lp-cta-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 32px rgba(232, 65, 66, 0.45); }
+
+.lp-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+.lp-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 143, 87, 0.35);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.lp-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fafaf9;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.lp-input::placeholder { color: rgba(250, 250, 249, 0.38); }
+.lp-input:focus {
+  border-color: rgba(255, 143, 87, 0.65);
+  box-shadow: 0 0 0 4px rgba(232, 65, 66, 0.18);
+}
+
+.lp-nav-link {
+  color: rgba(250, 250, 249, 0.65);
+  transition: color 0.18s ease;
+}
+.lp-nav-link:hover { color: #fff; }
+
+.lp-grid-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+}
+
+@media (max-width: 900px) {
+  .lp-hero-grid { grid-template-columns: 1fr !important; }
+  .lp-hero-phone { display: none !important; }
+  .lp-two-col { grid-template-columns: 1fr !important; }
+  .lp-feature-grid { grid-template-columns: 1fr 1fr !important; }
+  .lp-stocks-grid { grid-template-columns: 1fr 1fr !important; }
+  .lp-steps-grid { grid-template-columns: 1fr !important; }
+  .lp-stats-grid { grid-template-columns: 1fr 1fr !important; }
+  .lp-footer-grid { grid-template-columns: 1fr 1fr !important; }
+  .lp-nav-links { display: none !important; }
+}
+
+@media (max-width: 560px) {
+  .lp-feature-grid { grid-template-columns: 1fr !important; }
+  .lp-stocks-grid { grid-template-columns: 1fr !important; }
+  .lp-h1 { font-size: 44px !important; }
+  .lp-h2 { font-size: 30px !important; }
+  .lp-waitlist-form { flex-direction: column !important; }
+  .lp-waitlist-form button { width: 100% !important; }
+}
