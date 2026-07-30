@@ -5,13 +5,12 @@ import {
   Globe,
   Layers,
   Shield,
-  Sparkles,
   TrendingUp,
   Wallet,
   Zap,
 } from "lucide-react";
 import JoinWaitlist from "@/components/JoinWaitlist";
-import AppScreens from "@/components/AppScreens";
+import AppShowcase from "@/components/AppShowcase";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -136,58 +135,49 @@ export default function Home() {
       <Nav />
 
       {/* Hero */}
-      <section className="gradient-hero grid-pattern relative pt-16">
-        <div className="mx-auto max-w-6xl px-6 pb-20 pt-24 md:pt-32">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
-            <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-1.5 text-xs font-medium text-stone-600">
-                <Sparkles className="h-3.5 w-3.5 text-orange-600" />
-                Tokenized equities · Live in open beta
-              </div>
-              <h1 className="font-serif text-5xl leading-[1.05] tracking-tight text-stone-950 md:text-6xl lg:text-7xl">
-                The stock market,
-                <br />
-                <span className="text-stone-500">tokenized.</span>
-              </h1>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600">
-                Own xAAPL, xTSLA, xNVDA and more as on-chain tokens. Live Hyperliquid
-                pricing, USDC settlement in seconds, and keys that never leave your
-                hands — Wall Street speed, DeFi freedom.
-              </p>
-              <div className="mt-10 flex flex-wrap gap-4">
-                <Link
-                  href={APP_URL}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-stone-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-stone-950/10 transition hover:bg-stone-800"
-                >
-                  Start Trading
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <JoinWaitlist variant="cta" />
-              </div>
-              <div className="mt-12 flex flex-wrap gap-8 text-sm text-stone-500">
-                <div>
-                  <div className="font-mono text-2xl font-semibold text-stone-950">12+</div>
-                  <div>Tokenized equities</div>
-                </div>
-                <div>
-                  <div className="font-mono text-2xl font-semibold text-stone-950">&lt;2s</div>
-                  <div>Trade settlement</div>
-                </div>
-                <div>
-                  <div className="font-mono text-2xl font-semibold text-stone-950">24/7</div>
-                  <div>Live price feeds</div>
-                </div>
-              </div>
+      <section className="relative bg-stone-950 pt-16 text-white">
+        <div className="dark-hero-glow dark-grid-pattern">
+          <div className="mx-auto max-w-4xl px-6 pb-20 pt-24 text-center md:pt-32">
+            <div className="font-mono text-[11px] uppercase tracking-[0.35em] text-stone-500">
+              [ Tokenized Equities ]
             </div>
+            <h1 className="mt-8 font-serif text-5xl leading-[1.05] tracking-tight md:text-7xl">
+              Trade stocks.
+              <br />
+              <span className="text-orange-400">Settled on-chain.</span>
+            </h1>
+            <p className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-stone-400">
+              Own xAAPL, xTSLA, xNVDA and more as on-chain tokens — live Hyperliquid
+              pricing, USDC settlement in seconds, and keys that never leave your hands.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-6">
+              <JoinWaitlist variant="hero" />
+              <Link
+                href={APP_URL}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-stone-300 transition hover:text-white"
+              >
+                Launch App
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <p className="mt-6 text-xs text-stone-500">
+              Free on testnet · Non-custodial · 12+ tokenized equities
+            </p>
+          </div>
 
-            {/* App screens carousel */}
-            <div id="app" className="relative flex justify-center lg:justify-end lg:pr-10">
-              <AppScreens />
-            </div>
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t border-white/10 px-6 py-5 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">
+            <span>01 Live markets</span>
+            <span>02 One-tap trades</span>
+            <span>03 USDC settlement</span>
+            <span>04 Self-custody</span>
+            <span>05 24/7 feeds</span>
           </div>
         </div>
         <Ticker />
       </section>
+
+      {/* App showcase */}
+      <AppShowcase />
 
       {/* Features */}
       <section id="features" className="py-24 bg-white">
@@ -244,7 +234,7 @@ export default function Home() {
       </section>
 
       {/* Markets */}
-      <section id="markets" className="py-24 bg-stone-50 border-y border-stone-200">
+      <section id="markets" className="py-24 bg-white">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>

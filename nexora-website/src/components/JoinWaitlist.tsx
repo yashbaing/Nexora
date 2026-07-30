@@ -5,7 +5,7 @@ import { ArrowRight, Check, Sparkles, X } from "lucide-react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
-type Variant = "nav" | "cta";
+type Variant = "nav" | "cta" | "hero";
 
 export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant }) {
   const [open, setOpen] = useState(false);
@@ -49,7 +49,9 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
   const buttonClass =
     variant === "nav"
       ? "inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-semibold text-stone-950 transition hover:border-stone-300 hover:bg-stone-50"
-      : "inline-flex items-center gap-2 rounded-2xl border border-stone-200 bg-white px-10 py-4 text-sm font-semibold text-stone-950 transition hover:border-stone-300 hover:bg-stone-50";
+      : variant === "hero"
+        ? "inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-stone-950 shadow-lg shadow-black/20 transition hover:bg-stone-200"
+        : "inline-flex items-center gap-2 rounded-2xl border border-stone-200 bg-white px-10 py-4 text-sm font-semibold text-stone-950 transition hover:border-stone-300 hover:bg-stone-50";
 
   return (
     <>
