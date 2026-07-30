@@ -207,7 +207,16 @@ function JoinedCard({
   onReset: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const link = `${site.url}/?ref=${status.referralCode}`;
+  const [origin, setOrigin] = useState(site.url);
+
+  // Share the domain the visitor is actually on, so referral links work on
+  // preview deployments and before a custom domain is configured.
+  useEffect(() => {
+    const timer = setTimeout(() => setOrigin(window.location.origin), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const link = `${origin}/?ref=${status.referralCode}`;
   const shareText = `I just claimed my spot on the ${site.name} waitlist — fractional tokenized stocks, settled on-chain in USDC. Jump the queue with my link:`;
 
   const copy = async () => {

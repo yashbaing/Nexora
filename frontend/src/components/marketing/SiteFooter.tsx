@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
-import { site } from "@/lib/site";
+import { site, socialLinks } from "@/lib/site";
 import { Logo } from "./Logo";
 
 const columns = [
@@ -88,24 +88,29 @@ export function SiteFooter() {
           <p className="text-[13px] text-smoke">
             © {new Date().getFullYear()} {site.name}. All rights reserved.
           </p>
-          <div className="flex items-center gap-2">
-            {[
-              { label: "X", href: site.social.x },
-              { label: "GitHub", href: site.social.github },
-              { label: "Telegram", href: site.social.telegram },
-              { label: "Discord", href: site.social.discord },
-            ].map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="rounded-full border border-white/10 px-3.5 py-1.5 text-[12.5px] text-ash transition-colors hover:border-white/25 hover:text-chalk"
-              >
-                {s.label}
-              </a>
-            ))}
-          </div>
+          {socialLinks.length > 0 ? (
+            <div className="flex items-center gap-2">
+              {socialLinks.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="rounded-full border border-white/10 px-3.5 py-1.5 text-[12.5px] text-ash transition-colors hover:border-white/25 hover:text-chalk"
+                >
+                  {s.label}
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[13px] text-smoke">
+              Social channels open at launch —{" "}
+              <Link href="/#waitlist" className="text-ash underline-offset-4 hover:text-chalk hover:underline">
+                join the waitlist
+              </Link>{" "}
+              for updates.
+            </p>
+          )}
         </div>
       </div>
     </footer>

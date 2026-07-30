@@ -11,18 +11,24 @@ export const site = {
     "Nexora is a non-custodial Web3 equities platform. Buy fractional, tokenized shares of Apple, NVIDIA, Tesla and more — priced from live market feeds and settled in USDC on Avalanche.",
   shortDescription:
     "Buy fractional tokenized stocks with USDC on Avalanche. Non-custodial, 24/7, no brokerage account.",
+  /** Used for canonical URLs and OG tags. Set NEXT_PUBLIC_SITE_URL in production. */
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://nexora.finance",
   appPath: "/app",
   chain: "Avalanche",
   settlement: "USDC",
   oracle: "Hyperliquid",
-  social: {
-    x: "https://x.com",
-    github: "https://github.com",
-    telegram: "https://t.me",
-    discord: "https://discord.com",
-  },
 } as const;
+
+/**
+ * Social profiles for the footer. Empty entries are skipped rather than linked to
+ * a platform's home page, so the footer never carries a dead link.
+ */
+export const socialLinks: Array<{ label: string; href: string }> = [
+  { label: "X", href: "" },
+  { label: "GitHub", href: "" },
+  { label: "Telegram", href: "" },
+  { label: "Discord", href: "" },
+].filter((link) => link.href.length > 0);
 
 /**
  * Public facts about the current deployment. Mirrors `deployed-addresses.json`
