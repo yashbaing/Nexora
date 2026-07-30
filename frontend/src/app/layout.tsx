@@ -13,8 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nexora - Web3 Tokenized Stocks",
-  description: "Trade tokenized equities on Avalanche C-Chain — Nexora, the premier Web3 equities platform.",
+  title: "Tokenssized — Trade Tokenized Stocks on Web3",
+  description:
+    "Join the waitlist for Tokenssized. Trade Apple, Tesla, NVIDIA and global equities on-chain with real-time data and instant settlement on Avalanche.",
+  keywords: ["tokenized stocks", "web3 trading", "avalanche", "crypto equities", "waitlist"],
+  openGraph: {
+    title: "Tokenssized — Trade Tokenized Stocks on Web3",
+    description: "The next generation of equity trading. Join the waitlist for early access.",
+    type: "website",
+  },
 };
 
 import { WalletProvider } from "@/context/WalletContext";

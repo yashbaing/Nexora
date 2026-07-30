@@ -652,6 +652,60 @@ app.get("/deployed-addresses.json", (req: Request, res: Response) => {
   }
 });
 
+// ── Waitlist Routes ───────────────────────────────────────────────────────────
+app.post("/api/waitlist", async (req: Request, res: Response) => {
+  try {
+    const { email, name, referral } = req.body;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({ error: "Please enter a valid email address" });
+    }
+
+    const trimmedName = typeof name === "string" ? name.trim().slice(0, 120) : null;
+    const trimmedReferral =
+      typeof referral === "string" && referral.trim() ? referral.trim().slice(0, 64) : null;
+
+    const existing = await pool.query("SELECT id FROM waitlist WHERE email = $1", [normalizedEmail]);
+    if (existing.rows.length > 0) {
+      const countRes = await pool.query("SELECT COUNT(*)::int AS count FROM waitlist");
+      return res.json({
+        message: "You're already on the waitlist!",
+        alreadyRegistered: true,
+        count: countRes.rows[0]?.count ?? 0,
+      });
+    }
+
+    await pool.query(
+      "INSERT INTO waitlist (email, name, referral) VALUES ($1, $2, $3)",
+      [normalizedEmail, trimmedName, trimmedReferral]
+    );
+
+    const countRes = await pool.query("SELECT COUNT(*)::int AS count FROM waitlist");
+    res.status(201).json({
+      message: "Welcome to the waitlist! We'll be in touch soon.",
+      alreadyRegistered: false,
+      count: countRes.rows[0]?.count ?? 0,
+    });
+  } catch (err: any) {
+    console.error("❌ Waitlist signup error:", err);
+    res.status(500).json({ error: "Something went wrong. Please try again." });
+  }
+});
+
+app.get("/api/waitlist/count", async (_req: Request, res: Response) => {
+  try {
+    const countRes = await pool.query("SELECT COUNT(*)::int AS count FROM waitlist");
+    res.json({ count: countRes.rows[0]?.count ?? 0 });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "OK", timestamp: new Date() });
 });
