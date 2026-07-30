@@ -10,7 +10,7 @@ import {
   Zap,
 } from "lucide-react";
 import JoinWaitlist from "@/components/JoinWaitlist";
-import AppShowcase from "@/components/AppShowcase";
+import LiveShowcase from "@/components/LiveShowcase";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -89,22 +89,12 @@ function Nav() {
         <Link href="/" className="font-serif text-2xl tracking-tight text-stone-950">
           Nexora.
         </Link>
-        <nav className="hidden items-center gap-8 text-sm text-stone-600 md:flex">
+        <nav className="flex items-center gap-8 text-sm text-stone-600">
           <a href="#features" className="transition hover:text-stone-950">Features</a>
-          <a href="#how-it-works" className="transition hover:text-stone-950">How it works</a>
+          <a href="#how-it-works" className="hidden transition hover:text-stone-950 sm:inline">How it works</a>
           <a href="#app" className="transition hover:text-stone-950">App</a>
-          <a href="#markets" className="transition hover:text-stone-950">Markets</a>
+          <a href="#markets" className="hidden transition hover:text-stone-950 sm:inline">Markets</a>
         </nav>
-        <div className="flex items-center gap-3">
-          <JoinWaitlist variant="nav" />
-          <Link
-            href={APP_URL}
-            className="inline-flex items-center gap-2 rounded-full bg-stone-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800"
-          >
-            Launch App
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
       </div>
     </header>
   );
@@ -177,7 +167,7 @@ export default function Home() {
       </section>
 
       {/* App showcase */}
-      <AppShowcase />
+      <LiveShowcase />
 
       {/* Features */}
       <section id="features" className="py-24 bg-white">
