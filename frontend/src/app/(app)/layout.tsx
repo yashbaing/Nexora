@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import Script from "next/script";
+import "../globals.css";
+
+import { WalletProvider } from "@/context/WalletContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,12 +18,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Nexora - Web3 Tokenized Stocks",
   description: "Trade tokenized equities on Avalanche C-Chain — Nexora, the premier Web3 equities platform.",
+  robots: { index: false, follow: false },
 };
 
-import { WalletProvider } from "@/context/WalletContext";
-import Script from "next/script";
-
-export default function RootLayout({
+export default function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
