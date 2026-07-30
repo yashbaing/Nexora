@@ -638,6 +638,66 @@ app.get("/api/user/profile", verifyToken, async (req: AuthRequest, res: Response
   }
 });
 
+// ── Waitlist Routes (marketing/landing site signups) ──────────────────────────
+// WAITLIST_BASE_COUNT lets the team seed the public-facing counter with an
+// initial head start (e.g. from a pre-launch social campaign) without faking
+// individual rows in the database — set to "0" for a fully organic counter.
+const WAITLIST_BASE_COUNT = parseInt(process.env.WAITLIST_BASE_COUNT || "0", 10);
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+app.post("/api/waitlist", async (req: Request, res: Response) => {
+  try {
+    const emailRaw = req.body?.email;
+    const referrer =
+      typeof req.body?.referrer === "string" ? req.body.referrer.slice(0, 255) : null;
+
+    if (!emailRaw || typeof emailRaw !== "string" || !isValidEmail(emailRaw.trim())) {
+      return res.status(400).json({ error: "Please enter a valid email address." });
+    }
+    const email = emailRaw.trim().toLowerCase();
+
+    const existing = await pool.query("SELECT id FROM waitlist WHERE email = $1", [email]);
+
+    let id: number;
+    let alreadyJoined = false;
+    if (existing.rows[0]) {
+      id = existing.rows[0].id;
+      alreadyJoined = true;
+    } else {
+      const inserted = await pool.query(
+        "INSERT INTO waitlist (email, referrer) VALUES ($1, $2) RETURNING id",
+        [email, referrer]
+      );
+      id = inserted.rows[0].id;
+    }
+
+    const totalRes = await pool.query("SELECT COUNT(*)::int AS count FROM waitlist");
+    const total = totalRes.rows[0].count + WAITLIST_BASE_COUNT;
+    const position = id + WAITLIST_BASE_COUNT;
+
+    res.status(alreadyJoined ? 200 : 201).json({
+      message: alreadyJoined
+        ? "You're already on the waitlist — hang tight!"
+        : "You're on the waitlist!",
+      position,
+      total,
+      alreadyJoined,
+    });
+  } catch (err: any) {
+    console.error("❌ Waitlist join error:", err);
+    res.status(500).json({ error: "Something went wrong. Please try again." });
+  }
+});
+
+app.get("/api/waitlist/stats", async (_req: Request, res: Response) => {
+  try {
+    const totalRes = await pool.query("SELECT COUNT(*)::int AS count FROM waitlist");
+    res.json({ total: totalRes.rows[0].count + WAITLIST_BASE_COUNT });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/deployed-addresses.json", (req: Request, res: Response) => {
   try {
     const filePath = path.join(__dirname, "../../deployed-addresses.json");

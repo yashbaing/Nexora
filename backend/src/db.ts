@@ -67,6 +67,16 @@ export const initDb = async () => {
       );
     `);
 
+    // 5. Create Waitlist Table (marketing site signups, ahead of public launch)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS waitlist (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        referrer VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
     await client.query("COMMIT");
     console.log("✅ PostgreSQL schema initialized successfully.");
   } catch (error) {
