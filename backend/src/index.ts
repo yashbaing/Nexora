@@ -656,6 +656,60 @@ app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "OK", timestamp: new Date() });
 });
 
+// ── Waitlist (marketing site) ────────────────────────────────────────────────
+app.post("/api/waitlist", async (req: Request, res: Response) => {
+  try {
+    const email = String(req.body?.email || "")
+      .trim()
+      .toLowerCase();
+    const source = String(req.body?.source || "landing").slice(0, 64);
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Please enter a valid email address." });
+    }
+
+    const insert = await pool.query(
+      `INSERT INTO waitlist (email, source)
+       VALUES ($1, $2)
+       ON CONFLICT (email) DO NOTHING
+       RETURNING id, email, created_at`,
+      [email, source]
+    );
+
+    const countResult = await pool.query(`SELECT COUNT(*)::int AS count FROM waitlist`);
+    const count = countResult.rows[0]?.count ?? 0;
+
+    if (insert.rowCount === 0) {
+      return res.status(200).json({
+        ok: true,
+        alreadyJoined: true,
+        message: "You're already on the list. We'll be in touch.",
+        count,
+      });
+    }
+
+    return res.status(201).json({
+      ok: true,
+      alreadyJoined: false,
+      message: "You're in. Early access is coming.",
+      count,
+    });
+  } catch (err: any) {
+    console.error("Waitlist error:", err);
+    return res.status(500).json({ error: "Could not join waitlist. Try again shortly." });
+  }
+});
+
+app.get("/api/waitlist/count", async (_req: Request, res: Response) => {
+  try {
+    const countResult = await pool.query(`SELECT COUNT(*)::int AS count FROM waitlist`);
+    res.json({ count: countResult.rows[0]?.count ?? 0 });
+  } catch (err: any) {
+    console.error("Waitlist count error:", err);
+    res.json({ count: 0 });
+  }
+});
+
 // Start service
 const PORT = process.env.PORT || 5001;
 

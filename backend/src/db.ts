@@ -67,6 +67,16 @@ export const initDb = async () => {
       );
     `);
 
+    // 5. Waitlist for marketing site
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS waitlist (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        source VARCHAR(64) DEFAULT 'landing',
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
     await client.query("COMMIT");
     console.log("✅ PostgreSQL schema initialized successfully.");
   } catch (error) {

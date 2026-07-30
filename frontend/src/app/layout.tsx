@@ -1,24 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Syne, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const syne = Syne({
+  variable: "--font-nx-display",
   subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
+  variable: "--font-nx-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Nexora - Web3 Tokenized Stocks",
-  description: "Trade tokenized equities on Avalanche C-Chain — Nexora, the premier Web3 equities platform.",
+  title: "Nexora — Tokenized Stocks on Avalanche",
+  description:
+    "Own real stocks. Trade them as tokens. Avalanche-native equities settled in USDC with Hyperliquid liquidity. Join the waitlist.",
+  openGraph: {
+    title: "Nexora — Tokenized Stocks on Avalanche",
+    description:
+      "Own real stocks. Trade them as tokens. Join the waitlist for early access.",
+    type: "website",
+  },
 };
-
-import { WalletProvider } from "@/context/WalletContext";
-import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -26,16 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-    >
-      <body>
-        <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
-        <WalletProvider>
-          {children}
-        </WalletProvider>
-      </body>
+    <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
