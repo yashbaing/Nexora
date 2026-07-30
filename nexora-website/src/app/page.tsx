@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   BarChart3,
@@ -12,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import JoinWaitlist from "@/components/JoinWaitlist";
+import AppScreens from "@/components/AppScreens";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -62,29 +62,6 @@ const features = [
     title: "Nexora-native",
     description:
       "Built for Nexora Fuji testnet and Nexora L1 — fast finality, low fees, and EVM compatibility.",
-  },
-];
-
-const appScreens = [
-  {
-    src: "/screens/home.png",
-    title: "Home dashboard",
-    description: "Total value, top movers, and on-chain history at a glance.",
-  },
-  {
-    src: "/screens/markets.png",
-    title: "Live markets",
-    description: "Real-time tokenized equity quotes streamed from Hyperliquid.",
-  },
-  {
-    src: "/screens/stock.png",
-    title: "Stock detail",
-    description: "Candlestick charts, token stats, and one-tap buy or sell.",
-  },
-  {
-    src: "/screens/wallet.png",
-    title: "USDC wallet",
-    description: "Settlement balance, test faucet, and contract diagnostics.",
   },
 ];
 
@@ -165,17 +142,17 @@ export default function Home() {
             <div>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-1.5 text-xs font-medium text-stone-600">
                 <Sparkles className="h-3.5 w-3.5 text-orange-600" />
-                Web3 equities on Nexora
+                Tokenized equities · Live in open beta
               </div>
               <h1 className="font-serif text-5xl leading-[1.05] tracking-tight text-stone-950 md:text-6xl lg:text-7xl">
-                Trade stocks.
+                The stock market,
                 <br />
-                <span className="text-stone-500">Settled on-chain.</span>
+                <span className="text-stone-500">tokenized.</span>
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600">
-                Nexora is a premium tokenized equities platform. Real-time Hyperliquid pricing,
-                USDC settlement, and non-custodial trading on Nexora — built for the next era
-                of capital markets.
+                Own xAAPL, xTSLA, xNVDA and more as on-chain tokens. Live Hyperliquid
+                pricing, USDC settlement in seconds, and keys that never leave your
+                hands — Wall Street speed, DeFi freedom.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link
@@ -185,12 +162,7 @@ export default function Home() {
                   Start Trading
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-stone-200 bg-white px-8 py-4 text-sm font-semibold text-stone-950 transition hover:border-stone-300"
-                >
-                  See how it works
-                </a>
+                <JoinWaitlist variant="cta" />
               </div>
               <div className="mt-12 flex flex-wrap gap-8 text-sm text-stone-500">
                 <div>
@@ -208,54 +180,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Phone mockup */}
-            <div className="relative flex justify-center lg:justify-end">
-              <div className="animate-float relative w-[280px] rounded-[2.5rem] border-[6px] border-stone-950 bg-white p-1 shadow-2xl shadow-stone-950/20 md:w-[320px]">
-                <div className="rounded-[2rem] bg-stone-50 p-6">
-                  <div className="text-[10px] font-semibold uppercase tracking-widest text-stone-400">
-                    Portfolio Value
-                  </div>
-                  <div className="mt-2 font-serif text-4xl tracking-tight text-stone-950">
-                    $24,842.50
-                  </div>
-                  <div className="mt-1 font-mono text-xs text-green-600">▲ +3.24% today</div>
-
-                  <div className="mt-6 space-y-3">
-                    {stocks.slice(0, 4).map((s) => (
-                      <div
-                        key={s.symbol}
-                        className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3"
-                      >
-                        <div>
-                          <div className="font-mono text-xs font-semibold text-stone-950">
-                            {s.symbol}
-                          </div>
-                          <div className="text-[10px] text-stone-400">Equity token</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-mono text-xs text-stone-950">{s.price}</div>
-                          <div
-                            className={`font-mono text-[10px] ${
-                              s.change.startsWith("+") ? "text-green-600" : "text-red-600"
-                            }`}
-                          >
-                            {s.change}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 grid grid-cols-2 gap-2">
-                    <div className="rounded-xl bg-stone-950 py-3 text-center text-xs font-semibold text-white">
-                      Buy
-                    </div>
-                    <div className="rounded-xl border border-stone-200 py-3 text-center text-xs font-semibold text-stone-600">
-                      Sell
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* App screens carousel */}
+            <div id="app" className="relative flex justify-center lg:justify-end lg:pr-10">
+              <AppScreens />
             </div>
           </div>
         </div>
@@ -310,39 +237,6 @@ export default function Home() {
                 <div className="font-mono text-sm font-semibold text-stone-400">{s.step}</div>
                 <h3 className="mt-4 text-xl font-semibold text-stone-950">{s.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-stone-600">{s.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* App screens */}
-      <section id="app" className="py-24 bg-white">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
-              Inside the app
-            </h2>
-            <p className="mt-4 text-lg text-stone-600">
-              Real screens from the Nexora trading app — built mobile-first, from live
-              markets to on-chain settlement.
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            {appScreens.map((s) => (
-              <div key={s.title} className="flex flex-col items-center text-center">
-                <div className="w-full max-w-[240px] rounded-[2.25rem] border-[5px] border-stone-950 bg-stone-950 shadow-xl shadow-stone-950/15 transition duration-300 hover:-translate-y-2">
-                  <Image
-                    src={s.src}
-                    alt={s.title}
-                    width={780}
-                    height={1688}
-                    className="w-full rounded-[1.9rem]"
-                  />
-                </div>
-                <h3 className="mt-6 text-base font-semibold text-stone-950">{s.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-stone-600">{s.description}</p>
               </div>
             ))}
           </div>
