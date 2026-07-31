@@ -291,7 +291,7 @@ export default function Home() {
           <p className="mt-3 text-base text-stone-600 sm:mt-4 sm:text-lg">
             Get notified when the app launches on Nexora Fuji testnet. Free test USDC included.
           </p>
-          <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+          <div className="mt-4 flex w-full flex-col items-stretch gap-3 sm:mt-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
             <JoinWaitlist variant="cta" />
             <ComingSoon variant="cta" />
           </div>
