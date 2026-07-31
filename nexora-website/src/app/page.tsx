@@ -159,8 +159,8 @@ export default function Home() {
             <span className="text-[#f0a35e]">Settled on chain.</span>
           </h1>
           <p className="hero-rise-delay-2 mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/65 md:text-lg">
-            Buy and sell tokenized stocks like xAAPL, xTSLA, and xNVDA with live prices,
-            USDC settlement, and a wallet you control.
+            Buy and sell tokenized stocks like xAAPL, xTSLA, and xNVDA with live
+            Hyperliquid prices, USDC settlement, and a wallet you control.
           </p>
           <div className="hero-rise-delay-2 mt-10 flex flex-wrap items-center justify-center gap-5">
             <JoinWaitlist variant="hero" />
@@ -184,7 +184,7 @@ export default function Home() {
               Everything you need to trade
             </h2>
             <p className="mt-4 text-lg text-stone-600">
-              Live markets, simple portfolio tools, and on chain settlement in one app.
+              Live Hyperliquid prices, simple portfolio tools, and on chain settlement in one app.
             </p>
           </div>
 
@@ -238,7 +238,7 @@ export default function Home() {
                 Available markets
               </h2>
               <p className="mt-4 max-w-xl text-lg text-stone-600">
-                Popular stocks as on chain tokens, priced in real time and settled in USDC.
+                Popular stocks as on chain tokens, priced live with Hyperliquid and settled in USDC.
               </p>
             </div>
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-stone-400">
@@ -277,6 +277,22 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Hyperliquid */}
+      <section className="border-y border-stone-200 bg-white py-16 md:py-20">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-stone-400">
+            Price feed
+          </p>
+          <h2 className="mt-4 font-serif text-3xl tracking-tight text-stone-950 md:text-4xl">
+            Powered by Hyperliquid
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-stone-600 md:text-lg">
+            Market prices on Nexora stream from Hyperliquid in real time — so charts,
+            watchlists, and trades stay in sync with live market data.
+          </p>
         </div>
       </section>
 
