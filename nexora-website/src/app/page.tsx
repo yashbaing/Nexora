@@ -8,7 +8,6 @@ import {
   Shield,
   TrendingUp,
   Wallet,
-  Zap,
 } from "lucide-react";
 import JoinWaitlist from "@/components/JoinWaitlist";
 import LiveShowcase from "@/components/LiveShowcase";
