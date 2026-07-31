@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, Loader2, X } from "lucide-react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
@@ -9,6 +10,7 @@ type Variant = "nav" | "cta" | "hero";
 
 export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [joined, setJoined] = useState(false);
@@ -25,6 +27,10 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
@@ -32,6 +38,8 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Jump scroll to top of viewport so modal is always on-screen center
+    window.scrollTo({ top: window.scrollY, behavior: "instant" as ScrollBehavior });
     const t = window.setTimeout(() => inputRef.current?.focus(), 60);
     return () => {
       document.removeEventListener("keydown", onKey);
@@ -72,106 +80,111 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
         ? "inline-flex items-center gap-2 rounded-full bg-[#f0a35e] px-8 py-3.5 text-sm font-semibold text-[#0b0e13] shadow-lg shadow-black/30 transition hover:bg-[#f4b57a]"
         : "inline-flex items-center gap-2 rounded-full bg-[#07090d] px-10 py-4 text-sm font-semibold text-white transition hover:bg-[#1a1f28]";
 
+  const modal =
+    open && mounted
+      ? createPortal(
+          <div className="fixed inset-0 z-[200] grid place-items-center p-5">
+            <button
+              type="button"
+              aria-label="Close waitlist"
+              className="absolute inset-0 bg-black/65 backdrop-blur-md"
+              onClick={close}
+            />
+
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              className="waitlist-glass animate-modal-in relative z-10 w-full max-w-[300px] rounded-[22px] p-5"
+            >
+              <button
+                type="button"
+                onClick={close}
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              {joined ? (
+                <div className="text-center">
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-300">
+                    <Check className="h-5 w-5" strokeWidth={2.5} />
+                  </div>
+                  <h3 id={titleId} className="mt-3 text-lg font-semibold text-white">
+                    You&apos;re on the waitlist
+                  </h3>
+                  <p className="mt-1.5 text-sm text-white/60">
+                    We&apos;ll email you when the app is ready.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="mt-5 w-full rounded-full bg-[#c47a3a] py-3 text-sm font-semibold text-white transition hover:bg-[#d08948]"
+                  >
+                    Done
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <span className="text-[11px] font-medium text-white/75">Waitlist</span>
+                  </div>
+
+                  <h3 id={titleId} className="mt-3 text-xl font-semibold tracking-tight text-white">
+                    Join our waitlist
+                  </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-white/60">
+                    Get notified when the app launches.
+                  </p>
+
+                  <form onSubmit={submit} className="mt-5 flex flex-col gap-2.5">
+                    <label htmlFor="waitlist-email" className="sr-only">
+                      Email address
+                    </label>
+                    <input
+                      ref={inputRef}
+                      id="waitlist-email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/45 focus:border-[#f0a35e]/70 focus:bg-white/15"
+                    />
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full rounded-full bg-[#c47a3a] py-3 text-sm font-semibold text-white transition hover:bg-[#d08948] disabled:opacity-60"
+                    >
+                      {submitting ? (
+                        <Loader2 className="mx-auto h-4 w-4 animate-spin" />
+                      ) : (
+                        "Join Waitlist"
+                      )}
+                    </button>
+                    {message && (
+                      <p className="text-center text-xs text-rose-300" role="alert">
+                        {message}
+                      </p>
+                    )}
+                  </form>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body
+        )
+      : null;
+
   return (
     <>
       <button type="button" onClick={openModal} className={buttonClass}>
         Join Waitlist
       </button>
-
-      {open && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-5">
-          <button
-            type="button"
-            aria-label="Close waitlist"
-            className="absolute inset-0 bg-black/65 backdrop-blur-md"
-            onClick={close}
-          />
-
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className="waitlist-glass animate-modal-in relative w-full max-w-[300px] rounded-[22px] p-5"
-          >
-            <button
-              type="button"
-              onClick={close}
-              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white/10 hover:text-white"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            {joined ? (
-              <div className="text-center">
-                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-300">
-                  <Check className="h-5 w-5" strokeWidth={2.5} />
-                </div>
-                <h3 id={titleId} className="mt-3 text-lg font-semibold text-white">
-                  You&apos;re on the waitlist
-                </h3>
-                <p className="mt-1.5 text-sm text-white/60">
-                  We&apos;ll email you when the app is ready.
-                </p>
-                <button
-                  type="button"
-                  onClick={close}
-                  className="mt-5 w-full rounded-full bg-[#c47a3a] py-3 text-sm font-semibold text-white transition hover:bg-[#d08948]"
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-[11px] font-medium text-white/75">Waitlist</span>
-                </div>
-
-                <h3 id={titleId} className="mt-3 text-xl font-semibold tracking-tight text-white">
-                  Join our waitlist
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-white/60">
-                  Get notified when the app launches.
-                </p>
-
-                <form onSubmit={submit} className="mt-5 flex flex-col gap-2.5">
-                  <label htmlFor="waitlist-email" className="sr-only">
-                    Email address
-                  </label>
-                  <input
-                    ref={inputRef}
-                    id="waitlist-email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/45 focus:border-[#f0a35e]/70 focus:bg-white/15"
-                  />
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full rounded-full bg-[#c47a3a] py-3 text-sm font-semibold text-white transition hover:bg-[#d08948] disabled:opacity-60"
-                  >
-                    {submitting ? (
-                      <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-                    ) : (
-                      "Join Waitlist"
-                    )}
-                  </button>
-                  {message && (
-                    <p className="text-center text-xs text-rose-300" role="alert">
-                      {message}
-                    </p>
-                  )}
-                </form>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {modal}
     </>
   );
 }
