@@ -283,7 +283,7 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="safe-pad-bottom pt-10 pb-20 sm:pt-14 sm:pb-28 md:pt-16 md:pb-32">
+      <section className="pt-14 pb-16 sm:pt-20 sm:pb-20 md:pt-24 md:pb-24">
         <div className="safe-pad-x mx-auto max-w-2xl px-4 text-center sm:px-6">
           <h2 className="font-serif text-3xl tracking-tight text-stone-950 sm:text-4xl md:text-5xl">
             Join the waitlist
@@ -291,7 +291,7 @@ export default function Home() {
           <p className="mt-3 text-base text-stone-600 sm:mt-4 sm:text-lg">
             Get notified when the app launches on Nexora Fuji testnet. Free test USDC included.
           </p>
-          <div className="mt-2 flex w-full flex-col items-stretch gap-3 sm:mt-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+          <div className="mt-6 flex w-full flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
             <JoinWaitlist variant="cta" />
             <ComingSoon variant="cta" />
           </div>
