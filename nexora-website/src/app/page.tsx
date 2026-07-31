@@ -280,43 +280,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Infra strip */}
-      <section className="bg-[#07090d] py-24 text-white md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="grid gap-14 lg:grid-cols-[1.1fr_1fr] lg:items-end">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
-                Technology
-              </p>
-              <h2 className="mt-4 font-serif text-4xl tracking-tight md:text-5xl">
-                Built with reliable tools
-              </h2>
-              <p className="mt-5 max-w-lg text-lg leading-relaxed text-white/55">
-                Nexora uses Hyperliquid for live prices and smart contracts for settlement
-                on Nexora L1.
-              </p>
-            </div>
-            <dl className="grid grid-cols-2 gap-x-8 gap-y-8 border-t border-white/10 pt-8 lg:border-t-0 lg:pt-0">
-              {[
-                { label: "Network", value: "Nexora L1" },
-                { label: "Settlement", value: "USDC" },
-                { label: "Price feed", value: "Hyperliquid" },
-                { label: "Custody", value: "Non-custodial" },
-                { label: "Contracts", value: "Solidity 0.8" },
-                { label: "Client", value: "Next.js" },
-              ].map((item) => (
-                <div key={item.label}>
-                  <dt className="font-mono text-[10px] uppercase tracking-widest text-white/35">
-                    {item.label}
-                  </dt>
-                  <dd className="mt-1 font-serif text-xl text-white">{item.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="py-24 md:py-28">
         <div className="mx-auto max-w-2xl px-6 text-center">
