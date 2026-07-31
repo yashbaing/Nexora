@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Nexora — Trade Tokenized Stocks On-Chain",
     description:
-      "Buy and sell tokenized stocks with live prices and on-chain USDC settlement.",
+      "Buy and sell tokenized stocks with live prices and on chain USDC settlement.",
     type: "website",
   },
 };

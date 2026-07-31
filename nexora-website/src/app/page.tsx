@@ -43,7 +43,7 @@ const features = [
     icon: Layers,
     title: "Tokenized stocks",
     description:
-      "Trade xAAPL, xTSLA, xNVDA and more as on-chain tokens backed by oracle-signed quotes.",
+      "Trade xAAPL, xTSLA, xNVDA and more as on chain tokens backed by oracle-signed quotes.",
   },
   {
     icon: Wallet,
@@ -79,7 +79,7 @@ const steps = [
   {
     step: "03",
     title: "Start trading",
-    description: "Choose a stock, place a buy or sell, and settle on-chain.",
+    description: "Choose a stock, place a buy or sell, and settle on chain.",
   },
 ];
 
@@ -156,7 +156,7 @@ export default function Home() {
           <h1 className="hero-rise-delay mt-5 max-w-3xl font-serif text-3xl leading-[1.1] tracking-tight text-white/95 md:text-5xl">
             Trade stocks.
             <br />
-            <span className="text-[#f0a35e]">Settled on-chain.</span>
+            <span className="text-[#f0a35e]">Settled on chain.</span>
           </h1>
           <p className="hero-rise-delay-2 mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/65 md:text-lg">
             Buy and sell tokenized stocks like xAAPL, xTSLA, and xNVDA with live prices,
@@ -184,7 +184,7 @@ export default function Home() {
               Everything you need to trade
             </h2>
             <p className="mt-4 text-lg text-stone-600">
-              Live markets, simple portfolio tools, and on-chain settlement in one app.
+              Live markets, simple portfolio tools, and on chain settlement in one app.
             </p>
           </div>
 
@@ -238,7 +238,7 @@ export default function Home() {
                 Available markets
               </h2>
               <p className="mt-4 max-w-xl text-lg text-stone-600">
-                Popular stocks as on-chain tokens, priced in real time and settled in USDC.
+                Popular stocks as on chain tokens, priced in real time and settled in USDC.
               </p>
             </div>
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-stone-400">
@@ -338,7 +338,7 @@ export default function Home() {
           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="font-serif text-2xl text-stone-950">Nexora.</div>
-              <p className="mt-2 text-sm text-stone-500">Trade tokenized stocks on-chain.</p>
+              <p className="mt-2 text-sm text-stone-500">Trade tokenized stocks on chain.</p>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-stone-600">
               <a href="#features" className="hover:text-stone-950">
