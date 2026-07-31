@@ -29,57 +29,57 @@ const stocks = [
 const features = [
   {
     icon: TrendingUp,
-    title: "Institutional feeds",
+    title: "Live prices",
     description:
-      "Hyperliquid websocket prices stream into every screen — watchlists, charts, and order tickets stay in sync.",
+      "Stock prices update in real time from Hyperliquid across markets, charts, and your portfolio.",
   },
   {
     icon: Shield,
-    title: "Keys stay yours",
+    title: "Non-custodial",
     description:
-      "Non-custodial wallet login. Nexora never holds your funds — trades settle to your address on-chain.",
+      "Connect your own wallet. Nexora does not hold your funds — trades settle to your address.",
   },
   {
     icon: Layers,
-    title: "Real equity tokens",
+    title: "Tokenized stocks",
     description:
-      "xAAPL, xTSLA, xNVDA and more as ERC-20s with oracle-signed quotes — own exposure, not a synthetic IOU UI.",
+      "Trade xAAPL, xTSLA, xNVDA and more as on-chain tokens backed by oracle-signed quotes.",
   },
   {
     icon: Wallet,
-    title: "USDC rails",
+    title: "USDC settlement",
     description:
-      "Fund once, trade freely. Settlement in USDC with confirmation in seconds on Nexora L1.",
+      "Buy and sell using USDC. Trades confirm on Nexora L1 in seconds.",
   },
   {
     icon: BarChart3,
-    title: "Portfolio clarity",
+    title: "Portfolio tracking",
     description:
-      "Holdings, allocation, P&L, and full transaction history — built for traders, not dashboards for dashboards.",
+      "See your holdings, gains and losses, and full trade history in one place.",
   },
   {
     icon: Zap,
-    title: "Built for speed",
+    title: "Fast and low cost",
     description:
-      "Low-fee finality on Nexora. Place a buy, watch the fill, see the token in your wallet.",
+      "Nexora is built for quick confirmation and low fees on every trade.",
   },
 ];
 
 const steps = [
   {
     step: "01",
-    title: "Connect",
-    description: "Link Core Wallet, a test account, or Google sign-in to open your Nexora profile.",
+    title: "Connect your wallet",
+    description: "Sign in with Core Wallet, a test account, or Google.",
   },
   {
     step: "02",
-    title: "Fund",
-    description: "Mint test USDC from the faucet — or deposit USDC when mainnet opens.",
+    title: "Add USDC",
+    description: "Mint free test USDC from the faucet, or deposit USDC later on mainnet.",
   },
   {
     step: "03",
-    title: "Trade",
-    description: "Pick a market, size the order, settle on-chain. Your tokens. Your keys.",
+    title: "Start trading",
+    description: "Choose a stock, place a buy or sell, and settle on-chain.",
   },
 ];
 
@@ -98,7 +98,7 @@ function Nav() {
             How it works
           </a>
           <a href="#app" className="transition hover:text-white">
-            Product
+            App
           </a>
           <a href="#markets" className="hidden transition hover:text-white sm:inline">
             Markets
@@ -154,13 +154,13 @@ export default function Home() {
             Nexora.
           </p>
           <h1 className="hero-rise-delay mt-5 max-w-3xl font-serif text-3xl leading-[1.1] tracking-tight text-white/95 md:text-5xl">
-            Equities you can own.
+            Trade stocks.
             <br />
-            <span className="italic text-[#f0a35e]">Settled in USDC.</span>
+            <span className="text-[#f0a35e]">Settled on-chain.</span>
           </h1>
           <p className="hero-rise-delay-2 mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/65 md:text-lg">
-            Trade tokenized stocks with live Hyperliquid pricing — self-custody wallets,
-            on-chain fills, and a desk built for speed.
+            Buy and sell tokenized stocks like xAAPL, xTSLA, and xNVDA with live prices,
+            USDC settlement, and a wallet you control.
           </p>
           <div className="hero-rise-delay-2 mt-10 flex flex-wrap items-center justify-center gap-5">
             <JoinWaitlist variant="hero" />
@@ -178,13 +178,13 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="max-w-2xl">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-stone-400">
-              The desk
+              Features
             </p>
             <h2 className="mt-4 font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
-              A trading app that settles like a chain.
+              Everything you need to trade
             </h2>
             <p className="mt-4 text-lg text-stone-600">
-              Familiar market UX. Real on-chain ownership. No custodial shortcuts.
+              Live markets, simple portfolio tools, and on-chain settlement in one app.
             </p>
           </div>
 
@@ -207,10 +207,10 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-stone-400">
-              Flow
+              How it works
             </p>
             <h2 className="mt-4 font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
-              Three steps to your first fill.
+              Get started in three steps
             </h2>
           </div>
 
@@ -235,14 +235,14 @@ export default function Home() {
                 Markets
               </p>
               <h2 className="mt-4 font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
-                Twelve equities. One book.
+                Available markets
               </h2>
               <p className="mt-4 max-w-xl text-lg text-stone-600">
-                US names tokenized as ERC-20s — priced live, settled in USDC.
+                Popular stocks as on-chain tokens, priced in real time and settled in USDC.
               </p>
             </div>
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-stone-400">
-              Full book in the app <ArrowRight className="h-4 w-4" />
+              See all in the app <ArrowRight className="h-4 w-4" />
             </span>
           </div>
 
@@ -286,14 +286,14 @@ export default function Home() {
           <div className="grid gap-14 lg:grid-cols-[1.1fr_1fr] lg:items-end">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
-                Stack
+                Technology
               </p>
               <h2 className="mt-4 font-serif text-4xl tracking-tight md:text-5xl">
-                Liquidity feeds. Oracle quotes. On-chain settlement.
+                Built with reliable tools
               </h2>
               <p className="mt-5 max-w-lg text-lg leading-relaxed text-white/55">
-                Nexora wires Hyperliquid market data into Solidity contracts — so every trade
-                you see in the app is ready to settle on Nexora L1.
+                Nexora uses Hyperliquid for live prices and smart contracts for settlement
+                on Nexora L1.
               </p>
             </div>
             <dl className="grid grid-cols-2 gap-x-8 gap-y-8 border-t border-white/10 pt-8 lg:border-t-0 lg:pt-0">
@@ -321,10 +321,10 @@ export default function Home() {
       <section className="py-24 md:py-28">
         <div className="mx-auto max-w-2xl px-6 text-center">
           <h2 className="font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
-            Get early access to the desk.
+            Join the waitlist
           </h2>
           <p className="mt-4 text-lg text-stone-600">
-            Join the waitlist for launch on Nexora Fuji testnet — free USDC faucet included.
+            Get notified when the app launches on Nexora Fuji testnet. Free test USDC included.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <JoinWaitlist variant="cta" />
@@ -338,7 +338,7 @@ export default function Home() {
           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="font-serif text-2xl text-stone-950">Nexora.</div>
-              <p className="mt-2 text-sm text-stone-500">Tokenized equities. On-chain settlement.</p>
+              <p className="mt-2 text-sm text-stone-500">Trade tokenized stocks on-chain.</p>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-stone-600">
               <a href="#features" className="hover:text-stone-950">
@@ -351,12 +351,12 @@ export default function Home() {
                 Markets
               </a>
               <Link href={APP_URL} className="text-stone-400">
-                App · Soon
+                App coming soon
               </Link>
             </div>
           </div>
           <div className="mt-8 border-t border-stone-200 pt-8 text-xs text-stone-400">
-            Demonstration platform. Not financial advice. Trade at your own risk.
+            Nexora is a demo platform. This is not financial advice. Trade at your own risk.
           </div>
         </div>
       </footer>

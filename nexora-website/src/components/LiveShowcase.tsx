@@ -46,15 +46,19 @@ function useLiveTickers() {
   return tickers;
 }
 
-function MiniSpark({ up }: { up: boolean }) {
+function MiniSpark({ up, seed }: { up: boolean; seed: string }) {
   const pts = useMemo(() => {
-    let y = 12;
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+    let y = 10;
     return Array.from({ length: 12 }, (_, i) => {
-      y += (Math.random() - (up ? 0.42 : 0.58)) * 4;
+      hash = (hash * 1664525 + 1013904223) >>> 0;
+      const r = (hash % 1000) / 1000;
+      y += (r - (up ? 0.42 : 0.58)) * 3.5;
       y = Math.max(2, Math.min(18, y));
-      return `${i * 4},${20 - y}`;
+      return `${i * 4},${(20 - y).toFixed(2)}`;
     }).join(" ");
-  }, [up]);
+  }, [up, seed]);
 
   return (
     <svg width="44" height="20" viewBox="0 0 44 20" className="opacity-90">
@@ -101,7 +105,7 @@ function HomeScreen({ tickers }: { tickers: Ticker[] }) {
             <div className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/40">
               Portfolio
             </div>
-            <div className="mt-1 font-serif text-lg leading-none">Nexora Desk</div>
+            <div className="mt-1 font-serif text-lg leading-none">Nexora</div>
           </div>
           <div className="rounded-full bg-white/10 px-2.5 py-1 font-mono text-[9px] text-emerald-300">
             LIVE
@@ -166,7 +170,7 @@ function MarketsScreen({ tickers }: { tickers: Ticker[] }) {
       <StatusBar />
       <div className="px-4 pt-5">
         <div className="font-serif text-xl leading-none">Markets</div>
-        <div className="mt-1 text-[10px] text-white/40">Hyperliquid · streaming</div>
+        <div className="mt-1 text-[10px] text-white/40">Live market prices</div>
         <div className="mt-3 rounded-xl bg-white/[0.05] px-3 py-2 text-[10px] text-white/35 ring-1 ring-white/[0.06]">
           Search xAAPL, Tesla…
         </div>
@@ -195,7 +199,7 @@ function MarketsScreen({ tickers }: { tickers: Ticker[] }) {
                 <div className="font-mono text-[11px] font-semibold">{t.symbol}</div>
                 <div className="text-[9px] text-white/35">{t.name}</div>
               </div>
-              <MiniSpark up={up} />
+              <MiniSpark up={up} seed={t.symbol} />
               <div className="text-right">
                 <div className="font-mono text-[11px] tabular-nums">{fmt(t.price)}</div>
                 <div
@@ -316,7 +320,7 @@ function WalletScreen({ tickers }: { tickers: Ticker[] }) {
       <StatusBar />
       <div className="px-4 pt-5">
         <div className="font-serif text-xl leading-none">Wallet</div>
-        <div className="mt-1 text-[10px] text-white/40">Self-custody · Nexora L1</div>
+        <div className="mt-1 text-[10px] text-white/40">Your wallet on Nexora L1</div>
 
         <div className="mt-4 rounded-2xl bg-gradient-to-br from-[#1a2230] to-[#0f131a] p-4 ring-1 ring-white/10">
           <div className="text-[9px] uppercase tracking-[0.18em] text-white/40">USDC</div>
@@ -325,7 +329,7 @@ function WalletScreen({ tickers }: { tickers: Ticker[] }) {
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <div className="rounded-xl bg-[#f0a35e] py-2 text-center text-[10px] font-semibold text-[#0b0e13]">
-              Mint faucet
+              Get test USDC
             </div>
             <div className="rounded-xl bg-white/10 py-2 text-center text-[10px] font-semibold">
               Send
@@ -435,26 +439,26 @@ const scenes = [
   {
     key: "home",
     label: "Home",
-    title: "Your book, live",
-    description: "Portfolio value and movers update with every Hyperliquid tick.",
+    title: "Your portfolio",
+    description: "See your balance and top movers update in real time.",
   },
   {
     key: "markets",
     label: "Markets",
-    title: "The full equity board",
-    description: "Scan tokenized names with sparklines and 24h change at a glance.",
+    title: "Browse markets",
+    description: "View tokenized stocks with live prices and daily change.",
   },
   {
     key: "stock",
     label: "Charts",
-    title: "Candles for conviction",
-    description: "Intraday price action with one-tap buy and sell.",
+    title: "Price charts",
+    description: "Check price history and place a buy or sell.",
   },
   {
     key: "wallet",
     label: "Wallet",
-    title: "USDC under your keys",
-    description: "Faucet, send, and holdings — self-custody on Nexora L1.",
+    title: "Your wallet",
+    description: "Check USDC, get test funds, and view your holdings.",
   },
 ];
 
@@ -556,13 +560,13 @@ export default function LiveShowcase() {
 
       <div className="relative mx-auto max-w-2xl px-6 text-center">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
-          Product
+          App
         </p>
         <h2 className="mt-4 font-serif text-3xl tracking-tight md:text-5xl">
-          The desk, in your pocket.
+          See the app
         </h2>
         <p className="mt-3 text-sm text-white/50">
-          Live mock of the Nexora app — prices tick like production.
+          A live preview of the Nexora trading app with updating prices.
         </p>
       </div>
 

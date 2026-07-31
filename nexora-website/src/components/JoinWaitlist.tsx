@@ -85,12 +85,12 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
                   <Sparkles className="h-5 w-5 text-orange-400" />
                 </div>
                 <h3 className="mt-4 font-serif text-2xl tracking-tight text-white">
-                  {joined ? "You're on the list" : "Get early access"}
+                  {joined ? "You're on the waitlist" : "Join the waitlist"}
                 </h3>
                 <p className="mt-1.5 text-sm text-stone-400">
                   {joined
-                    ? "We'll email you the moment Nexora opens up."
-                    : "Be first in line when Nexora opens to the public."}
+                    ? "We'll email you when Nexora launches."
+                    : "Enter your email and we'll notify you when the app is ready."}
                 </p>
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
                     disabled={submitting}
                     className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-stone-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
                   >
-                    {submitting ? "Joining…" : "Join the Waitlist"}
+                    {submitting ? "Submitting…" : "Join waitlist"}
                     {!submitting && <ArrowRight className="h-4 w-4" />}
                   </button>
 
