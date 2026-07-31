@@ -219,24 +219,26 @@ function MarketsScreen({ tickers }: { tickers: Ticker[] }) {
 }
 
 function StockScreen({ ticker }: { ticker: Ticker }) {
-  const [bars, setBars] = useState(() =>
-    Array.from({ length: 26 }, () => ({
-      h: 25 + Math.random() * 65,
-      up: Math.random() > 0.4,
-    }))
+  const [points, setPoints] = useState(() =>
+    Array.from({ length: 36 }, (_, i) => 40 + Math.sin(i / 3.2) * 18 + Math.random() * 10)
   );
 
   useEffect(() => {
     const t = setInterval(() => {
-      setBars((prev) => [
-        ...prev.slice(1),
-        { h: 25 + Math.random() * 65, up: Math.random() > 0.4 },
-      ]);
+      setPoints((prev) => {
+        const last = prev[prev.length - 1];
+        const next = Math.max(12, Math.min(88, last + (Math.random() - 0.48) * 8));
+        return [...prev.slice(1), next];
+      });
     }, TICK_MS / 2);
     return () => clearInterval(t);
   }, []);
 
   const up = ticker.change >= 0;
+  const line = points
+    .map((y, i) => `${(i / (points.length - 1)) * 200},${100 - y}`)
+    .join(" ");
+  const area = `0,100 ${line} 200,100`;
 
   return (
     <div className="flex h-full flex-col bg-[#0b0e13] text-white">
@@ -245,9 +247,7 @@ function StockScreen({ ticker }: { ticker: Ticker }) {
         <div className="text-[9px] uppercase tracking-[0.18em] text-white/35">{ticker.name}</div>
         <div className="mt-0.5 flex items-baseline justify-between">
           <div className="font-mono text-lg font-semibold">{ticker.symbol}</div>
-          <div
-            className={`font-mono text-[11px] ${up ? "text-emerald-400" : "text-rose-400"}`}
-          >
+          <div className={`font-mono text-[11px] ${up ? "text-emerald-400" : "text-rose-400"}`}>
             {fmtSigned(ticker.change)}
           </div>
         </div>
@@ -256,50 +256,26 @@ function StockScreen({ ticker }: { ticker: Ticker }) {
         </div>
       </div>
 
-      <div className="relative mx-3 mt-3 h-[9.5rem] overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent ring-1 ring-white/[0.06]">
-        <div className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)",
-            backgroundSize: "18px 18px",
-          }}
-        />
-        <div className="absolute inset-x-2 bottom-2 top-3 flex items-end gap-[3px]">
-          {bars.map((b, i) => (
-            <div
-              key={i}
-              className="relative flex-1"
-              style={{ height: `${b.h}%` }}
-            >
-              <div
-                className={`absolute inset-x-[35%] top-0 bottom-0 ${
-                  b.up ? "bg-emerald-400/70" : "bg-rose-400/70"
-                }`}
-              />
-              <div
-                className={`absolute inset-x-0 top-[20%] bottom-[20%] rounded-[1px] ${
-                  b.up ? "bg-emerald-400" : "bg-rose-400"
-                }`}
-              />
-            </div>
-          ))}
-        </div>
+      <div className="relative mx-3 mt-3 flex-1 overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent ring-1 ring-white/[0.06]">
+        <svg viewBox="0 0 200 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+          <defs>
+            <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={up ? "#34d399" : "#fb7185"} stopOpacity="0.35" />
+              <stop offset="100%" stopColor={up ? "#34d399" : "#fb7185"} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <polygon points={area} fill="url(#chartFill)" />
+          <polyline
+            points={line}
+            fill="none"
+            stroke={up ? "#34d399" : "#fb7185"}
+            strokeWidth="1.8"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
       </div>
 
-      <div className="mt-3 flex gap-1.5 px-4">
-        {["1H", "1D", "1W", "1M"].map((r, i) => (
-          <div
-            key={r}
-            className={`rounded-full px-2.5 py-1 text-[9px] font-medium ${
-              i === 1 ? "bg-white text-[#0b0e13]" : "text-white/40"
-            }`}
-          >
-            {r}
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-auto grid grid-cols-2 gap-2 px-4 pb-4">
+      <div className="mt-auto grid grid-cols-2 gap-2 px-4 py-4">
         <div className="rounded-xl bg-rose-500/90 py-2.5 text-center text-[11px] font-semibold">
           Sell
         </div>
@@ -361,9 +337,9 @@ function WalletScreen({ tickers }: { tickers: Ticker[] }) {
   );
 }
 
-const PHONE_W = 192;
-const PHONE_H = 392;
-const SIDE_SCALE = 0.78;
+const PHONE_W = 220;
+const PHONE_H = 448;
+const SIDE_SCALE = 0.74;
 
 function PhoneShell({
   children,
@@ -505,56 +481,35 @@ export default function LiveShowcase() {
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(240,163,94,0.12),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_20%_80%,rgba(52,211,153,0.08),transparent_60%)]" />
+        {/* Soft line graphs only — no candlestick bars */}
         <svg
-          className="absolute bottom-[8%] left-1/2 h-36 w-[min(900px,90%)] -translate-x-1/2 opacity-[0.16]"
-          viewBox="0 0 900 140"
+          className="absolute bottom-[10%] left-1/2 h-44 w-[min(960px,94%)] -translate-x-1/2 opacity-[0.18]"
+          viewBox="0 0 960 160"
           fill="none"
         >
-          {(
-            [
-              [30, 80, 45, true],
-              [70, 60, 70, false],
-              [110, 75, 50, true],
-              [150, 40, 85, true],
-              [190, 90, 35, false],
-              [230, 55, 75, true],
-              [270, 70, 55, false],
-              [310, 35, 90, true],
-              [350, 65, 60, true],
-              [390, 95, 30, false],
-              [430, 50, 80, true],
-              [470, 78, 48, false],
-              [510, 42, 88, true],
-              [550, 68, 58, true],
-              [590, 88, 40, false],
-              [630, 52, 78, true],
-              [670, 72, 52, false],
-              [710, 48, 82, true],
-              [750, 85, 38, false],
-              [790, 58, 70, true],
-              [830, 74, 50, true],
-            ] as const
-          ).map(([x, bodyTop, bodyH, up], i) => (
-            <g key={i} className="animate-candle" style={{ animationDelay: `${i * 0.1}s` }}>
-              <line
-                x1={x}
-                x2={x}
-                y1={bodyTop - 16}
-                y2={bodyTop + bodyH + 16}
-                stroke={up ? "#34d399" : "#fb7185"}
-                strokeWidth="1.4"
-              />
-              <rect
-                x={x - 6}
-                y={bodyTop}
-                width="12"
-                height={bodyH}
-                rx="1.5"
-                fill={up ? "#34d399" : "#fb7185"}
-                opacity="0.7"
-              />
-            </g>
-          ))}
+          <defs>
+            <linearGradient id="bgGraphFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0 110 C80 98, 140 70, 220 78 C300 86, 360 40, 440 52 C520 64, 580 28, 660 42 C740 56, 820 90, 900 72 L960 68 L960 160 L0 160 Z"
+            fill="url(#bgGraphFill)"
+          />
+          <path
+            d="M0 110 C80 98, 140 70, 220 78 C300 86, 360 40, 440 52 C520 64, 580 28, 660 42 C740 56, 820 90, 900 72 L960 68"
+            stroke="#34d399"
+            strokeWidth="2"
+            fill="none"
+          />
+          <path
+            d="M0 128 C100 120, 180 100, 280 108 C380 116, 460 84, 560 92 C660 100, 760 118, 860 104 L960 98"
+            stroke="#f0a35e"
+            strokeWidth="1.5"
+            strokeOpacity="0.55"
+            fill="none"
+          />
         </svg>
       </div>
 
