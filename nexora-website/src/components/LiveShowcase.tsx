@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowDownRight, ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
 type Ticker = {
   symbol: string;
@@ -12,15 +12,17 @@ type Ticker = {
 };
 
 const SEED: Omit<Ticker, "price" | "change">[] = [
-  { symbol: "xAAPL", name: "Apple Inc.", base: 228.42 },
-  { symbol: "xTSLA", name: "Tesla Inc.", base: 189.66 },
-  { symbol: "xNVDA", name: "NVIDIA Corp.", base: 292.1 },
-  { symbol: "xMSFT", name: "Microsoft Corp.", base: 185.08 },
-  { symbol: "xGOOGL", name: "Alphabet Inc.", base: 154.12 },
-  { symbol: "xMETA", name: "Meta Platforms", base: 247.86 },
+  { symbol: "xAAPL", name: "Apple", base: 228.42 },
+  { symbol: "xTSLA", name: "Tesla", base: 189.66 },
+  { symbol: "xNVDA", name: "NVIDIA", base: 292.1 },
+  { symbol: "xMSFT", name: "Microsoft", base: 185.08 },
+  { symbol: "xGOOGL", name: "Alphabet", base: 154.12 },
+  { symbol: "xMETA", name: "Meta", base: 247.86 },
 ];
 
-const TICK_MS = 1600;
+const TICK_MS = 1500;
+const fmt = (n: number) => `$${n.toFixed(2)}`;
+const fmtSigned = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
 
 function useLiveTickers() {
   const [tickers, setTickers] = useState<Ticker[]>(() =>
@@ -31,7 +33,7 @@ function useLiveTickers() {
     const t = setInterval(() => {
       setTickers((prev) =>
         prev.map((s) => {
-          const delta = (Math.random() - 0.48) * (s.base * 0.006);
+          const delta = (Math.random() - 0.48) * (s.base * 0.005);
           const price = Math.max(1, s.price + delta);
           const change = ((price - s.base) / s.base) * 100;
           return { ...s, price, change };
@@ -44,29 +46,36 @@ function useLiveTickers() {
   return tickers;
 }
 
-const fmt = (n: number) => `$${n.toFixed(2)}`;
-const fmtSigned = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
+function MiniSpark({ up }: { up: boolean }) {
+  const pts = useMemo(() => {
+    let y = 12;
+    return Array.from({ length: 12 }, (_, i) => {
+      y += (Math.random() - (up ? 0.42 : 0.58)) * 4;
+      y = Math.max(2, Math.min(18, y));
+      return `${i * 4},${20 - y}`;
+    }).join(" ");
+  }, [up]);
 
-function PriceTag({ value, change, size = "sm" }: { value: number; change: number; size?: "sm" | "lg" }) {
-  const up = change >= 0;
   return (
-    <div className="text-right">
-      <div
-        className={
-          size === "lg"
-            ? "font-mono text-xl font-semibold text-stone-950"
-            : "font-mono text-[11px] font-semibold text-stone-950"
-        }
-      >
-        {fmt(value)}
-      </div>
-      <div
-        className={`flex items-center justify-end gap-0.5 font-mono ${size === "lg" ? "text-[11px]" : "text-[9px]"} ${
-          up ? "text-emerald-600" : "text-rose-600"
-        }`}
-      >
-        {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-        {fmtSigned(change)}
+    <svg width="44" height="20" viewBox="0 0 44 20" className="opacity-90">
+      <polyline
+        fill="none"
+        stroke={up ? "#34d399" : "#fb7185"}
+        strokeWidth="1.5"
+        points={pts}
+      />
+    </svg>
+  );
+}
+
+function StatusBar() {
+  return (
+    <div className="flex items-center justify-between px-4 pt-2 text-[9px] font-semibold text-white/50">
+      <span>9:41</span>
+      <div className="flex items-center gap-1">
+        <span className="h-1.5 w-3 rounded-sm bg-white/40" />
+        <span className="h-1.5 w-2 rounded-sm bg-white/40" />
+        <span className="h-2 w-4 rounded-sm bg-white/50" />
       </div>
     </div>
   );
@@ -74,7 +83,7 @@ function PriceTag({ value, change, size = "sm" }: { value: number; change: numbe
 
 function HomeScreen({ tickers }: { tickers: Ticker[] }) {
   const balance = useMemo(
-    () => tickers.slice(0, 3).reduce((sum, t) => sum + t.price * 0.32, 0),
+    () => tickers.slice(0, 3).reduce((sum, t) => sum + t.price * 0.28, 0),
     [tickers]
   );
   const balanceChange = useMemo(
@@ -84,54 +93,68 @@ function HomeScreen({ tickers }: { tickers: Ticker[] }) {
   const up = balanceChange >= 0;
 
   return (
-    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
-      <div className="flex items-center justify-between text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">
-        <span>Active wallet</span>
-        <span className="font-mono normal-case tracking-normal text-stone-500">0x6A63…453f</span>
-      </div>
-
-      <div className="mt-2.5 flex gap-1 overflow-hidden">
-        {tickers.slice(3, 6).map((t) => (
-          <div
-            key={t.symbol}
-            className="flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-1 font-mono text-[8px] whitespace-nowrap ring-1 ring-stone-200/80"
-          >
-            <span className="font-semibold text-stone-700">{t.symbol}</span>
-            <span className={t.change >= 0 ? "text-emerald-600" : "text-rose-600"}>{fmtSigned(t.change)}</span>
+    <div className="flex h-full flex-col bg-[#0b0e13] text-white">
+      <StatusBar />
+      <div className="px-4 pt-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/40">
+              Portfolio
+            </div>
+            <div className="mt-1 font-serif text-lg leading-none">Nexora Desk</div>
           </div>
-        ))}
-      </div>
+          <div className="rounded-full bg-white/10 px-2.5 py-1 font-mono text-[9px] text-emerald-300">
+            LIVE
+          </div>
+        </div>
 
-      <div className="mt-4 text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">Total value</div>
-      <div className="mt-0.5 font-mono text-[1.7rem] font-bold leading-none tabular-nums text-stone-950">
-        {fmt(balance)}
-      </div>
-      <div className={`mt-1.5 flex items-center gap-1 text-[11px] font-medium ${up ? "text-emerald-600" : "text-rose-600"}`}>
-        {up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-        {fmtSigned(balanceChange)} today
-      </div>
+        <div className="mt-5 font-mono text-[2rem] font-semibold leading-none tracking-tight tabular-nums">
+          {fmt(balance)}
+        </div>
+        <div
+          className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+            up ? "bg-emerald-500/15 text-emerald-300" : "bg-rose-500/15 text-rose-300"
+          }`}
+        >
+          {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+          {fmtSigned(balanceChange)} today
+        </div>
 
-      <div className="mt-3.5 grid grid-cols-2 gap-1.5">
-        <div className="rounded-xl bg-stone-950 py-2 text-center text-[10px] font-semibold text-white">+ Deposit</div>
-        <div className="rounded-xl bg-white py-2 text-center text-[10px] font-semibold text-stone-600 ring-1 ring-stone-200">
-          Markets
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-xl bg-[#f0a35e] py-2.5 text-center text-[11px] font-semibold text-[#0b0e13]">
+            Buy
+          </div>
+          <div className="rounded-xl bg-white/10 py-2.5 text-center text-[11px] font-semibold text-white">
+            Deposit
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 text-[11px] font-semibold text-stone-950">Movers</div>
-      <div className="mt-1.5 flex flex-col gap-1">
-        {tickers.slice(0, 3).map((t) => (
-          <div
-            key={t.symbol}
-            className="flex items-center justify-between rounded-xl bg-white px-2.5 py-2 ring-1 ring-stone-200/70"
-          >
-            <div>
-              <div className="font-mono text-[10px] font-semibold text-stone-950">{t.symbol}</div>
-              <div className="text-[8px] text-stone-400">Equity token</div>
+      <div className="mt-5 px-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">
+        Top movers
+      </div>
+      <div className="mt-2 flex flex-1 flex-col gap-1.5 px-3 pb-4">
+        {tickers.slice(0, 4).map((t) => {
+          const tUp = t.change >= 0;
+          return (
+            <div
+              key={t.symbol}
+              className="flex items-center justify-between rounded-2xl bg-white/[0.04] px-3 py-2.5 ring-1 ring-white/[0.06]"
+            >
+              <div className="min-w-0">
+                <div className="font-mono text-[11px] font-semibold">{t.symbol}</div>
+                <div className="truncate text-[9px] text-white/35">{t.name}</div>
+              </div>
+              <MiniSpark up={tUp} seed={t.symbol} />
+              <div className="text-right">
+                <div className="font-mono text-[11px] tabular-nums">{fmt(t.price)}</div>
+                <div className={`font-mono text-[9px] ${tUp ? "text-emerald-400" : "text-rose-400"}`}>
+                  {fmtSigned(t.change)}
+                </div>
+              </div>
             </div>
-            <PriceTag value={t.price} change={t.change} />
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -139,46 +162,72 @@ function HomeScreen({ tickers }: { tickers: Ticker[] }) {
 
 function MarketsScreen({ tickers }: { tickers: Ticker[] }) {
   return (
-    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
-      <div className="font-serif text-lg leading-none">Markets</div>
-      <div className="mt-1 text-[9px] text-stone-400">Live Hyperliquid quotes</div>
-      <div className="mt-2.5 rounded-full bg-white px-3 py-1.5 text-[9px] text-stone-400 ring-1 ring-stone-200">
-        Search by symbol or name
-      </div>
-      <div className="mt-2.5 flex gap-1">
-        {["All", "Tech", "Auto", "Finance"].map((f, i) => (
-          <div
-            key={f}
-            className={`rounded-full px-2 py-1 text-[8px] font-medium ${
-              i === 0 ? "bg-stone-950 text-white" : "bg-white text-stone-500 ring-1 ring-stone-200"
-            }`}
-          >
-            {f}
-          </div>
-        ))}
-      </div>
-      <div className="mt-2 flex flex-col divide-y divide-stone-200/70">
-        {tickers.map((t) => (
-          <div key={t.symbol} className="flex items-center justify-between py-2">
-            <div>
-              <div className="font-mono text-[10px] font-semibold text-stone-950">{t.symbol}</div>
-              <div className="text-[8px] text-stone-400">{t.name}</div>
+    <div className="flex h-full flex-col bg-[#0b0e13] text-white">
+      <StatusBar />
+      <div className="px-4 pt-5">
+        <div className="font-serif text-xl leading-none">Markets</div>
+        <div className="mt-1 text-[10px] text-white/40">Hyperliquid · streaming</div>
+        <div className="mt-3 rounded-xl bg-white/[0.05] px-3 py-2 text-[10px] text-white/35 ring-1 ring-white/[0.06]">
+          Search xAAPL, Tesla…
+        </div>
+        <div className="mt-3 flex gap-1.5">
+          {["All", "Tech", "Auto", "Watch"].map((f, i) => (
+            <div
+              key={f}
+              className={`rounded-full px-2.5 py-1 text-[9px] font-medium ${
+                i === 0 ? "bg-white text-[#0b0e13]" : "bg-white/[0.06] text-white/50"
+              }`}
+            >
+              {f}
             </div>
-            <PriceTag value={t.price} change={t.change} />
-          </div>
-        ))}
+          ))}
+        </div>
+      </div>
+      <div className="mt-3 flex flex-1 flex-col px-2 pb-3">
+        {tickers.map((t) => {
+          const up = t.change >= 0;
+          return (
+            <div
+              key={t.symbol}
+              className="flex items-center justify-between border-b border-white/[0.05] px-2 py-2.5"
+            >
+              <div>
+                <div className="font-mono text-[11px] font-semibold">{t.symbol}</div>
+                <div className="text-[9px] text-white/35">{t.name}</div>
+              </div>
+              <MiniSpark up={up} />
+              <div className="text-right">
+                <div className="font-mono text-[11px] tabular-nums">{fmt(t.price)}</div>
+                <div
+                  className={`mt-0.5 inline-block rounded px-1.5 py-0.5 font-mono text-[9px] ${
+                    up ? "bg-emerald-500/15 text-emerald-300" : "bg-rose-500/15 text-rose-300"
+                  }`}
+                >
+                  {fmtSigned(t.change)}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 function StockScreen({ ticker }: { ticker: Ticker }) {
-  const bars = useMemo(() => Array.from({ length: 24 }, () => 28 + Math.random() * 62), [ticker.symbol]);
-  const [heights, setHeights] = useState(bars);
+  const [bars, setBars] = useState(() =>
+    Array.from({ length: 26 }, () => ({
+      h: 25 + Math.random() * 65,
+      up: Math.random() > 0.4,
+    }))
+  );
 
   useEffect(() => {
     const t = setInterval(() => {
-      setHeights((prev) => [...prev.slice(1), 28 + Math.random() * 62]);
+      setBars((prev) => [
+        ...prev.slice(1),
+        { h: 25 + Math.random() * 65, up: Math.random() > 0.4 },
+      ]);
     }, TICK_MS / 2);
     return () => clearInterval(t);
   }, []);
@@ -186,45 +235,72 @@ function StockScreen({ ticker }: { ticker: Ticker }) {
   const up = ticker.change >= 0;
 
   return (
-    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
-      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">{ticker.name}</div>
-      <div className="font-mono text-base font-semibold">{ticker.symbol}</div>
-      <div className="mt-1.5 flex items-end justify-between">
-        <div className="font-mono text-[1.7rem] font-bold leading-none tabular-nums">{fmt(ticker.price)}</div>
-        <div className={`flex items-center gap-0.5 text-[11px] font-semibold ${up ? "text-emerald-600" : "text-rose-600"}`}>
-          {up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-          {fmtSigned(ticker.change)}
+    <div className="flex h-full flex-col bg-[#0b0e13] text-white">
+      <StatusBar />
+      <div className="px-4 pt-4">
+        <div className="text-[9px] uppercase tracking-[0.18em] text-white/35">{ticker.name}</div>
+        <div className="mt-0.5 flex items-baseline justify-between">
+          <div className="font-mono text-lg font-semibold">{ticker.symbol}</div>
+          <div
+            className={`font-mono text-[11px] ${up ? "text-emerald-400" : "text-rose-400"}`}
+          >
+            {fmtSigned(ticker.change)}
+          </div>
+        </div>
+        <div className="mt-1 font-mono text-[1.75rem] font-semibold leading-none tabular-nums">
+          {fmt(ticker.price)}
         </div>
       </div>
-      <div className="mt-3.5 flex h-24 items-end gap-[2.5px] rounded-xl bg-white px-2 py-2 ring-1 ring-stone-200/70">
-        {heights.map((h, i) => (
-          <div
-            key={i}
-            className={`flex-1 rounded-sm transition-all duration-700 ease-out ${
-              i % 3 === 0 ? "bg-rose-300" : "bg-emerald-400"
-            }`}
-            style={{ height: `${h}%` }}
-          />
-        ))}
+
+      <div className="relative mx-3 mt-3 h-[9.5rem] overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent ring-1 ring-white/[0.06]">
+        <div className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)",
+            backgroundSize: "18px 18px",
+          }}
+        />
+        <div className="absolute inset-x-2 bottom-2 top-3 flex items-end gap-[3px]">
+          {bars.map((b, i) => (
+            <div
+              key={i}
+              className="relative flex-1"
+              style={{ height: `${b.h}%` }}
+            >
+              <div
+                className={`absolute inset-x-[35%] top-0 bottom-0 ${
+                  b.up ? "bg-emerald-400/70" : "bg-rose-400/70"
+                }`}
+              />
+              <div
+                className={`absolute inset-x-0 top-[20%] bottom-[20%] rounded-[1px] ${
+                  b.up ? "bg-emerald-400" : "bg-rose-400"
+                }`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="mt-3 flex gap-1.5">
-        {["1H", "1D", "1W"].map((r, i) => (
+
+      <div className="mt-3 flex gap-1.5 px-4">
+        {["1H", "1D", "1W", "1M"].map((r, i) => (
           <div
             key={r}
-            className={`rounded-full px-2.5 py-1 text-[8px] font-medium ${
-              i === 0 ? "bg-stone-950 text-white" : "text-stone-400"
+            className={`rounded-full px-2.5 py-1 text-[9px] font-medium ${
+              i === 1 ? "bg-white text-[#0b0e13]" : "text-white/40"
             }`}
           >
             {r}
           </div>
         ))}
       </div>
-      <div className="mt-auto grid grid-cols-2 gap-1.5">
-        <div className="rounded-xl bg-white py-2 text-center text-[10px] font-semibold text-rose-500 ring-1 ring-rose-200">
+
+      <div className="mt-auto grid grid-cols-2 gap-2 px-4 pb-4">
+        <div className="rounded-xl bg-rose-500/90 py-2.5 text-center text-[11px] font-semibold">
           Sell
         </div>
-        <div className="rounded-xl bg-emerald-600 py-2 text-center text-[10px] font-semibold text-white">
-          Buy {ticker.symbol}
+        <div className="rounded-xl bg-emerald-500 py-2.5 text-center text-[11px] font-semibold text-[#0b0e13]">
+          Buy
         </div>
       </div>
     </div>
@@ -232,41 +308,48 @@ function StockScreen({ ticker }: { ticker: Ticker }) {
 }
 
 function WalletScreen({ tickers }: { tickers: Ticker[] }) {
-  const usdc = useMemo(() => 240 + tickers[0].change * 4, [tickers]);
+  const usdc = useMemo(() => 248 + tickers[0].change * 3.2, [tickers]);
+  const holdings = tickers.slice(0, 3);
+
   return (
-    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
-      <div className="font-serif text-lg leading-none">Wallet</div>
-      <div className="mt-1 text-[9px] text-stone-400">Fund account &amp; check USDC</div>
+    <div className="flex h-full flex-col bg-[#0b0e13] text-white">
+      <StatusBar />
+      <div className="px-4 pt-5">
+        <div className="font-serif text-xl leading-none">Wallet</div>
+        <div className="mt-1 text-[10px] text-white/40">Self-custody · Nexora L1</div>
 
-      <div className="mt-3.5 rounded-2xl bg-stone-950 p-3.5 text-white">
-        <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">USDC balance</div>
-        <div className="mt-1 font-mono text-2xl font-bold tabular-nums">{fmt(usdc)}</div>
-        <div className="mt-1 text-[8px] text-stone-500">Nexora L1 settlement</div>
+        <div className="mt-4 rounded-2xl bg-gradient-to-br from-[#1a2230] to-[#0f131a] p-4 ring-1 ring-white/10">
+          <div className="text-[9px] uppercase tracking-[0.18em] text-white/40">USDC</div>
+          <div className="mt-1 font-mono text-[1.7rem] font-semibold leading-none tabular-nums">
+            {fmt(usdc)}
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-[#f0a35e] py-2 text-center text-[10px] font-semibold text-[#0b0e13]">
+              Mint faucet
+            </div>
+            <div className="rounded-xl bg-white/10 py-2 text-center text-[10px] font-semibold">
+              Send
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-3 rounded-2xl bg-white p-3.5 ring-1 ring-dashed ring-stone-300">
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold">
-          <Sparkles className="h-3.5 w-3.5 text-amber-500" /> USDC Faucet
-        </div>
-        <p className="mt-1 text-[9px] leading-relaxed text-stone-500">
-          Mint mock USDC to test tokenized stock purchases.
-        </p>
-        <div className="mt-2.5 rounded-xl bg-stone-950 py-2 text-center text-[10px] font-semibold text-white">
-          Mint Mock USDC
-        </div>
+      <div className="mt-4 px-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">
+        Holdings
       </div>
-
-      <div className="mt-3 text-[11px] font-semibold">Contracts</div>
-      <div className="mt-1.5 flex flex-col gap-1">
-        {["Platform", "USDC", "Oracle signer"].map((label, i) => (
+      <div className="mt-2 flex flex-col gap-1.5 px-3 pb-4">
+        {holdings.map((t, i) => (
           <div
-            key={label}
-            className="flex items-center justify-between rounded-xl bg-white px-2.5 py-1.5 text-[9px] ring-1 ring-stone-200/70"
+            key={t.symbol}
+            className="flex items-center justify-between rounded-2xl bg-white/[0.04] px-3 py-2.5 ring-1 ring-white/[0.06]"
           >
-            <span className="text-stone-500">{label}</span>
-            <span className="font-mono text-stone-400">
-              0x{(i + 1).toString().padStart(2, "0")}…f{7 - i}b1
-            </span>
+            <div>
+              <div className="font-mono text-[11px] font-semibold">{t.symbol}</div>
+              <div className="text-[9px] text-white/35">{(0.4 + i * 0.15).toFixed(2)} tokens</div>
+            </div>
+            <div className="text-right font-mono text-[11px] tabular-nums">
+              {fmt(t.price * (0.4 + i * 0.15))}
+            </div>
           </div>
         ))}
       </div>
@@ -274,10 +357,9 @@ function WalletScreen({ tickers }: { tickers: Ticker[] }) {
   );
 }
 
-/** Comfortable phone size — smaller than a real device mock so the stage breathes. */
-const PHONE_W = 200;
-const PHONE_H = 408;
-const SIDE_SCALE = 0.72;
+const PHONE_W = 192;
+const PHONE_H = 392;
+const SIDE_SCALE = 0.78;
 
 function PhoneShell({
   children,
@@ -290,16 +372,16 @@ function PhoneShell({
   onClick?: () => void;
   ariaLabel?: string;
 }) {
-  const className = `phone-shell relative shrink-0 overflow-hidden rounded-[1.75rem] border-[5px] border-[#14110f] bg-[#14110f] transition-all duration-500 ease-out ${
+  const className = `phone-shell relative shrink-0 overflow-hidden rounded-[1.7rem] border-[5px] border-[#1a1f28] bg-[#1a1f28] transition-all duration-500 ease-out ${
     dimmed
-      ? "cursor-pointer opacity-[0.5] shadow-lg shadow-black/30 hover:opacity-85"
-      : "z-10 opacity-100 shadow-2xl shadow-black/45"
+      ? "cursor-pointer opacity-50 shadow-lg shadow-black/40 hover:opacity-85"
+      : "z-10 opacity-100 shadow-2xl shadow-black/50"
   }`;
   const style = { width: PHONE_W, height: PHONE_H };
   const inner = (
     <>
-      <div className="pointer-events-none absolute top-2 left-1/2 z-20 h-3.5 w-14 -translate-x-1/2 rounded-full bg-black/90" />
-      <div className="h-full w-full overflow-hidden rounded-[1.35rem] bg-white">{children}</div>
+      <div className="pointer-events-none absolute top-2 left-1/2 z-20 h-3.5 w-14 -translate-x-1/2 rounded-full bg-black" />
+      <div className="h-full w-full overflow-hidden rounded-[1.3rem] bg-[#0b0e13]">{children}</div>
     </>
   );
 
@@ -332,10 +414,7 @@ function SidePhone({
   const boxW = PHONE_W * SIDE_SCALE;
   const boxH = PHONE_H * SIDE_SCALE;
   return (
-    <div
-      className="relative hidden shrink-0 md:block"
-      style={{ width: boxW, height: boxH }}
-    >
+    <div className="relative hidden shrink-0 md:block" style={{ width: boxW, height: boxH }}>
       <div
         className="absolute left-1/2 top-1/2 origin-center transition-transform duration-500"
         style={{
@@ -353,85 +432,33 @@ function SidePhone({
 }
 
 const scenes = [
-  { key: "home", label: "Home", title: "Your wealth, live", description: "Balance and top movers update in real time." },
-  { key: "markets", label: "Markets", title: "Markets that never sleep", description: "Live tokenized equity quotes, ticking every second." },
-  { key: "stock", label: "Charts", title: "Charts built for conviction", description: "Live candles and price action for every stock." },
-  { key: "wallet", label: "Wallet", title: "USDC in your control", description: "Self-custody balance with a built-in testnet faucet." },
+  {
+    key: "home",
+    label: "Home",
+    title: "Your book, live",
+    description: "Portfolio value and movers update with every Hyperliquid tick.",
+  },
+  {
+    key: "markets",
+    label: "Markets",
+    title: "The full equity board",
+    description: "Scan tokenized names with sparklines and 24h change at a glance.",
+  },
+  {
+    key: "stock",
+    label: "Charts",
+    title: "Candles for conviction",
+    description: "Intraday price action with one-tap buy and sell.",
+  },
+  {
+    key: "wallet",
+    label: "Wallet",
+    title: "USDC under your keys",
+    description: "Faucet, send, and holdings — self-custody on Nexora L1.",
+  },
 ];
 
 const AUTO_MS = 5000;
-
-function TradingBackdrop() {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="trading-floor absolute inset-0" />
-      <div className="trading-grid absolute inset-0 opacity-60" />
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0c0a09] to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0c0a09] to-transparent" />
-
-      {/* Soft candle silhouettes */}
-      <svg
-        className="absolute bottom-[12%] left-1/2 h-40 w-[min(920px,92%)] -translate-x-1/2 opacity-[0.14]"
-        viewBox="0 0 920 160"
-        fill="none"
-      >
-        {(
-          [
-            [40, 90, 50, true],
-            [90, 70, 70, false],
-            [140, 85, 45, true],
-            [190, 55, 85, true],
-            [240, 95, 40, false],
-            [290, 60, 78, true],
-            [340, 80, 55, false],
-            [390, 48, 90, true],
-            [440, 72, 60, true],
-            [490, 100, 35, false],
-            [540, 58, 82, true],
-            [590, 88, 48, false],
-            [640, 50, 88, true],
-            [690, 75, 58, true],
-            [740, 95, 42, false],
-            [790, 62, 76, true],
-            [840, 80, 52, false],
-          ] as const
-        ).map(([x, bodyTop, bodyH, up], i) => (
-          <g key={i} className="animate-candle" style={{ animationDelay: `${i * 0.12}s` }}>
-            <line
-              x1={x}
-              x2={x}
-              y1={bodyTop - 18}
-              y2={bodyTop + bodyH + 18}
-              stroke={up ? "#34d399" : "#fb7185"}
-              strokeWidth="1.5"
-              opacity="0.7"
-            />
-            <rect
-              x={x - 7}
-              y={bodyTop}
-              width="14"
-              height={bodyH}
-              rx="2"
-              fill={up ? "#34d399" : "#fb7185"}
-              opacity="0.55"
-            />
-          </g>
-        ))}
-      </svg>
-
-      {/* Floating price chips */}
-      <div className="animate-float-slow absolute top-[18%] left-[8%] hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] text-emerald-300/80 backdrop-blur-sm lg:block">
-        xNVDA +2.14%
-      </div>
-      <div className="animate-float-delayed absolute top-[28%] right-[9%] hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] text-rose-300/80 backdrop-blur-sm lg:block">
-        xTSLA −0.68%
-      </div>
-      <div className="animate-float-slow absolute bottom-[22%] left-[14%] hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] text-stone-300/70 backdrop-blur-sm md:block">
-        USDC settle · 1.2s
-      </div>
-    </div>
-  );
-}
 
 export default function LiveShowcase() {
   const tickers = useLiveTickers();
@@ -458,7 +485,7 @@ export default function LiveShowcase() {
       case "markets":
         return <MarketsScreen tickers={tickers} />;
       case "stock":
-        return <StockScreen ticker={tickers[1]} />;
+        return <StockScreen ticker={tickers[2]} />;
       default:
         return <WalletScreen tickers={tickers} />;
     }
@@ -467,25 +494,78 @@ export default function LiveShowcase() {
   return (
     <section
       id="app"
-      className="relative overflow-hidden bg-[#0c0a09] py-16 text-white md:py-20"
+      className="relative overflow-hidden bg-[#07090d] py-16 text-white md:py-24"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <TradingBackdrop />
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(240,163,94,0.12),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_20%_80%,rgba(52,211,153,0.08),transparent_60%)]" />
+        <svg
+          className="absolute bottom-[8%] left-1/2 h-36 w-[min(900px,90%)] -translate-x-1/2 opacity-[0.16]"
+          viewBox="0 0 900 140"
+          fill="none"
+        >
+          {(
+            [
+              [30, 80, 45, true],
+              [70, 60, 70, false],
+              [110, 75, 50, true],
+              [150, 40, 85, true],
+              [190, 90, 35, false],
+              [230, 55, 75, true],
+              [270, 70, 55, false],
+              [310, 35, 90, true],
+              [350, 65, 60, true],
+              [390, 95, 30, false],
+              [430, 50, 80, true],
+              [470, 78, 48, false],
+              [510, 42, 88, true],
+              [550, 68, 58, true],
+              [590, 88, 40, false],
+              [630, 52, 78, true],
+              [670, 72, 52, false],
+              [710, 48, 82, true],
+              [750, 85, 38, false],
+              [790, 58, 70, true],
+              [830, 74, 50, true],
+            ] as const
+          ).map(([x, bodyTop, bodyH, up], i) => (
+            <g key={i} className="animate-candle" style={{ animationDelay: `${i * 0.1}s` }}>
+              <line
+                x1={x}
+                x2={x}
+                y1={bodyTop - 16}
+                y2={bodyTop + bodyH + 16}
+                stroke={up ? "#34d399" : "#fb7185"}
+                strokeWidth="1.4"
+              />
+              <rect
+                x={x - 6}
+                y={bodyTop}
+                width="12"
+                height={bodyH}
+                rx="1.5"
+                fill={up ? "#34d399" : "#fb7185"}
+                opacity="0.7"
+              />
+            </g>
+          ))}
+        </svg>
+      </div>
 
       <div className="relative mx-auto max-w-2xl px-6 text-center">
-        <div className="font-mono text-[11px] uppercase tracking-[0.35em] text-stone-500">
-          [ A day with Nexora ]
-        </div>
-        <h2 className="mt-5 font-serif text-3xl tracking-tight text-white md:mt-6 md:text-5xl">
-          Every market. One on-chain loop.
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
+          Product
+        </p>
+        <h2 className="mt-4 font-serif text-3xl tracking-tight md:text-5xl">
+          The desk, in your pocket.
         </h2>
-        <p className="mt-3 text-sm text-stone-400">
-          Live simulation — prices tick every second, just like the real app.
+        <p className="mt-3 text-sm text-white/50">
+          Live mock of the Nexora app — prices tick like production.
         </p>
       </div>
 
-      {/* Flex stage — reserved side slots so phones never overlap or collapse */}
       <div className="relative mx-auto mt-10 flex max-w-5xl items-center justify-center gap-6 px-4 md:mt-12 lg:gap-10">
         <SidePhone
           rotate={-7}
@@ -514,7 +594,7 @@ export default function LiveShowcase() {
 
       <div className="relative mx-auto mt-8 h-[3.25rem] max-w-md px-6 text-center md:mt-9">
         <div className="text-base font-semibold text-white">{scenes[active].title}</div>
-        <p className="mt-1 text-sm leading-relaxed text-stone-400">{scenes[active].description}</p>
+        <p className="mt-1 text-sm leading-relaxed text-white/45">{scenes[active].description}</p>
       </div>
 
       <div className="relative mt-3 flex flex-wrap items-center justify-center gap-2 px-6 md:mt-4">
@@ -528,8 +608,8 @@ export default function LiveShowcase() {
             }}
             className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
               i === active
-                ? "bg-white text-stone-950 shadow-md shadow-black/30"
-                : "text-stone-500 hover:text-stone-200"
+                ? "bg-white text-[#07090d]"
+                : "text-white/40 hover:text-white/80"
             }`}
           >
             {s.label}

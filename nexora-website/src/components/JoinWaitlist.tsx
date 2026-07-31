@@ -47,15 +47,15 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
 
   const buttonClass =
     variant === "nav"
-      ? "inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-semibold text-stone-950 transition hover:border-stone-300 hover:bg-stone-50"
+      ? "inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
       : variant === "hero"
-        ? "inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-stone-950 shadow-lg shadow-black/20 transition hover:bg-stone-200"
-        : "inline-flex items-center gap-2 rounded-2xl bg-stone-950 px-10 py-4 text-sm font-semibold text-white shadow-lg shadow-stone-950/10 transition hover:bg-stone-800";
+        ? "inline-flex items-center gap-2 rounded-full bg-[#f0a35e] px-8 py-3.5 text-sm font-semibold text-[#0b0e13] shadow-lg shadow-black/30 transition hover:bg-[#f4b57a]"
+        : "inline-flex items-center gap-2 rounded-full bg-[#07090d] px-10 py-4 text-sm font-semibold text-white transition hover:bg-[#1a1f28]";
 
   return (
     <>
       <button type="button" onClick={openModal} className={buttonClass}>
-        <Sparkles className="h-4 w-4 text-orange-500" />
+        <Sparkles className={`h-4 w-4 ${variant === "hero" ? "text-[#0b0e13]" : "text-[#f0a35e]"}`} />
         Join Waitlist
       </button>
 

@@ -20,13 +20,13 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Nexora — Tokenized Equities On-Chain",
+  title: "Nexora — Equities. Settled in USDC.",
   description:
-    "Trade tokenized stocks settled in USDC on Nexora. Real-time pricing from Hyperliquid, non-custodial wallet login, and on-chain settlement.",
+    "Trade tokenized stocks with live Hyperliquid pricing. Self-custody wallets, on-chain fills, USDC settlement on Nexora.",
   openGraph: {
-    title: "Nexora — Tokenized Equities On-Chain",
+    title: "Nexora — Equities. Settled in USDC.",
     description:
-      "A premium Web3 equities platform with institutional liquidity and USDC settlement.",
+      "The on-chain equities desk — live markets, non-custodial wallets, USDC settlement.",
     type: "website",
   },
 };
