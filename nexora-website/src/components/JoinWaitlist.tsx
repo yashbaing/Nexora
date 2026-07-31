@@ -91,7 +91,7 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="waitlist-glass animate-modal-in relative w-full max-w-[360px] rounded-[24px] p-6 sm:p-7"
+            className="waitlist-glass animate-modal-in relative w-full max-w-[300px] rounded-[22px] p-5"
           >
             <button
               type="button"
@@ -104,19 +104,19 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
 
             {joined ? (
               <div className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-300">
-                  <Check className="h-6 w-6" strokeWidth={2.5} />
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-300">
+                  <Check className="h-5 w-5" strokeWidth={2.5} />
                 </div>
-                <h3 id={titleId} className="mt-4 text-xl font-semibold text-white">
+                <h3 id={titleId} className="mt-3 text-lg font-semibold text-white">
                   You&apos;re on the waitlist
                 </h3>
-                <p className="mt-2 text-sm text-white/60">
+                <p className="mt-1.5 text-sm text-white/60">
                   We&apos;ll email you when the app is ready.
                 </p>
                 <button
                   type="button"
                   onClick={close}
-                  className="mt-6 w-full rounded-full bg-[#c47a3a] py-3 text-sm font-semibold text-white transition hover:bg-[#d08948]"
+                  className="mt-5 w-full rounded-full bg-[#c47a3a] py-3 text-sm font-semibold text-white transition hover:bg-[#d08948]"
                 >
                   Done
                 </button>
@@ -128,14 +128,14 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
                   <span className="text-[11px] font-medium text-white/75">Waitlist</span>
                 </div>
 
-                <h3 id={titleId} className="mt-4 text-2xl font-semibold tracking-tight text-white">
+                <h3 id={titleId} className="mt-3 text-xl font-semibold tracking-tight text-white">
                   Join our waitlist
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/60">
+                <p className="mt-1.5 text-sm leading-relaxed text-white/60">
                   Get notified when the app launches.
                 </p>
 
-                <form onSubmit={submit} className="mt-6 flex flex-col gap-3">
+                <form onSubmit={submit} className="mt-5 flex flex-col gap-2.5">
                   <label htmlFor="waitlist-email" className="sr-only">
                     Email address
                   </label>
@@ -148,12 +148,12 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/45 focus:border-[#f0a35e]/70 focus:bg-white/15"
+                    className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/45 focus:border-[#f0a35e]/70 focus:bg-white/15"
                   />
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full rounded-full bg-[#c47a3a] py-3.5 text-sm font-semibold text-white transition hover:bg-[#d08948] disabled:opacity-60"
+                    className="w-full rounded-full bg-[#c47a3a] py-3 text-sm font-semibold text-white transition hover:bg-[#d08948] disabled:opacity-60"
                   >
                     {submitting ? (
                       <Loader2 className="mx-auto h-4 w-4 animate-spin" />
