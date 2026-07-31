@@ -35,6 +35,12 @@ const features = [
       "Stock prices update in real time across markets, charts, and your portfolio.",
   },
   {
+    icon: Activity,
+    title: "Hyperliquid feeds",
+    description:
+      "Market data streams from Hyperliquid so quotes and charts stay in sync with live prices.",
+  },
+  {
     icon: Shield,
     title: "Non-custodial",
     description:
@@ -57,12 +63,6 @@ const features = [
     title: "Portfolio tracking",
     description:
       "See your holdings, gains and losses, and full trade history in one place.",
-  },
-  {
-    icon: Zap,
-    title: "Fast and low cost",
-    description:
-      "Nexora is built for quick confirmation and low fees on every trade.",
   },
 ];
 
