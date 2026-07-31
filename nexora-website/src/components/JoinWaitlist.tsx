@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, Check, X } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { ArrowRight, Check, Loader2, Mail, X } from "lucide-react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
@@ -13,6 +13,10 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
   const [submitting, setSubmitting] = useState(false);
   const [joined, setJoined] = useState(false);
   const [message, setMessage] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const titleId = useId();
+
+  const close = () => setOpen(false);
 
   const openModal = () => {
     setJoined(false);
@@ -20,26 +24,42 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
     setOpen(true);
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const t = window.setTimeout(() => inputRef.current?.focus(), 50);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+      window.clearTimeout(t);
+    };
+  }, [open]);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email.trim() || submitting) return;
     setSubmitting(true);
     setMessage("");
     try {
       const res = await fetch(`${BACKEND_URL}/api/waitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setMessage(data?.error || "Something went wrong.");
+        setMessage(data?.error || "Please try again.");
       } else {
         setMessage(data?.message || "You're on the waitlist!");
         setJoined(true);
       }
     } catch {
-      setMessage("Something went wrong.");
+      setMessage("Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -60,78 +80,110 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={close}
         >
+          <div className="absolute inset-0 bg-[#07090d]/55 backdrop-blur-sm" />
+
           <div
             role="dialog"
             aria-modal="true"
-            aria-labelledby="waitlist-title"
-            className="animate-modal-in relative w-full max-w-[260px] rounded-xl bg-white p-4 shadow-2xl shadow-black/25"
+            aria-labelledby={titleId}
+            className="animate-modal-in relative w-full max-w-[320px] overflow-hidden rounded-2xl bg-white shadow-[0_24px_64px_-16px_rgba(0,0,0,0.45)] ring-1 ring-black/5"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Thin brand accent */}
+            <div className="h-1 w-full bg-gradient-to-r from-[#f0a35e] via-[#f0a35e] to-emerald-400" />
+
             <button
               type="button"
-              onClick={() => setOpen(false)}
-              className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-md text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+              onClick={close}
+              className="absolute right-3 top-4 flex h-7 w-7 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-800"
               aria-label="Close"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
 
-            {joined ? (
-              <div className="flex flex-col items-center py-1 text-center">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                  <Check className="h-4 w-4" strokeWidth={2.5} />
-                </div>
-                <p id="waitlist-title" className="mt-2.5 text-sm font-semibold text-stone-950">
-                  You&apos;re in
-                </p>
-                <p className="mt-0.5 text-[11px] text-stone-500">
-                  We&apos;ll email you at launch.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="mt-3 w-full rounded-lg bg-stone-950 py-2 text-xs font-semibold text-white transition hover:bg-stone-800"
-                >
-                  Close
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={submit} className="flex flex-col gap-2.5">
-                <div className="pr-5">
-                  <h3 id="waitlist-title" className="text-sm font-semibold text-stone-950">
-                    Join waitlist
+            <div className="px-5 pb-5 pt-4">
+              {joined ? (
+                <div className="text-center">
+                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/60">
+                    <Check className="h-5 w-5" strokeWidth={2.5} />
+                  </div>
+                  <h3 id={titleId} className="mt-3 font-serif text-xl text-stone-950">
+                    You&apos;re on the list
                   </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-stone-500">
+                    We&apos;ll email you when Nexora launches.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="mt-5 w-full rounded-xl bg-stone-950 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800"
+                  >
+                    Done
+                  </button>
                 </div>
+              ) : (
+                <>
+                  <div className="pr-6">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-stone-400">
+                      Nexora
+                    </p>
+                    <h3 id={titleId} className="mt-1 font-serif text-xl text-stone-950">
+                      Join the waitlist
+                    </h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-stone-500">
+                      Get notified when the app is ready.
+                    </p>
+                  </div>
 
-                <input
-                  id="waitlist-email"
-                  type="email"
-                  required
-                  autoFocus
-                  placeholder="you@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  aria-label="Email"
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-stone-950 focus:bg-white"
-                />
+                  <form onSubmit={submit} className="mt-4 space-y-3">
+                    <label htmlFor="waitlist-email" className="sr-only">
+                      Email address
+                    </label>
+                    <div className="relative">
+                      <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                      <input
+                        ref={inputRef}
+                        id="waitlist-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        placeholder="you@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-3.5 text-sm text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-[#f0a35e] focus:bg-white focus:ring-4 focus:ring-[#f0a35e]/15"
+                      />
+                    </div>
 
-                {message && (
-                  <p className="-mt-1 text-[11px] text-red-600">{message}</p>
-                )}
+                    {message && (
+                      <p className="text-xs text-rose-600" role="alert">
+                        {message}
+                      </p>
+                    )}
 
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-stone-950 py-2 text-xs font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
-                >
-                  {submitting ? "…" : "Join"}
-                  {!submitting && <ArrowRight className="h-3 w-3" />}
-                </button>
-              </form>
-            )}
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#07090d] py-2.5 text-sm font-semibold text-white transition hover:bg-[#1a1f28] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Joining…
+                        </>
+                      ) : (
+                        <>
+                          Join waitlist
+                          <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
