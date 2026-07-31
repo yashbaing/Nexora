@@ -21,6 +21,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.font-serif {
+  font-family: var(--font-instrument-serif), "Times New Roman", serif;
+}
+
 @keyframes modal-in {
   0% { opacity: 0; transform: scale(0.94) translateY(8px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
@@ -81,5 +85,54 @@ body {
 .dark-hero-glow {
   background-image:
     radial-gradient(ellipse 70% 55% at 50% -10%, rgba(234, 88, 12, 0.18), transparent),
-    radial-gradient(ellipse 45% 40% at 88% 15%, rgba(22, 163, 74, 0.07), transparent);
+    radial-gradient(ellipse 45% 40% at 88% 15%, rgba(22, 163, 74, 0.07), transparent),
+    radial-gradient(ellipse 40% 35% at 12% 70%, rgba(52, 211, 153, 0.06), transparent);
+}
+
+/* Trading floor backdrop for app showcase */
+.trading-floor {
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 35%, rgba(251, 146, 60, 0.12), transparent 70%),
+    radial-gradient(ellipse 40% 40% at 18% 70%, rgba(16, 185, 129, 0.1), transparent 65%),
+    radial-gradient(ellipse 35% 35% at 85% 55%, rgba(244, 63, 94, 0.06), transparent 60%),
+    linear-gradient(180deg, #12100e 0%, #0c0a09 55%, #0a0908 100%);
+}
+
+.trading-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, black 20%, transparent 75%);
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes candle-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8.5s ease-in-out infinite 1.2s;
+}
+
+.animate-candle {
+  animation: candle-breathe 3.6s ease-in-out infinite;
+}
+
+.phone-shell {
+  will-change: transform, opacity;
 }

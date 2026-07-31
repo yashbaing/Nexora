@@ -126,8 +126,36 @@ export default function Home() {
       <Nav />
 
       {/* Hero */}
-      <section className="relative bg-stone-950 pt-16 text-white">
-        <div className="dark-hero-glow dark-grid-pattern">
+      <section className="relative overflow-hidden bg-stone-950 pt-16 text-white">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="trading-floor absolute inset-0 opacity-90" />
+          <div className="dark-grid-pattern absolute inset-0 opacity-80" />
+          <div className="dark-hero-glow absolute inset-0" />
+          <svg
+            className="absolute bottom-0 left-1/2 h-36 w-[min(1100px,120%)] -translate-x-1/2 opacity-[0.12]"
+            viewBox="0 0 1100 140"
+            fill="none"
+          >
+            <path
+              d="M0 98 C80 92, 120 70, 180 74 C240 78, 280 40, 340 48 C400 56, 440 20, 500 28 C560 36, 600 64, 660 58 C720 52, 760 18, 820 30 C880 42, 920 70, 980 62 C1040 54, 1070 78, 1100 72"
+              stroke="#34d399"
+              strokeWidth="1.5"
+              fill="none"
+            />
+            <path
+              d="M0 98 C80 92, 120 70, 180 74 C240 78, 280 40, 340 48 C400 56, 440 20, 500 28 C560 36, 600 64, 660 58 C720 52, 760 18, 820 30 C880 42, 920 70, 980 62 C1040 54, 1070 78, 1100 72 L1100 140 L0 140 Z"
+              fill="url(#heroChartFill)"
+            />
+            <defs>
+              <linearGradient id="heroChartFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#34d399" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <div className="relative">
           <div className="mx-auto max-w-4xl px-6 pb-20 pt-24 text-center md:pt-32">
             <div className="font-mono text-[11px] uppercase tracking-[0.35em] text-stone-500">
               [ Tokenized Equities ]

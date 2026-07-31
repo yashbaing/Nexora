@@ -51,12 +51,18 @@ function PriceTag({ value, change, size = "sm" }: { value: number; change: numbe
   const up = change >= 0;
   return (
     <div className="text-right">
-      <div className={size === "lg" ? "font-mono text-2xl font-semibold text-stone-950" : "font-mono text-xs font-semibold text-stone-950"}>
+      <div
+        className={
+          size === "lg"
+            ? "font-mono text-xl font-semibold text-stone-950"
+            : "font-mono text-[11px] font-semibold text-stone-950"
+        }
+      >
         {fmt(value)}
       </div>
       <div
-        className={`flex items-center justify-end gap-0.5 font-mono ${size === "lg" ? "text-xs" : "text-[10px]"} ${
-          up ? "text-green-600" : "text-red-600"
+        className={`flex items-center justify-end gap-0.5 font-mono ${size === "lg" ? "text-[11px]" : "text-[9px]"} ${
+          up ? "text-emerald-600" : "text-rose-600"
         }`}
       >
         {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
@@ -78,40 +84,50 @@ function HomeScreen({ tickers }: { tickers: Ticker[] }) {
   const up = balanceChange >= 0;
 
   return (
-    <div className="flex h-full flex-col bg-white px-4 pt-11 pb-4 text-stone-950">
-      <div className="flex items-center justify-between text-[9px] font-semibold uppercase tracking-widest text-stone-400">
+    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
+      <div className="flex items-center justify-between text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">
         <span>Active wallet</span>
         <span className="font-mono normal-case tracking-normal text-stone-500">0x6A63…453f</span>
       </div>
 
-      <div className="mt-3 flex gap-1.5 overflow-hidden">
+      <div className="mt-2.5 flex gap-1 overflow-hidden">
         {tickers.slice(3, 6).map((t) => (
-          <div key={t.symbol} className="flex shrink-0 items-center gap-1 rounded-full bg-stone-100 px-2 py-1 font-mono text-[9px] whitespace-nowrap">
+          <div
+            key={t.symbol}
+            className="flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-1 font-mono text-[8px] whitespace-nowrap ring-1 ring-stone-200/80"
+          >
             <span className="font-semibold text-stone-700">{t.symbol}</span>
-            <span className={t.change >= 0 ? "text-green-600" : "text-red-600"}>{fmtSigned(t.change)}</span>
+            <span className={t.change >= 0 ? "text-emerald-600" : "text-rose-600"}>{fmtSigned(t.change)}</span>
           </div>
         ))}
       </div>
 
-      <div className="mt-5 text-[9px] font-semibold uppercase tracking-widest text-stone-400">Total value</div>
-      <div className="mt-1 font-mono text-3xl font-bold tabular-nums text-stone-950">{fmt(balance)}</div>
-      <div className={`mt-1 flex items-center gap-1 text-xs font-medium ${up ? "text-green-600" : "text-red-600"}`}>
+      <div className="mt-4 text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">Total value</div>
+      <div className="mt-0.5 font-mono text-[1.7rem] font-bold leading-none tabular-nums text-stone-950">
+        {fmt(balance)}
+      </div>
+      <div className={`mt-1.5 flex items-center gap-1 text-[11px] font-medium ${up ? "text-emerald-600" : "text-rose-600"}`}>
         {up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
         {fmtSigned(balanceChange)} today
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-xl bg-stone-950 py-2.5 text-center text-[11px] font-semibold text-white">+ Deposit USDC</div>
-        <div className="rounded-xl border border-stone-200 py-2.5 text-center text-[11px] font-semibold text-stone-600">Markets</div>
+      <div className="mt-3.5 grid grid-cols-2 gap-1.5">
+        <div className="rounded-xl bg-stone-950 py-2 text-center text-[10px] font-semibold text-white">+ Deposit</div>
+        <div className="rounded-xl bg-white py-2 text-center text-[10px] font-semibold text-stone-600 ring-1 ring-stone-200">
+          Markets
+        </div>
       </div>
 
-      <div className="mt-5 text-xs font-semibold text-stone-950">Movers</div>
-      <div className="mt-2 flex flex-col gap-1.5">
+      <div className="mt-4 text-[11px] font-semibold text-stone-950">Movers</div>
+      <div className="mt-1.5 flex flex-col gap-1">
         {tickers.slice(0, 3).map((t) => (
-          <div key={t.symbol} className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50 px-3 py-2">
+          <div
+            key={t.symbol}
+            className="flex items-center justify-between rounded-xl bg-white px-2.5 py-2 ring-1 ring-stone-200/70"
+          >
             <div>
-              <div className="font-mono text-[11px] font-semibold text-stone-950">{t.symbol}</div>
-              <div className="text-[9px] text-stone-400">Equity token</div>
+              <div className="font-mono text-[10px] font-semibold text-stone-950">{t.symbol}</div>
+              <div className="text-[8px] text-stone-400">Equity token</div>
             </div>
             <PriceTag value={t.price} change={t.change} />
           </div>
@@ -123,28 +139,30 @@ function HomeScreen({ tickers }: { tickers: Ticker[] }) {
 
 function MarketsScreen({ tickers }: { tickers: Ticker[] }) {
   return (
-    <div className="flex h-full flex-col bg-white px-4 pt-11 pb-4 text-stone-950">
-      <div className="font-serif text-xl">Markets</div>
-      <div className="text-[10px] text-stone-400">Real-time quotes powered by Hyperliquid</div>
-      <div className="mt-3 rounded-full bg-stone-100 px-3 py-2 text-[10px] text-stone-400">Search by symbol or name</div>
-      <div className="mt-3 flex gap-1.5">
+    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
+      <div className="font-serif text-lg leading-none">Markets</div>
+      <div className="mt-1 text-[9px] text-stone-400">Live Hyperliquid quotes</div>
+      <div className="mt-2.5 rounded-full bg-white px-3 py-1.5 text-[9px] text-stone-400 ring-1 ring-stone-200">
+        Search by symbol or name
+      </div>
+      <div className="mt-2.5 flex gap-1">
         {["All", "Tech", "Auto", "Finance"].map((f, i) => (
           <div
             key={f}
-            className={`rounded-full px-2.5 py-1 text-[9px] font-medium ${
-              i === 0 ? "bg-stone-950 text-white" : "border border-stone-200 text-stone-500"
+            className={`rounded-full px-2 py-1 text-[8px] font-medium ${
+              i === 0 ? "bg-stone-950 text-white" : "bg-white text-stone-500 ring-1 ring-stone-200"
             }`}
           >
             {f}
           </div>
         ))}
       </div>
-      <div className="mt-3 flex flex-col divide-y divide-stone-100">
+      <div className="mt-2 flex flex-col divide-y divide-stone-200/70">
         {tickers.map((t) => (
-          <div key={t.symbol} className="flex items-center justify-between py-2.5">
+          <div key={t.symbol} className="flex items-center justify-between py-2">
             <div>
-              <div className="font-mono text-[11px] font-semibold text-stone-950">{t.symbol}</div>
-              <div className="text-[9px] text-stone-400">{t.name}</div>
+              <div className="font-mono text-[10px] font-semibold text-stone-950">{t.symbol}</div>
+              <div className="text-[8px] text-stone-400">{t.name}</div>
             </div>
             <PriceTag value={t.price} change={t.change} />
           </div>
@@ -155,15 +173,12 @@ function MarketsScreen({ tickers }: { tickers: Ticker[] }) {
 }
 
 function StockScreen({ ticker }: { ticker: Ticker }) {
-  const bars = useMemo(() => Array.from({ length: 28 }, () => 30 + Math.random() * 60), [ticker.symbol]);
+  const bars = useMemo(() => Array.from({ length: 24 }, () => 28 + Math.random() * 62), [ticker.symbol]);
   const [heights, setHeights] = useState(bars);
 
   useEffect(() => {
     const t = setInterval(() => {
-      setHeights((prev) => {
-        const next = [...prev.slice(1), 30 + Math.random() * 60];
-        return next;
-      });
+      setHeights((prev) => [...prev.slice(1), 28 + Math.random() * 62]);
     }, TICK_MS / 2);
     return () => clearInterval(t);
   }, []);
@@ -171,37 +186,46 @@ function StockScreen({ ticker }: { ticker: Ticker }) {
   const up = ticker.change >= 0;
 
   return (
-    <div className="flex h-full flex-col bg-white px-4 pt-11 pb-4 text-stone-950">
-      <div className="text-[9px] font-semibold uppercase tracking-widest text-stone-400">{ticker.name}</div>
-      <div className="font-mono text-lg font-semibold">{ticker.symbol}</div>
-      <div className="mt-2 flex items-end justify-between">
-        <div className="font-mono text-3xl font-bold tabular-nums">{fmt(ticker.price)}</div>
-        <div className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-green-600" : "text-red-600"}`}>
+    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
+      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">{ticker.name}</div>
+      <div className="font-mono text-base font-semibold">{ticker.symbol}</div>
+      <div className="mt-1.5 flex items-end justify-between">
+        <div className="font-mono text-[1.7rem] font-bold leading-none tabular-nums">{fmt(ticker.price)}</div>
+        <div className={`flex items-center gap-0.5 text-[11px] font-semibold ${up ? "text-emerald-600" : "text-rose-600"}`}>
           {up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
           {fmtSigned(ticker.change)}
         </div>
       </div>
-      <div className="mt-4 flex h-28 items-end gap-[3px]">
+      <div className="mt-3.5 flex h-24 items-end gap-[2.5px] rounded-xl bg-white px-2 py-2 ring-1 ring-stone-200/70">
         {heights.map((h, i) => (
           <div
             key={i}
             className={`flex-1 rounded-sm transition-all duration-700 ease-out ${
-              i % 3 === 0 ? "bg-red-300" : "bg-green-300"
+              i % 3 === 0 ? "bg-rose-300" : "bg-emerald-400"
             }`}
             style={{ height: `${h}%` }}
           />
         ))}
       </div>
-      <div className="mt-4 flex gap-2">
+      <div className="mt-3 flex gap-1.5">
         {["1H", "1D", "1W"].map((r, i) => (
-          <div key={r} className={`rounded-full px-2.5 py-1 text-[9px] font-medium ${i === 0 ? "bg-stone-950 text-white" : "text-stone-400"}`}>
+          <div
+            key={r}
+            className={`rounded-full px-2.5 py-1 text-[8px] font-medium ${
+              i === 0 ? "bg-stone-950 text-white" : "text-stone-400"
+            }`}
+          >
             {r}
           </div>
         ))}
       </div>
-      <div className="mt-auto grid grid-cols-2 gap-2">
-        <div className="rounded-xl border border-red-200 py-2.5 text-center text-[11px] font-semibold text-red-500">Sell</div>
-        <div className="rounded-xl bg-green-600 py-2.5 text-center text-[11px] font-semibold text-white">Buy {ticker.symbol}</div>
+      <div className="mt-auto grid grid-cols-2 gap-1.5">
+        <div className="rounded-xl bg-white py-2 text-center text-[10px] font-semibold text-rose-500 ring-1 ring-rose-200">
+          Sell
+        </div>
+        <div className="rounded-xl bg-emerald-600 py-2 text-center text-[10px] font-semibold text-white">
+          Buy {ticker.symbol}
+        </div>
       </div>
     </div>
   );
@@ -210,32 +234,39 @@ function StockScreen({ ticker }: { ticker: Ticker }) {
 function WalletScreen({ tickers }: { tickers: Ticker[] }) {
   const usdc = useMemo(() => 240 + tickers[0].change * 4, [tickers]);
   return (
-    <div className="flex h-full flex-col bg-white px-4 pt-11 pb-4 text-stone-950">
-      <div className="font-serif text-xl">Wallet</div>
-      <div className="text-[10px] text-stone-400">Fund account &amp; check USDC balance</div>
+    <div className="flex h-full flex-col bg-[#fafaf8] px-3.5 pt-10 pb-3.5 text-stone-950">
+      <div className="font-serif text-lg leading-none">Wallet</div>
+      <div className="mt-1 text-[9px] text-stone-400">Fund account &amp; check USDC</div>
 
-      <div className="mt-4 rounded-2xl bg-stone-100 p-4">
-        <div className="text-[9px] font-semibold uppercase tracking-widest text-stone-400">USDC settlement balance</div>
+      <div className="mt-3.5 rounded-2xl bg-stone-950 p-3.5 text-white">
+        <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-stone-400">USDC balance</div>
         <div className="mt-1 font-mono text-2xl font-bold tabular-nums">{fmt(usdc)}</div>
-        <div className="mt-1 text-[9px] text-stone-400">Nexora L1 settlement</div>
+        <div className="mt-1 text-[8px] text-stone-500">Nexora L1 settlement</div>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-dashed border-stone-200 p-4">
-        <div className="flex items-center gap-1.5 text-xs font-semibold">
-          <Sparkles className="h-3.5 w-3.5 text-orange-500" /> USDC Faucet
+      <div className="mt-3 rounded-2xl bg-white p-3.5 ring-1 ring-dashed ring-stone-300">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold">
+          <Sparkles className="h-3.5 w-3.5 text-amber-500" /> USDC Faucet
         </div>
-        <p className="mt-1.5 text-[10px] leading-relaxed text-stone-500">
-          Obtain mock USDC to test tokenized stock purchases.
+        <p className="mt-1 text-[9px] leading-relaxed text-stone-500">
+          Mint mock USDC to test tokenized stock purchases.
         </p>
-        <div className="mt-3 rounded-xl bg-stone-950 py-2.5 text-center text-[11px] font-semibold text-white">Mint Mock USDC</div>
+        <div className="mt-2.5 rounded-xl bg-stone-950 py-2 text-center text-[10px] font-semibold text-white">
+          Mint Mock USDC
+        </div>
       </div>
 
-      <div className="mt-4 text-xs font-semibold">Contract diagnostics</div>
-      <div className="mt-2 flex flex-col gap-1.5">
-        {["Platform contract", "USDC contract", "Backend signer"].map((label, i) => (
-          <div key={label} className="flex items-center justify-between rounded-xl bg-stone-50 px-3 py-2 text-[10px]">
+      <div className="mt-3 text-[11px] font-semibold">Contracts</div>
+      <div className="mt-1.5 flex flex-col gap-1">
+        {["Platform", "USDC", "Oracle signer"].map((label, i) => (
+          <div
+            key={label}
+            className="flex items-center justify-between rounded-xl bg-white px-2.5 py-1.5 text-[9px] ring-1 ring-stone-200/70"
+          >
             <span className="text-stone-500">{label}</span>
-            <span className="font-mono text-stone-400">0x{(i + 1).toString().padStart(2, "0")}…f{7 - i}b1</span>
+            <span className="font-mono text-stone-400">
+              0x{(i + 1).toString().padStart(2, "0")}…f{7 - i}b1
+            </span>
           </div>
         ))}
       </div>
@@ -243,50 +274,81 @@ function WalletScreen({ tickers }: { tickers: Ticker[] }) {
   );
 }
 
-const NATURAL_W = 260;
-const NATURAL_H = 560;
-const MINI_W = 176;
-const SCALE = MINI_W / NATURAL_W;
-const MINI_H = NATURAL_H * SCALE;
+/** Comfortable phone size — smaller than a real device mock so the stage breathes. */
+const PHONE_W = 200;
+const PHONE_H = 408;
+const SIDE_SCALE = 0.72;
 
-function MiniPreview({
-  scene,
-  rotate,
-  side,
+function PhoneShell({
+  children,
+  dimmed = false,
   onClick,
-  render,
+  ariaLabel,
 }: {
-  scene: { key: string; label: string };
-  rotate: number;
-  side: "left" | "right";
-  onClick: () => void;
-  render: (key: string) => ReactNode;
+  children: ReactNode;
+  dimmed?: boolean;
+  onClick?: () => void;
+  ariaLabel?: string;
 }) {
+  const className = `phone-shell relative shrink-0 overflow-hidden rounded-[1.75rem] border-[5px] border-[#14110f] bg-[#14110f] transition-all duration-500 ease-out ${
+    dimmed
+      ? "cursor-pointer opacity-[0.5] shadow-lg shadow-black/30 hover:opacity-85"
+      : "z-10 opacity-100 shadow-2xl shadow-black/45"
+  }`;
+  const style = { width: PHONE_W, height: PHONE_H };
+  const inner = (
+    <>
+      <div className="pointer-events-none absolute top-2 left-1/2 z-20 h-3.5 w-14 -translate-x-1/2 rounded-full bg-black/90" />
+      <div className="h-full w-full overflow-hidden rounded-[1.35rem] bg-white">{children}</div>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" aria-label={ariaLabel} onClick={onClick} className={className} style={style}>
+        {inner}
+      </button>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      aria-label={`Show ${scene.label}`}
-      onClick={onClick}
-      className={`absolute top-1/2 hidden -translate-y-1/2 cursor-pointer overflow-hidden rounded-[1.6rem] border-[5px] border-stone-950 bg-stone-950 opacity-40 shadow-xl shadow-stone-950/15 transition-all duration-500 hover:opacity-75 md:block ${
-        side === "left" ? "left-[4%] lg:left-[10%]" : "right-[4%] lg:right-[10%]"
-      }`}
-      style={{
-        width: MINI_W,
-        height: MINI_H,
-        transform: `translateY(-50%) rotate(${rotate}deg)`,
-      }}
+    <div className={className} style={style}>
+      {inner}
+    </div>
+  );
+}
+
+function SidePhone({
+  children,
+  rotate,
+  onClick,
+  ariaLabel,
+}: {
+  children: ReactNode;
+  rotate: number;
+  onClick: () => void;
+  ariaLabel: string;
+}) {
+  const boxW = PHONE_W * SIDE_SCALE;
+  const boxH = PHONE_H * SIDE_SCALE;
+  return (
+    <div
+      className="relative hidden shrink-0 md:block"
+      style={{ width: boxW, height: boxH }}
     >
       <div
+        className="absolute left-1/2 top-1/2 origin-center transition-transform duration-500"
         style={{
-          width: NATURAL_W,
-          height: NATURAL_H,
-          transform: `scale(${SCALE})`,
-          transformOrigin: "top left",
+          width: PHONE_W,
+          height: PHONE_H,
+          transform: `translate(-50%, -50%) scale(${SIDE_SCALE}) rotate(${rotate}deg)`,
         }}
       >
-        {render(scene.key)}
+        <PhoneShell dimmed onClick={onClick} ariaLabel={ariaLabel}>
+          {children}
+        </PhoneShell>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -298,6 +360,78 @@ const scenes = [
 ];
 
 const AUTO_MS = 5000;
+
+function TradingBackdrop() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="trading-floor absolute inset-0" />
+      <div className="trading-grid absolute inset-0 opacity-60" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0c0a09] to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0c0a09] to-transparent" />
+
+      {/* Soft candle silhouettes */}
+      <svg
+        className="absolute bottom-[12%] left-1/2 h-40 w-[min(920px,92%)] -translate-x-1/2 opacity-[0.14]"
+        viewBox="0 0 920 160"
+        fill="none"
+      >
+        {(
+          [
+            [40, 90, 50, true],
+            [90, 70, 70, false],
+            [140, 85, 45, true],
+            [190, 55, 85, true],
+            [240, 95, 40, false],
+            [290, 60, 78, true],
+            [340, 80, 55, false],
+            [390, 48, 90, true],
+            [440, 72, 60, true],
+            [490, 100, 35, false],
+            [540, 58, 82, true],
+            [590, 88, 48, false],
+            [640, 50, 88, true],
+            [690, 75, 58, true],
+            [740, 95, 42, false],
+            [790, 62, 76, true],
+            [840, 80, 52, false],
+          ] as const
+        ).map(([x, bodyTop, bodyH, up], i) => (
+          <g key={i} className="animate-candle" style={{ animationDelay: `${i * 0.12}s` }}>
+            <line
+              x1={x}
+              x2={x}
+              y1={bodyTop - 18}
+              y2={bodyTop + bodyH + 18}
+              stroke={up ? "#34d399" : "#fb7185"}
+              strokeWidth="1.5"
+              opacity="0.7"
+            />
+            <rect
+              x={x - 7}
+              y={bodyTop}
+              width="14"
+              height={bodyH}
+              rx="2"
+              fill={up ? "#34d399" : "#fb7185"}
+              opacity="0.55"
+            />
+          </g>
+        ))}
+      </svg>
+
+      {/* Floating price chips */}
+      <div className="animate-float-slow absolute top-[18%] left-[8%] hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] text-emerald-300/80 backdrop-blur-sm lg:block">
+        xNVDA +2.14%
+      </div>
+      <div className="animate-float-delayed absolute top-[28%] right-[9%] hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] text-rose-300/80 backdrop-blur-sm lg:block">
+        xTSLA −0.68%
+      </div>
+      <div className="animate-float-slow absolute bottom-[22%] left-[14%] hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] text-stone-300/70 backdrop-blur-sm md:block">
+        USDC settle · 1.2s
+      </div>
+    </div>
+  );
+}
 
 export default function LiveShowcase() {
   const tickers = useLiveTickers();
@@ -333,61 +467,69 @@ export default function LiveShowcase() {
   return (
     <section
       id="app"
-      className="relative overflow-hidden border-y border-stone-200 bg-stone-50 py-16 md:py-24"
+      className="relative overflow-hidden bg-[#0c0a09] py-16 text-white md:py-20"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="mx-auto max-w-2xl px-6 text-center">
-        <div className="font-mono text-[11px] uppercase tracking-[0.35em] text-stone-400">
+      <TradingBackdrop />
+
+      <div className="relative mx-auto max-w-2xl px-6 text-center">
+        <div className="font-mono text-[11px] uppercase tracking-[0.35em] text-stone-500">
           [ A day with Nexora ]
         </div>
-        <h2 className="mt-5 font-serif text-3xl tracking-tight text-stone-950 md:mt-6 md:text-5xl">
+        <h2 className="mt-5 font-serif text-3xl tracking-tight text-white md:mt-6 md:text-5xl">
           Every market. One on-chain loop.
         </h2>
-        <p className="mt-3 text-sm text-stone-500">
-          This is a live simulation — prices tick every second, just like the real app.
+        <p className="mt-3 text-sm text-stone-400">
+          Live simulation — prices tick every second, just like the real app.
         </p>
       </div>
 
-      <div className="relative mx-auto mt-10 h-[560px] max-w-6xl md:mt-14 md:h-[560px]">
-        <MiniPreview
-          scene={scenes[prev]}
-          rotate={-9}
-          side="left"
-          onClick={() => { setPaused(true); go(-1); }}
-          render={renderScene}
-        />
+      {/* Flex stage — reserved side slots so phones never overlap or collapse */}
+      <div className="relative mx-auto mt-10 flex max-w-5xl items-center justify-center gap-6 px-4 md:mt-12 lg:gap-10">
+        <SidePhone
+          rotate={-7}
+          ariaLabel={`Show ${scenes[prev].label}`}
+          onClick={() => {
+            setPaused(true);
+            go(-1);
+          }}
+        >
+          {renderScene(scenes[prev].key)}
+        </SidePhone>
 
-        <div className="absolute left-1/2 top-1/2 h-[560px] w-[260px] -translate-x-1/2 -translate-y-1/2">
-          <div className="h-full w-full overflow-hidden rounded-[2.4rem] border-[6px] border-stone-950 bg-stone-950 shadow-2xl shadow-stone-950/25">
-            {renderScene(scenes[active].key)}
-          </div>
-        </div>
+        <PhoneShell>{renderScene(scenes[active].key)}</PhoneShell>
 
-        <MiniPreview
-          scene={scenes[next]}
-          rotate={9}
-          side="right"
-          onClick={() => { setPaused(true); go(1); }}
-          render={renderScene}
-        />
+        <SidePhone
+          rotate={7}
+          ariaLabel={`Show ${scenes[next].label}`}
+          onClick={() => {
+            setPaused(true);
+            go(1);
+          }}
+        >
+          {renderScene(scenes[next].key)}
+        </SidePhone>
       </div>
 
-      <div className="mx-auto mt-8 h-14 max-w-md px-6 text-center md:mt-10">
-        <div className="text-base font-semibold text-stone-950">{scenes[active].title}</div>
-        <p className="mt-1 text-sm leading-relaxed text-stone-500">{scenes[active].description}</p>
+      <div className="relative mx-auto mt-8 h-[3.25rem] max-w-md px-6 text-center md:mt-9">
+        <div className="text-base font-semibold text-white">{scenes[active].title}</div>
+        <p className="mt-1 text-sm leading-relaxed text-stone-400">{scenes[active].description}</p>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-2 px-6 md:mt-4 md:gap-2.5">
+      <div className="relative mt-3 flex flex-wrap items-center justify-center gap-2 px-6 md:mt-4">
         {scenes.map((s, i) => (
           <button
             key={s.key}
             type="button"
-            onClick={() => { setPaused(true); setActive(i); }}
-            className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
+            onClick={() => {
+              setPaused(true);
+              setActive(i);
+            }}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
               i === active
-                ? "bg-white text-stone-950 shadow-md shadow-stone-950/10 ring-1 ring-stone-200"
-                : "text-stone-400 hover:text-stone-600"
+                ? "bg-white text-stone-950 shadow-md shadow-black/30"
+                : "text-stone-500 hover:text-stone-200"
             }`}
           >
             {s.label}
