@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  Activity,
   ArrowRight,
   BarChart3,
   Layers,
