@@ -170,7 +170,7 @@ function MarketsScreen({ tickers }: { tickers: Ticker[] }) {
       <StatusBar />
       <div className="px-4 pt-5">
         <div className="font-serif text-xl leading-none">Markets</div>
-        <div className="mt-1 text-[10px] text-white/40">Live market prices</div>
+        <div className="mt-1 text-[10px] text-white/40">Hyperliquid prices</div>
         <div className="mt-3 rounded-xl bg-white/[0.05] px-3 py-2 text-[10px] text-white/35 ring-1 ring-white/[0.06]">
           Search xAAPL, Tesla…
         </div>
