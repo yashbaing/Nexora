@@ -61,64 +61,59 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-stone-950/50 p-4 backdrop-blur-[2px]"
           onClick={() => setOpen(false)}
         >
           <div
-            className="animate-modal-in relative w-full max-w-[380px] overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-stone-950/30"
+            className="animate-modal-in relative w-full max-w-[300px] rounded-2xl bg-white p-5 shadow-xl shadow-stone-950/20"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-500 transition hover:bg-stone-200 hover:text-stone-950"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
               aria-label="Close"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </button>
 
-            {/* Top banner */}
-            <div className="relative overflow-hidden bg-stone-950">
-              <div className="dark-hero-glow dark-grid-pattern absolute inset-0" />
-              <div className="relative flex flex-col items-center justify-center px-8 pb-8 pt-10 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-inset ring-white/15">
-                  <Sparkles className="h-5 w-5 text-orange-400" />
+            {joined ? (
+              <div className="pt-1 text-center">
+                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                  <Check className="h-4 w-4" />
                 </div>
-                <h3 className="mt-4 font-serif text-2xl tracking-tight text-white">
-                  {joined ? "You're on the waitlist" : "Join the waitlist"}
+                <h3 className="mt-3 text-base font-semibold text-stone-950">
+                  You&apos;re on the waitlist
                 </h3>
-                <p className="mt-1.5 text-sm text-stone-400">
-                  {joined
-                    ? "We'll email you when Nexora launches."
-                    : "Enter your email and we'll notify you when the app is ready."}
+                <p className="mt-1 text-xs leading-relaxed text-stone-500">
+                  {message || "We'll email you when Nexora launches."}
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="mt-4 w-full rounded-lg bg-stone-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800"
+                >
+                  Done
+                </button>
               </div>
-            </div>
-
-            <div className="px-7 py-7">
-              {joined ? (
-                <>
-                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-green-50 text-green-600">
-                    <Check className="h-5 w-5" />
+            ) : (
+              <div className="pr-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#07090d] text-[#f0a35e]">
+                    <Sparkles className="h-3.5 w-3.5" />
                   </div>
-                  {message && (
-                    <p className="text-center text-sm text-stone-500">{message}</p>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setOpen(false)}
-                    className="mt-6 w-full rounded-xl bg-stone-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800"
-                  >
-                    Done
-                  </button>
-                </>
-              ) : (
-                <form onSubmit={submit} className="flex flex-col gap-3">
+                  <h3 className="text-base font-semibold text-stone-950">Join the waitlist</h3>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-stone-500">
+                  Enter your email and we&apos;ll notify you when the app is ready.
+                </p>
+
+                <form onSubmit={submit} className="mt-4 flex flex-col gap-2.5">
                   <label htmlFor="waitlist-email" className="sr-only">
                     Email address
                   </label>
                   <div className="relative">
-                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
                     <input
                       id="waitlist-email"
                       type="email"
@@ -127,29 +122,29 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
                       placeholder="you@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-xl border border-stone-200 bg-stone-50 py-3.5 pl-11 pr-4 text-sm text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-stone-950 focus:bg-white"
+                      className="w-full rounded-lg border border-stone-200 bg-stone-50 py-2.5 pl-9 pr-3 text-sm text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-stone-400 focus:bg-white"
                     />
                   </div>
 
                   {message && (
-                    <p className="-mt-1 text-left text-xs text-red-600">{message}</p>
+                    <p className="text-left text-[11px] text-red-600">{message}</p>
                   )}
 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-stone-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-stone-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
                   >
                     {submitting ? "Submitting…" : "Join waitlist"}
-                    {!submitting && <ArrowRight className="h-4 w-4" />}
+                    {!submitting && <ArrowRight className="h-3.5 w-3.5" />}
                   </button>
 
-                  <p className="mt-1 text-center text-[11px] text-stone-400">
-                    No spam, ever. Unsubscribe anytime.
+                  <p className="text-center text-[10px] text-stone-400">
+                    No spam. Unsubscribe anytime.
                   </p>
                 </form>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
