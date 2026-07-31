@@ -14,6 +14,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -22,6 +24,23 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* Prefer notch-safe padding when available */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-pad-x {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .safe-pad-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-pad-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 .font-serif {
@@ -112,6 +131,17 @@ body {
 
 .animate-ken-burns {
   animation: ken-burns 28s ease-in-out alternate infinite;
+}
+
+@media (max-width: 640px) {
+  .animate-ken-burns {
+    animation: none;
+    transform: scale(1.08);
+  }
+
+  .animate-ticker {
+    animation-duration: 28s;
+  }
 }
 
 .phone-shell {

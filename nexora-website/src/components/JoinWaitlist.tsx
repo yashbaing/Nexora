@@ -75,15 +75,15 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
 
   const buttonClass =
     variant === "nav"
-      ? "inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
+      ? "inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
       : variant === "hero"
-        ? "inline-flex items-center gap-2 rounded-full bg-[#f0a35e] px-8 py-3.5 text-sm font-semibold text-[#0b0e13] shadow-lg shadow-black/30 transition hover:bg-[#f4b57a]"
-        : "inline-flex items-center gap-2 rounded-full bg-[#07090d] px-10 py-4 text-sm font-semibold text-white transition hover:bg-[#1a1f28]";
+        ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#f0a35e] px-8 py-3.5 text-sm font-semibold text-[#0b0e13] shadow-lg shadow-black/30 transition hover:bg-[#f4b57a] sm:w-auto"
+        : "inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#07090d] px-10 py-4 text-sm font-semibold text-white transition hover:bg-[#1a1f28] sm:w-auto";
 
   const modal =
     open && mounted
       ? createPortal(
-          <div className="fixed inset-0 z-[200] grid place-items-center p-5">
+          <div className="fixed inset-0 z-[200] flex items-end justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center sm:p-5">
             <button
               type="button"
               aria-label="Close waitlist"
@@ -95,7 +95,7 @@ export default function JoinWaitlist({ variant = "nav" }: { variant?: Variant })
               role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
-              className="waitlist-glass animate-modal-in relative z-10 w-full max-w-[300px] rounded-[22px] p-5"
+              className="waitlist-glass animate-modal-in relative z-10 max-h-[min(90dvh,640px)] w-full max-w-[320px] overflow-y-auto rounded-[22px] p-5"
             >
               <button
                 type="button"

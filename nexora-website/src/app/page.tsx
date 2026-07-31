@@ -85,22 +85,22 @@ const steps = [
 
 function Nav() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#07090d]/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="font-serif text-2xl tracking-tight text-white">
+    <header className="safe-pad-top fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#07090d]/70 backdrop-blur-xl">
+      <div className="safe-pad-x mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
+        <Link href="/" className="font-serif text-xl tracking-tight text-white sm:text-2xl">
           Nexora.
         </Link>
-        <nav className="flex items-center gap-7 text-sm text-white/60">
-          <a href="#features" className="transition hover:text-white">
+        <nav className="flex items-center gap-4 text-sm text-white/60 sm:gap-7">
+          <a href="#features" className="py-2 transition hover:text-white">
             Features
           </a>
-          <a href="#how-it-works" className="hidden transition hover:text-white sm:inline">
+          <a href="#how-it-works" className="hidden py-2 transition hover:text-white sm:inline">
             How it works
           </a>
-          <a href="#app" className="transition hover:text-white">
+          <a href="#app" className="py-2 transition hover:text-white">
             App
           </a>
-          <a href="#markets" className="hidden transition hover:text-white sm:inline">
+          <a href="#markets" className="hidden py-2 transition hover:text-white sm:inline">
             Markets
           </a>
         </nav>
@@ -134,14 +134,14 @@ export default function Home() {
       <Nav />
 
       {/* Hero — one composition: brand, headline, line, CTAs, full-bleed trading visual */}
-      <section className="relative min-h-[100svh] overflow-hidden bg-[#07090d] text-white">
+      <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[#07090d] text-white">
         <div aria-hidden className="absolute inset-0">
           <Image
             src="/hero-trading-floor.png"
             alt=""
             fill
             priority
-            className="animate-ken-burns object-cover object-center"
+            className="animate-ken-burns object-cover object-[center_30%] sm:object-center"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#07090d]/40 via-[#07090d]/30 to-[#07090d]/88" />
@@ -149,20 +149,20 @@ export default function Home() {
           <div className="hero-scan absolute inset-0 opacity-30" />
         </div>
 
-        <div className="relative mx-auto flex min-h-[100svh] max-w-5xl flex-col items-center justify-center px-6 pb-24 pt-24 text-center">
-          <p className="hero-rise font-serif text-5xl tracking-tight text-white md:text-7xl">
+        <div className="safe-pad-x relative mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 pb-8 pt-20 text-center sm:px-6 sm:pb-16 sm:pt-24">
+          <p className="hero-rise font-serif text-4xl tracking-tight text-white sm:text-5xl md:text-7xl">
             Nexora.
           </p>
-          <h1 className="hero-rise-delay mt-5 max-w-3xl font-serif text-3xl leading-[1.1] tracking-tight text-white/95 md:text-5xl">
+          <h1 className="hero-rise-delay mt-3 max-w-3xl font-serif text-[1.65rem] leading-[1.15] tracking-tight text-white/95 sm:mt-5 sm:text-3xl md:text-5xl">
             Trade stocks.
             <br />
             <span className="text-[#f0a35e]">Settled on chain.</span>
           </h1>
-          <p className="hero-rise-delay-2 mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/65 md:text-lg">
+          <p className="hero-rise-delay-2 mx-auto mt-4 max-w-lg text-[0.95rem] leading-relaxed text-white/65 sm:mt-6 sm:text-base md:text-lg">
             Buy and sell tokenized stocks like xAAPL, xTSLA, and xNVDA with live prices,
             USDC settlement, and a wallet you control.
           </p>
-          <div className="hero-rise-delay-2 mt-10 flex flex-wrap items-center justify-center gap-5">
+          <div className="hero-rise-delay-2 mt-7 flex w-full max-w-sm flex-col items-center gap-4 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center sm:gap-5">
             <JoinWaitlist variant="hero" />
             <ComingSoon variant="hero" />
           </div>
@@ -174,24 +174,24 @@ export default function Home() {
       <LiveShowcase />
 
       {/* Features — one job: why Nexora */}
-      <section id="features" className="py-24 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
+      <section id="features" className="py-16 sm:py-24 md:py-28">
+        <div className="safe-pad-x mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-stone-400">
               Features
             </p>
-            <h2 className="mt-4 font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
+            <h2 className="mt-3 font-serif text-3xl tracking-tight text-stone-950 sm:mt-4 sm:text-4xl md:text-5xl">
               Everything you need to trade
             </h2>
-            <p className="mt-4 text-lg text-stone-600">
+            <p className="mt-3 text-base text-stone-600 sm:mt-4 sm:text-lg">
               Live markets, simple portfolio tools, and on chain settlement in one app.
             </p>
           </div>
 
-          <div className="mt-16 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-x-10 gap-y-10 sm:mt-16 sm:grid-cols-2 sm:gap-y-12 lg:grid-cols-3">
             {features.map((f) => (
               <div key={f.title}>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#07090d] text-white">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#07090d] text-white sm:mb-4">
                   <f.icon className="h-4 w-4" />
                 </div>
                 <h3 className="text-lg font-semibold text-stone-950">{f.title}</h3>
@@ -203,23 +203,23 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="border-y border-stone-200/80 bg-white py-24 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
+      <section id="how-it-works" className="border-y border-stone-200/80 bg-white py-16 sm:py-24 md:py-28">
+        <div className="safe-pad-x mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-stone-400">
               How it works
             </p>
-            <h2 className="mt-4 font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
+            <h2 className="mt-3 font-serif text-3xl tracking-tight text-stone-950 sm:mt-4 sm:text-4xl md:text-5xl">
               Get started in three steps
             </h2>
           </div>
 
-          <div className="mt-16 grid gap-12 md:grid-cols-3 md:gap-8">
+          <div className="mt-10 grid gap-10 sm:mt-16 sm:gap-12 md:grid-cols-3 md:gap-8">
             {steps.map((s) => (
               <div key={s.step} className="text-center md:text-left">
                 <div className="font-mono text-sm font-semibold text-[#f0a35e]">{s.step}</div>
-                <h3 className="mt-3 font-serif text-2xl text-stone-950">{s.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-stone-600">{s.description}</p>
+                <h3 className="mt-3 font-serif text-xl text-stone-950 sm:text-2xl">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600 sm:mt-3">{s.description}</p>
               </div>
             ))}
           </div>
@@ -227,17 +227,17 @@ export default function Home() {
       </section>
 
       {/* Markets */}
-      <section id="markets" className="py-24 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section id="markets" className="py-16 sm:py-24 md:py-28">
+        <div className="safe-pad-x mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-stone-400">
                 Markets
               </p>
-              <h2 className="mt-4 font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
+              <h2 className="mt-3 font-serif text-3xl tracking-tight text-stone-950 sm:mt-4 sm:text-4xl md:text-5xl">
                 Available markets
               </h2>
-              <p className="mt-4 max-w-xl text-lg text-stone-600">
+              <p className="mt-3 max-w-xl text-base text-stone-600 sm:mt-4 sm:text-lg">
                 Popular stocks as on chain tokens, priced in real time and settled in USDC.
               </p>
             </div>
@@ -246,79 +246,81 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="mt-12 overflow-hidden border border-stone-200 bg-white">
-            <div className="grid grid-cols-12 gap-4 border-b border-stone-200 bg-[#f7f6f3] px-5 py-3 font-mono text-[10px] font-semibold uppercase tracking-widest text-stone-400">
-              <span className="col-span-5">Symbol</span>
-              <span className="col-span-3 hidden sm:block">Name</span>
-              <span className="col-span-3 text-right sm:col-span-2">Last</span>
-              <span className="col-span-4 text-right sm:col-span-2">24h</span>
-            </div>
-            {stocks.map((s, i) => (
-              <div
-                key={s.symbol}
-                className={`grid grid-cols-12 items-center gap-4 px-5 py-4 ${
-                  i < stocks.length - 1 ? "border-b border-stone-100" : ""
-                }`}
-              >
-                <span className="col-span-5 font-mono text-sm font-semibold text-stone-950">
-                  {s.symbol}
-                </span>
-                <span className="col-span-3 hidden text-sm text-stone-500 sm:block">{s.name}</span>
-                <span className="col-span-3 text-right font-mono text-sm text-stone-700 sm:col-span-2">
-                  {s.price}
-                </span>
-                <span
-                  className={`col-span-4 text-right font-mono text-sm sm:col-span-2 ${
-                    s.change.startsWith("+") ? "text-emerald-600" : "text-rose-600"
+          <div className="mt-8 overflow-x-auto border border-stone-200 bg-white sm:mt-12">
+            <div className="min-w-[300px]">
+              <div className="grid grid-cols-12 gap-2 border-b border-stone-200 bg-[#f7f6f3] px-3 py-3 font-mono text-[10px] font-semibold uppercase tracking-widest text-stone-400 sm:gap-4 sm:px-5">
+                <span className="col-span-5">Symbol</span>
+                <span className="col-span-3 hidden sm:block">Name</span>
+                <span className="col-span-3 text-right sm:col-span-2">Last</span>
+                <span className="col-span-4 text-right sm:col-span-2">24h</span>
+              </div>
+              {stocks.map((s, i) => (
+                <div
+                  key={s.symbol}
+                  className={`grid grid-cols-12 items-center gap-2 px-3 py-3.5 sm:gap-4 sm:px-5 sm:py-4 ${
+                    i < stocks.length - 1 ? "border-b border-stone-100" : ""
                   }`}
                 >
-                  {s.change}
-                </span>
-              </div>
-            ))}
+                  <span className="col-span-5 font-mono text-[13px] font-semibold text-stone-950 sm:text-sm">
+                    {s.symbol}
+                  </span>
+                  <span className="col-span-3 hidden text-sm text-stone-500 sm:block">{s.name}</span>
+                  <span className="col-span-3 text-right font-mono text-[13px] text-stone-700 sm:col-span-2 sm:text-sm">
+                    {s.price}
+                  </span>
+                  <span
+                    className={`col-span-4 text-right font-mono text-[13px] sm:col-span-2 sm:text-sm ${
+                      s.change.startsWith("+") ? "text-emerald-600" : "text-rose-600"
+                    }`}
+                  >
+                    {s.change}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-24 md:py-28">
-        <div className="mx-auto max-w-2xl px-6 text-center">
-          <h2 className="font-serif text-4xl tracking-tight text-stone-950 md:text-5xl">
+      <section className="safe-pad-bottom py-16 sm:py-24 md:py-28">
+        <div className="safe-pad-x mx-auto max-w-2xl px-4 text-center sm:px-6">
+          <h2 className="font-serif text-3xl tracking-tight text-stone-950 sm:text-4xl md:text-5xl">
             Join the waitlist
           </h2>
-          <p className="mt-4 text-lg text-stone-600">
+          <p className="mt-3 text-base text-stone-600 sm:mt-4 sm:text-lg">
             Get notified when the app launches on Nexora Fuji testnet. Free test USDC included.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
             <JoinWaitlist variant="cta" />
             <ComingSoon variant="cta" />
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-stone-200 bg-white py-12">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+      <footer className="safe-pad-bottom border-t border-stone-200 bg-white py-10 sm:py-12">
+        <div className="safe-pad-x mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="font-serif text-2xl text-stone-950">Nexora.</div>
               <p className="mt-2 text-sm text-stone-500">Trade tokenized stocks on chain.</p>
             </div>
-            <div className="flex flex-wrap gap-6 text-sm text-stone-600">
-              <a href="#features" className="hover:text-stone-950">
+            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-stone-600">
+              <a href="#features" className="py-1 hover:text-stone-950">
                 Features
               </a>
-              <a href="#how-it-works" className="hover:text-stone-950">
+              <a href="#how-it-works" className="py-1 hover:text-stone-950">
                 How it works
               </a>
-              <a href="#markets" className="hover:text-stone-950">
+              <a href="#markets" className="py-1 hover:text-stone-950">
                 Markets
               </a>
-              <Link href={APP_URL} className="text-stone-400">
+              <Link href={APP_URL} className="py-1 text-stone-400">
                 App coming soon
               </Link>
             </div>
           </div>
-          <div className="mt-8 border-t border-stone-200 pt-8 text-xs text-stone-400">
+          <div className="mt-8 border-t border-stone-200 pt-6 text-xs leading-relaxed text-stone-400 sm:pt-8">
             Nexora is a demo platform. This is not financial advice. Trade at your own risk.
           </div>
         </div>

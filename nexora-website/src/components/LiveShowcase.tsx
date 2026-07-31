@@ -1,7 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { ArrowDownRight, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 type Ticker = {
   symbol: string;
@@ -346,22 +354,29 @@ function PhoneShell({
   dimmed = false,
   onClick,
   ariaLabel,
+  className: extraClass = "",
 }: {
   children: ReactNode;
   dimmed?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
+  className?: string;
 }) {
-  const className = `phone-shell relative shrink-0 overflow-hidden rounded-[1.7rem] border-[5px] border-[#1a1f28] bg-[#1a1f28] transition-all duration-500 ease-out ${
+  const className = `phone-shell relative shrink-0 overflow-hidden rounded-[1.55rem] border-[4px] border-[#1a1f28] bg-[#1a1f28] transition-all duration-500 ease-out sm:rounded-[1.7rem] sm:border-[5px] ${
     dimmed
       ? "cursor-pointer opacity-50 shadow-lg shadow-black/40 hover:opacity-85"
       : "z-10 opacity-100 shadow-2xl shadow-black/50"
-  }`;
-  const style = { width: PHONE_W, height: PHONE_H };
+  } ${extraClass}`;
+  const style = {
+    width: "min(220px, 72vw)",
+    aspectRatio: `${PHONE_W} / ${PHONE_H}`,
+  } as const;
   const inner = (
     <>
-      <div className="pointer-events-none absolute top-2 left-1/2 z-20 h-3.5 w-14 -translate-x-1/2 rounded-full bg-black" />
-      <div className="h-full w-full overflow-hidden rounded-[1.3rem] bg-[#0b0e13]">{children}</div>
+      <div className="pointer-events-none absolute top-2 left-1/2 z-20 h-3 w-12 -translate-x-1/2 rounded-full bg-black sm:h-3.5 sm:w-14" />
+      <div className="h-full w-full overflow-hidden rounded-[1.15rem] bg-[#0b0e13] sm:rounded-[1.3rem]">
+        {children}
+      </div>
     </>
   );
 
@@ -444,6 +459,7 @@ export default function LiveShowcase() {
   const tickers = useLiveTickers();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   const go = useCallback((dir: 1 | -1) => {
     setActive((i) => (i + dir + scenes.length) % scenes.length);
@@ -457,6 +473,19 @@ export default function LiveShowcase() {
 
   const prev = (active - 1 + scenes.length) % scenes.length;
   const next = (active + 1) % scenes.length;
+
+  const onPointerDown = (e: ReactPointerEvent) => {
+    touchStartX.current = e.clientX;
+  };
+
+  const onPointerUp = (e: ReactPointerEvent) => {
+    if (touchStartX.current == null) return;
+    const delta = e.clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 40) return;
+    setPaused(true);
+    go(delta < 0 ? 1 : -1);
+  };
 
   const renderScene = (key: string) => {
     switch (key) {
@@ -474,7 +503,7 @@ export default function LiveShowcase() {
   return (
     <section
       id="app"
-      className="relative overflow-hidden bg-[#07090d] py-16 text-white md:py-24"
+      className="relative overflow-hidden bg-[#07090d] py-12 text-white sm:py-16 md:py-24"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -513,19 +542,38 @@ export default function LiveShowcase() {
         </svg>
       </div>
 
-      <div className="relative mx-auto max-w-2xl px-6 text-center">
+      <div className="safe-pad-x relative mx-auto max-w-2xl px-4 text-center sm:px-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
           App
         </p>
-        <h2 className="mt-4 font-serif text-3xl tracking-tight md:text-5xl">
+        <h2 className="mt-3 font-serif text-3xl tracking-tight sm:mt-4 md:text-5xl">
           See the app
         </h2>
-        <p className="mt-3 text-sm text-white/50">
+        <p className="mt-2 text-sm text-white/50 sm:mt-3">
           A live preview of the Nexora trading app with updating prices.
         </p>
       </div>
 
-      <div className="relative mx-auto mt-10 flex max-w-5xl items-center justify-center gap-6 px-4 md:mt-12 lg:gap-10">
+      <div
+        className="relative mx-auto mt-8 flex max-w-5xl items-center justify-center gap-3 px-2 sm:mt-10 sm:gap-6 sm:px-4 md:mt-12 lg:gap-10"
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => {
+          touchStartX.current = null;
+        }}
+      >
+        <button
+          type="button"
+          aria-label={`Show ${scenes[prev].label}`}
+          onClick={() => {
+            setPaused(true);
+            go(-1);
+          }}
+          className="absolute left-1 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 ring-1 ring-white/15 backdrop-blur-md transition hover:bg-white/15 md:hidden"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+
         <SidePhone
           rotate={-7}
           ariaLabel={`Show ${scenes[prev].label}`}
@@ -549,31 +597,45 @@ export default function LiveShowcase() {
         >
           {renderScene(scenes[next].key)}
         </SidePhone>
+
+        <button
+          type="button"
+          aria-label={`Show ${scenes[next].label}`}
+          onClick={() => {
+            setPaused(true);
+            go(1);
+          }}
+          className="absolute right-1 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 ring-1 ring-white/15 backdrop-blur-md transition hover:bg-white/15 md:hidden"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
       </div>
 
-      <div className="relative mx-auto mt-8 h-[3.25rem] max-w-md px-6 text-center md:mt-9">
+      <div className="safe-pad-x relative mx-auto mt-6 min-h-[3.25rem] max-w-md px-4 text-center sm:mt-8 sm:px-6 md:mt-9">
         <div className="text-base font-semibold text-white">{scenes[active].title}</div>
         <p className="mt-1 text-sm leading-relaxed text-white/45">{scenes[active].description}</p>
       </div>
 
-      <div className="relative mt-3 flex flex-wrap items-center justify-center gap-2 px-6 md:mt-4">
-        {scenes.map((s, i) => (
-          <button
-            key={s.key}
-            type="button"
-            onClick={() => {
-              setPaused(true);
-              setActive(i);
-            }}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
-              i === active
-                ? "bg-white text-[#07090d]"
-                : "text-white/40 hover:text-white/80"
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
+      <div className="safe-pad-x relative mt-3 flex justify-center px-4 md:mt-4">
+        <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:justify-center sm:gap-2 [&::-webkit-scrollbar]:hidden">
+          {scenes.map((s, i) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => {
+                setPaused(true);
+                setActive(i);
+              }}
+              className={`shrink-0 rounded-full px-3.5 py-2 text-sm font-medium transition-all duration-300 sm:px-4 ${
+                i === active
+                  ? "bg-white text-[#07090d]"
+                  : "text-white/40 hover:text-white/80"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
