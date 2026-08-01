@@ -311,19 +311,17 @@ export default function Home() {
         <div className="safe-pad-x mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="flex items-center gap-3">
-                <div className="font-serif text-2xl text-stone-950">Nexora.</div>
-                <a
-                  href={X_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Follow Nexora on X"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 text-stone-700 transition hover:border-stone-300 hover:bg-stone-50 hover:text-stone-950"
-                >
-                  <XIcon className="h-3.5 w-3.5" />
-                </a>
-              </div>
+              <div className="font-serif text-2xl text-stone-950">Nexora.</div>
               <p className="mt-2 text-sm text-stone-500">Trade tokenized stocks on chain.</p>
+              <a
+                href={X_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 text-sm text-stone-500 transition hover:text-stone-950"
+              >
+                <XIcon className="h-3.5 w-3.5" />
+                <span>@Nexoraa7</span>
+              </a>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-stone-600">
               <a href="#features" className="py-1 hover:text-stone-950">
