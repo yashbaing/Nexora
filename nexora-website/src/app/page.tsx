@@ -13,7 +13,6 @@ import JoinWaitlist from "@/components/JoinWaitlist";
 import LiveShowcase from "@/components/LiveShowcase";
 import ComingSoon from "@/components/ComingSoon";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const X_URL = "https://x.com/Nexoraa7";
 
 function XIcon({ className }: { className?: string }) {
