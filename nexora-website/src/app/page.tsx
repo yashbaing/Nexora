@@ -313,15 +313,6 @@ export default function Home() {
             <div>
               <div className="font-serif text-2xl text-stone-950">Nexora.</div>
               <p className="mt-2 text-sm text-stone-500">Trade tokenized stocks on chain.</p>
-              <a
-                href={X_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-2 text-sm text-stone-500 transition hover:text-stone-950"
-              >
-                <XIcon className="h-3.5 w-3.5" />
-                <span>@Nexoraa7</span>
-              </a>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-stone-600">
               <a href="#features" className="py-1 hover:text-stone-950">
@@ -338,8 +329,21 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="mt-8 border-t border-stone-200 pt-6 text-xs leading-relaxed text-stone-400 sm:pt-8">
-            Nexora is a demo platform. This is not financial advice. Trade at your own risk.
+          <div className="mt-8 flex items-center justify-between gap-4 border-t border-stone-200 pt-6 sm:pt-8">
+            <p className="text-xs leading-relaxed text-stone-400">
+              Nexora is a demo platform. This is not financial advice. Trade at your own risk.
+            </p>
+            <div className="flex shrink-0 items-center gap-3">
+              <a
+                href={X_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="X (Twitter)"
+                className="text-stone-400 transition-colors hover:text-stone-700"
+              >
+                <XIcon className="h-[15px] w-[15px]" />
+              </a>
+            </div>
           </div>
         </div>
       </footer>
