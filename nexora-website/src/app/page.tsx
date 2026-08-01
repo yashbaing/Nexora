@@ -314,7 +314,7 @@ export default function Home() {
               <div className="font-serif text-2xl text-stone-950">Nexora.</div>
               <p className="mt-2 text-sm text-stone-500">Trade tokenized stocks on chain.</p>
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-stone-600">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-stone-600">
               <a href="#features" className="py-1 hover:text-stone-950">
                 Features
               </a>
@@ -323,6 +323,15 @@ export default function Home() {
               </a>
               <a href="#markets" className="py-1 hover:text-stone-950">
                 Markets
+              </a>
+              <a
+                href={X_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 py-1 hover:text-stone-950"
+              >
+                <XIcon className="h-3.5 w-3.5" />
+                X
               </a>
               <Link href={APP_URL} className="py-1 text-stone-400">
                 App coming soon
