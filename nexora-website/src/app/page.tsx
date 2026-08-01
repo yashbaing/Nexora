@@ -324,26 +324,19 @@ export default function Home() {
               <a href="#markets" className="py-1 hover:text-stone-950">
                 Markets
               </a>
-              <Link href={APP_URL} className="py-1 text-stone-400">
-                App coming soon
-              </Link>
-            </div>
-          </div>
-          <div className="mt-8 flex items-center justify-between gap-4 border-t border-stone-200 pt-6 sm:pt-8">
-            <p className="text-xs leading-relaxed text-stone-400">
-              Nexora is a demo platform. This is not financial advice. Trade at your own risk.
-            </p>
-            <div className="flex shrink-0 items-center gap-3">
               <a
                 href={X_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="X (Twitter)"
-                className="text-stone-400 transition-colors hover:text-stone-700"
+                className="inline-flex items-center py-1 text-stone-500 transition-colors hover:text-stone-950"
               >
                 <XIcon className="h-[15px] w-[15px]" />
               </a>
             </div>
+          </div>
+          <div className="mt-8 border-t border-stone-200 pt-6 text-xs leading-relaxed text-stone-400 sm:pt-8">
+            Nexora is a demo platform. This is not financial advice. Trade at your own risk.
           </div>
         </div>
       </footer>
