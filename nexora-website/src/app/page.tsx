@@ -324,18 +324,18 @@ export default function Home() {
               <a href="#markets" className="py-1 hover:text-stone-950">
                 Markets
               </a>
+              <Link href={APP_URL} className="py-1 text-stone-400">
+                App coming soon
+              </Link>
               <a
                 href={X_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 py-1 hover:text-stone-950"
+                aria-label="Follow Nexora on X"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 text-stone-700 transition hover:border-stone-300 hover:bg-stone-50 hover:text-stone-950"
               >
                 <XIcon className="h-3.5 w-3.5" />
-                X
               </a>
-              <Link href={APP_URL} className="py-1 text-stone-400">
-                App coming soon
-              </Link>
             </div>
           </div>
           <div className="mt-8 border-t border-stone-200 pt-6 text-xs leading-relaxed text-stone-400 sm:pt-8">
