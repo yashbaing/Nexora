@@ -75,6 +75,13 @@ async function main() {
   const outputPath = path.join(__dirname, "../../deployed-addresses.json");
   fs.writeFileSync(outputPath, JSON.stringify(addresses, null, 2));
   console.log("💾 Addresses saved to:", outputPath);
+
+  // Also publish Monad addresses into the mobile app when deploying to Monad Testnet
+  if (addresses.chainId === "10143") {
+    const mobilePath = path.join(__dirname, "../../mobile/src/addresses-monad.json");
+    fs.writeFileSync(mobilePath, JSON.stringify(addresses, null, 2));
+    console.log("📱 Mobile Monad addresses saved to:", mobilePath);
+  }
 }
 
 main()

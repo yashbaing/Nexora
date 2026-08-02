@@ -38,6 +38,17 @@ const config: HardhatUserConfig = {
       chainId: 66666,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+    monadTestnet: {
+      url: process.env.MONAD_RPC_URL || "https://testnet-rpc.monad.xyz",
+      chainId: 10143,
+      accounts: process.env.MONAD_PRIVATE_KEY
+        ? [process.env.MONAD_PRIVATE_KEY]
+        : process.env.PRIVATE_KEY
+          ? [process.env.PRIVATE_KEY]
+          : process.env.ORACLE_PRIVATE_KEY
+            ? [process.env.ORACLE_PRIVATE_KEY]
+            : [],
+    },
   },
 };
 

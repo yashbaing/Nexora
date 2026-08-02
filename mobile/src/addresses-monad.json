@@ -1,0 +1,1 @@
+{"note":"Deploy with: cd blockchain && npx hardhat run scripts/deploy.ts --network monadTestnet"}

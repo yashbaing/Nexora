@@ -2,6 +2,26 @@
 
 A full-featured React app for trading tokenized stocks with real-time data, multiple payment methods, and a complete backend.
 
+## Mobile app (Android + iPhone)
+
+Expo React Native trading client lives in [`mobile/`](./mobile):
+
+- Hyperliquid-powered live prices via the Nexora backend
+- Buy/sell tokenized stocks with oracle quotes
+- Monad Testnet–ready (chain id `10143`); settles on Fuji until Monad contracts are funded/deployed
+- UI aligned with [nexora-frontend-sand.vercel.app](https://nexora-frontend-sand.vercel.app/)
+
+```bash
+cd mobile
+npm install
+npx expo start          # Expo Go on Android / iPhone
+# Android APK:
+npx expo prebuild --platform android
+cd android && ./gradlew assembleDebug
+```
+
+See [`mobile/README.md`](./mobile/README.md) for Monad deploy + iOS/EAS build steps.
+
 ## 🎯 Features
 
 ✅ **Authentication**
