@@ -26,28 +26,34 @@
   "supplier": {
     "id": "oliva-sur",
     "name": "Oliva Sur Cooperativa",
-    "address": "0x3f5E76Fdf1e9F2Dc641F6E19cF1f58b42E6a5238"
+    "address": "0x3f5E76Fdf1e9F2Dc641F6E19cF1f58b42E6a5238",
+    "privateKey": "0x850b0169a7c98a1755ac46cab83dcdcaa4c2b7e7e832d16c561fb1b11fe17372"
   },
   "buyers": [
     {
       "name": "Restaurant A",
-      "address": "0xcA5D598D23764b9A90c87f51341E8235B47EB05D"
+      "address": "0xcA5D598D23764b9A90c87f51341E8235B47EB05D",
+      "privateKey": "0x5313192205650feb22aeda27a6cb0fafd95a2ccb789654935d9ceccb0097d33b"
     },
     {
       "name": "Restaurant B",
-      "address": "0x39D95422f9EE843C8ddB2D5fa38c215f62998b58"
+      "address": "0x39D95422f9EE843C8ddB2D5fa38c215f62998b58",
+      "privateKey": "0xf2b4ba6138d1240d6c001730cda177f95e9c5048f07fb8b0870736cd58fdda80"
     },
     {
       "name": "Hotel C",
-      "address": "0xA42002Cea70205f0229a2E8530976755c8CA5492"
+      "address": "0xA42002Cea70205f0229a2E8530976755c8CA5492",
+      "privateKey": "0xdd7b5b3c334d3d63bef9f425ad2b74e4b5e1c6adb32676f498999f67e76df423"
     },
     {
       "name": "Grocery D",
-      "address": "0xAb337b6fb4f407386a132A88dabAC142fdB9B681"
+      "address": "0xAb337b6fb4f407386a132A88dabAC142fdB9B681",
+      "privateKey": "0x8421e37dde3eb536fe942e96846970515a995d482239554c903fd1790819255f"
     },
     {
       "name": "Catering E",
-      "address": "0xF1A7A19761585439BEf1c7C5d98E34b356C9B631"
+      "address": "0xF1A7A19761585439BEf1c7C5d98E34b356C9B631",
+      "privateKey": "0xf050932f9a826b665a8795dbc347114c2a3ba7817247a72593f4d8e2960a1c5d"
     }
   ],
   "arcOfficial": {

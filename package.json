@@ -1,7 +1,7 @@
 {
-  "name": "nexora-trading-app",
+  "name": "arcmoq",
   "version": "1.0.0",
-  "description": "Complete trading app for tokenized stocks with real-time data",
+  "description": "UAE SME group purchasing with AI agent, Arc USDC/EURC settlement, and warehouse receipts",
   "workspaces": [
     "frontend",
     "backend"
@@ -11,7 +11,7 @@
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
-    "install-all": "npm install"
+    "test:contracts": "npm run test --prefix blockchain"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

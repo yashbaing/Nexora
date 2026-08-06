@@ -1,41 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Outfit } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const display = Fraunces({
   subsets: ["latin"],
+  variable: "--font-display",
+  axes: ["SOFT", "WONK", "opsz"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sans = Outfit({
   subsets: ["latin"],
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
-  title: "Nexora - Web3 Tokenized Stocks",
-  description: "Trade tokenized equities on Avalanche C-Chain — Nexora, the premier Web3 equities platform.",
+  title: "ArcMOQ — UAE SMEs. Global inventory. One autonomous order.",
+  description:
+    "Group purchasing for UAE SMEs with an AI procurement agent, USDC→EURC settlement on Arc, and redeemable digital warehouse receipts.",
 };
 
-import { WalletProvider } from "@/context/WalletContext";
-import Script from "next/script";
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-    >
-      <body>
-        <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
-        <WalletProvider>
-          {children}
-        </WalletProvider>
-      </body>
+    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+      <body style={{ fontFamily: "var(--font-sans), sans-serif" }}>{children}</body>
     </html>
   );
 }

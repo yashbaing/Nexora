@@ -1,130 +1,101 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0c0a09;
-  --tab-h: 64px;
-  --header-h: 56px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --ink: #0b1f17;
+  --ink-soft: #163528;
+  --leaf: #6b8f71;
+  --leaf-bright: #8fbc8f;
+  --stone: #d9cfc0;
+  --sand: #ebe4d7;
+  --citrus: #e8a317;
+  --citrus-deep: #c4850c;
+  --foam: #f7f3eb;
+  --line: rgba(11, 31, 23, 0.12);
+  --ok: #1f7a4d;
+  --warn: #b45309;
+  --danger: #9f1239;
+  --label: #5c6b62;
 }
 
+* { box-sizing: border-box; }
+
 html, body {
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden;
   margin: 0;
   padding: 0;
-  background: #f5f5f4;
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  box-sizing: border-box;
+  min-height: 100%;
+  background: var(--foam);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
 
-#__next, main {
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden;
+a { color: inherit; text-decoration: none; }
+
+button, input, select, textarea {
+  font: inherit;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+::selection {
+  background: rgba(232, 163, 23, 0.35);
 }
 
-@keyframes tickerScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-33.33%); }
+.arc-grid {
+  background-image:
+    linear-gradient(rgba(11, 31, 23, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 31, 23, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
-.animate-ticker   { animation: tickerScroll 38s linear infinite; }
-.animate-slideup  { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-/* ── Hide scrollbars globally but allow scroll ─────────── */
-::-webkit-scrollbar { display: none; }
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+.olive-haze {
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 20%, rgba(107, 143, 113, 0.35), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 85% 10%, rgba(232, 163, 23, 0.18), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 70% 80%, rgba(22, 53, 40, 0.2), transparent 55%),
+    linear-gradient(165deg, #f7f3eb 0%, #e7efe6 45%, #d9e4d6 100%);
 }
 
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type="number"] { -moz-appearance: textfield; }
-
-/* ── App Shell ─────────────────────────────────────────── */
-.sw-shell {
-  display: flex;
-  height: 100dvh;
-  width: 100%;
-  background: #f5f5f4;
-  justify-content: center;
+.label-pill {
+  display: inline-flex;
   align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px dashed var(--line);
+  background: rgba(255,255,255,0.55);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label);
 }
 
-/* ── Phone frame (desktop/tablet only) ────────────────── */
-.sw-phone {
-  position: relative;
-  width: 390px;
-  height: min(844px, calc(100dvh - 32px));
-  background: #ffffff;
-  border-radius: 36px;
-  border: 6px solid #0c0a09;
-  box-shadow: 0 24px 64px rgba(12, 10, 9, 0.18), 0 2px 8px rgba(12, 10, 9, 0.06);
-  overflow: hidden;
-  flex-shrink: 0;
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── On narrow viewports: go full-screen, no frame ─────── */
-@media (max-width: 480px) {
-  .sw-shell {
-    padding: 0;
-    align-items: stretch;
-    background: #ffffff;
-  }
-  .sw-phone {
-    width: 100%;
-    height: 100dvh;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-  }
+@keyframes pulse-line {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
 }
 
-/* ── On very short screens (landscape mobile) ─────────── */
-@media (max-height: 600px) {
-  :root { --tab-h: 52px; --header-h: 48px; }
-  .sw-phone {
-    height: 100dvh;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-    width: 100%;
-  }
-  .sw-shell {
-    padding: 0;
-    background: #ffffff;
-  }
+.rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.rise-delay-1 { animation-delay: 0.12s; }
+.rise-delay-2 { animation-delay: 0.24s; }
+.rise-delay-3 { animation-delay: 0.36s; }
+
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--citrus);
+  box-shadow: 0 0 0 4px rgba(232, 163, 23, 0.2);
 }
 
-/* ── Scrollable content area inside the phone ─────────── */
-.sw-scroll {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
+.scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: rgba(11,31,23,0.2); border-radius: 99px; }
 
-/* ── Content height = phone height minus header and tab ── */
-.sw-content {
-  height: calc(100% - var(--header-h) - var(--tab-h));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; }
 
-/* ── Compact text helpers ───────────────────────────────── */
-.text-2xs { font-size: 10px; }
-.text-xs   { font-size: 11px; }
-.text-sm   { font-size: 12px; }
-.gap-compact { gap: 6px; }
+@media (max-width: 800px) {
+  .desktop-nav { display: none !important; }
+  .mobile-tabs { display: flex !important; }
+}

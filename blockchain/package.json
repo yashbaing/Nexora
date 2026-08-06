@@ -1,12 +1,13 @@
 {
-  "name": "nexora-blockchain",
+  "name": "arcmoq-blockchain",
   "version": "1.0.0",
-  "description": "Smart contracts for Nexora Web3 trading app",
+  "description": "ArcMOQ smart contracts for Arc Testnet",
   "scripts": {
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "node:local": "npx hardhat node",
-    "deploy:local": "npx hardhat run scripts/deploy.ts --network localhost"
+    "deploy:local": "npx hardhat run scripts/deploy.ts --network localhost",
+    "deploy:arc": "npx hardhat run scripts/deploy.ts --network arcTestnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
