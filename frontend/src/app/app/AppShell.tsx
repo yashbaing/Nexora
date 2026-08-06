@@ -29,12 +29,20 @@ const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
   { id: "receipt", label: "Receipt", icon: <Receipt size={16} /> },
 ];
 
-export default function AppShell({ initialTab = "orders" }: { initialTab?: Tab }) {
+export default function AppShell({
+  initialTab = "orders",
+  initialState,
+  initialConfig,
+}: {
+  initialTab?: Tab;
+  initialState?: any;
+  initialConfig?: any;
+}) {
   const router = useRouter();
   const tab = initialTab;
   const setTab = (t: Tab) => router.push(t === "orders" ? "/app" : `/app?tab=${t}`);
-  const [config, setConfig] = useState<any>(null);
-  const [state, setState] = useState<any>({ status: "idle", events: [], txs: [] });
+  const [config, setConfig] = useState<any>(initialConfig || null);
+  const [state, setState] = useState<any>(initialState || { status: "idle", events: [], txs: [] });
   const [running, setRunning] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
   const [redeemResult, setRedeemResult] = useState<any>(null);
