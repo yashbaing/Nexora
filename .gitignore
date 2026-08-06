@@ -9,3 +9,6 @@ build/
 artifacts/
 cache/
 typechain-types/
+blockchain/deployed-addresses.json
+coverage/
+

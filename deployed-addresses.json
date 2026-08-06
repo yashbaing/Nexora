@@ -1,21 +1,18 @@
 {
-  "MockUSDC": "0xa95D5F58f7bDDD29fb945655D17E359df2F27B1B",
-  "StockwavePlatform": "0xf4d581d6974EDF49a8695D1a1aA3834FaB35D0ec",
-  "OracleSigner": "0x6A63340D6d071C808Ec69D9fd570D1dF284A453f",
-  "stocks": {
-    "xAAPL": "0xEA419220F62760926Cf515026EB697C1131691C8",
-    "xTSLA": "0x2708DDd6999f7b51F8aef1833c49973b36882b26",
-    "xNVDA": "0x83F5513DA8023651617749D66e7959EA5Fd8D008",
-    "xMSFT": "0xcC2A4BfCfDcc75C4362101732b9128Ce1d266d0D",
-    "xGOOGL": "0x552d1AA8667fd0fabe9d076761dedCe53c0cFbe3",
-    "xAMZN": "0x9A774d95171D6957Dbe2e85a4A058bB22932F684",
-    "xMETA": "0x201FD9f3555084d1340E1BD482f5892B533C6488",
-    "xRELI": "0xAC7CAd07c217266A5efF7027b09c2Be3976c9023",
-    "xTCS": "0x70cA7b94FeCa5bC763543361fcDC6757E7c7ec7e",
-    "xJPM": "0x4f611464D5Fc5fE4F8dd28f96D5D33570a68ae7b",
-    "xKO": "0x9e16d2d95FF00702b864f40cFE739F4685B65875",
-    "xINFY": "0x7712D5ed77FC1d8af6E15F9E68407a93b8B0C3B6"
-  },
-  "chainId": "43113",
-  "rpcUrl": "https://api.avax-test.network/ext/bc/C/rpc"
+  "network": "pending-deploy",
+  "chainId": 5042002,
+  "rpcUrl": "https://rpc.testnet.arc.io",
+  "explorer": "https://testnet.arcscan.app",
+  "USDC": "0x3600000000000000000000000000000000000000",
+  "EURC": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+  "GroupOrder": null,
+  "StableFXAdapter": null,
+  "WarehouseReceipt": null,
+  "labels": {
+    "aedCollection": "Simulated PSP",
+    "arcSettlement": "Pending Arc deploy — set ARC_PRIVATE_KEY and run npm run deploy:arc",
+    "supplierQuotes": "Sandbox",
+    "stableFx": "Test or Adapter Mode",
+    "warehouseAttestation": "Demo Verifier"
+  }
 }
