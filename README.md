@@ -77,6 +77,10 @@ cp .env.example .env   # set ARC_PRIVATE_KEY
 npm run deploy:arc
 ```
 
+Generated deployer for this environment (needs faucet funding):
+
+`0xf944B3ECC9f4fB7809aC01aA80348321B666e707`
+
 Addresses are written to `deployed-addresses.json`.
 
 ## What is real vs simulated
